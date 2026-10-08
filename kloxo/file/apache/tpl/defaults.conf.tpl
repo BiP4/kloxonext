@@ -196,7 +196,7 @@ $portnip_conf = getLinkCustomfile($globalspath, "portnip.conf");
 $defaultdocroot = "/home/kloxo/httpd/default";
 
 if ($indexorder) {
-	$indexorder = implode(' ', $indexorder);
+	$indexorder = implode(' ', (array)$indexorder);
 }
 
 $acmechallenge_conf = getLinkCustomfile($globalspath, "acme-challenge.conf");

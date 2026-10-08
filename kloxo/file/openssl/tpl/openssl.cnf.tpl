@@ -5,7 +5,7 @@
 		$a[$k] = 'DNS:' . $v;
 	}
 
-	$SAN = implode(', ', $a);
+	$SAN = implode(', ', (array)$a);
 ?>
 [req]
 prompt = no

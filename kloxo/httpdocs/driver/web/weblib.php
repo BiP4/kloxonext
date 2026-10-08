@@ -1681,7 +1681,7 @@ class Web extends Lxdb
 		$dir = dirname($filename);
 		$owner = "{$this->username}:apache";
 
-		$password = crypt($this->stats_password, '$1$'.randomString(8).'$');
+		$password = lx_password_hash($this->stats_password);
 		$content = "{$this->stats_username}:$password\n";
 
 		lxuser_mkdir($owner, $dir);

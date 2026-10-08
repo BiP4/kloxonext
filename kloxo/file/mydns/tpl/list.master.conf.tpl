@@ -11,12 +11,12 @@
 		}
 	}
 
-	$d2olds = array_diff($d2names, $d1names);
+	$d2olds = array_diff((array)$d2names, (array)$d1names);
 
 	// MR -- delete unwanted domains
 	if (!empty($d2olds)) {
 		foreach ($d2olds as $k => $v) {
-			$id = d2ids[$k];
+			$id = $d2ids[$k];
 
 			$conn->query("DELETE FROM soa WHERE origin='{$v}'");
 			$conn->query("DELETE FROM soa WHERE zone='{$id}'");

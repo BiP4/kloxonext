@@ -28,8 +28,8 @@ class Mailaccount__Qmail extends lxDriverClass
 
 		if (!$this->main->password) {
 		// MR -- fix for php 5.6+
-		//	$password = crypt('something', '$1$'.randomString(8).'$');
-			$password = crypt(randomString(8), '$1$'.randomString(8).'$');
+		//	$password = lx_password_hash('something');
+			$password = lx_password_hash(randomString(8));
 		}
 
 		$quser = explode("@", $this->main->nname);

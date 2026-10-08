@@ -16,7 +16,7 @@
 		$d2names[] = str_replace("{$tpath}/", '', $v);
 	}
 
-	$d2olds = array_diff($d2names, $d1names);
+	$d2olds = array_diff((array)$d2names, (array)$d1names);
 
 	// MR -- delete unwanted files
 	if (!empty($d2olds)) {

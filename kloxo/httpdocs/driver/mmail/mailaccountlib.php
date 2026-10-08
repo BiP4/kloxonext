@@ -415,7 +415,7 @@ class Mailaccount extends Lxclient
 		$parent = $this->getTrueParentO();
 
 		$this->realpass = $this->password;
-		$this->password = crypt($this->password, '$1$'.randomString(8).'$');
+		$this->password = lx_password_hash($this->password);
 
 		if ($this->isOn("simple_add_f")) {
 			$this->priv = clone $parent->priv;

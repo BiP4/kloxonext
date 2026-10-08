@@ -7,7 +7,7 @@
 	$text  ="<acl>\n";
 
 	if (!empty($ips)) {
-		$i = implode(", ", $ips);
+		$i = implode(", ", (array)$ips);
 		$text .= "    slave       {$i}\n";
 		$yfile = getLinkCustomfile("{$ypath}/etc", "yadifad.conf");
 	} else {

@@ -13,6 +13,16 @@ function lx_count($value, $mode = COUNT_NORMAL)
 
 // KloxoNext - PHP 8.1+ makes mysqli throw on every SQL error; Kloxo checks return
 // values (and relies on failing queries while it migrates its schema).
+// KloxoNext - SHA-512 crypt ($6$) for every stored password. glibc crypt() verifies it, so
+// Pure-FTPd, htpasswd (Apache/nginx/lighttpd), Dovecot and Kloxo logins all accept it.
+// Replaces MD5-crypt ($1$) and the salt-less crypt() call removed in PHP 8.
+function lx_password_hash($password)
+{
+	$salt = substr(strtr(base64_encode(random_bytes(12)), '+', '.'), 0, 16);
+
+	return crypt((string)$password, '$6$rounds=5000$' . $salt . '$');
+}
+
 // PHP 7 array_map() returned null (with a warning) for a non-array argument
 function lx_array_map_safe($callback, $value)
 {

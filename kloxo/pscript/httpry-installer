@@ -1,21 +1,16 @@
 #!/bin/bash
 [ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-if [ "$(yum list|grep 'httpry')" != "" ] ; then
-	if [ "$(rpm -qa httpry)" == "" ] ; then
-		yum -y install httpry
-	else
-		yum -y update httpry
-	fi
+#    KloxoNext - httpry (HTTP request logger) is optional and only installed
+#    when the repositories of this distribution provide it.
 
-	'cp' -f /opt/configs/httpry/etc/init.d/httpry.init /etc/rc.d/init.d/httpry
-	'cp' -f /opt/configs/httpry/etc/logrotate.d/httpry /etc/logrotate.d/httpry
+. /script/os.inc
 
-	chmod 755 /etc/rc.d/init.d/httpry
-	chkconfig httpry on
-	#sh /script/restart-syslog -y
-else
-	sh /script/httpry-remover
+if ! pkg_available httpry ; then
+	echo "- httpry is not packaged for ${OS_ID} ${OS_VERSION}; skipped"
+	exit 0
 fi
 
-
+pkg_install httpry
+cp -f /opt/configs/httpry/etc/logrotate.d/httpry /etc/logrotate.d/httpry 2>/dev/null
+systemctl enable --now httpry >/dev/null 2>&1

@@ -113,7 +113,7 @@ if ($statsapp === 'webalizer') {
 }
 
 if ($indexorder) {
-	$indexorder = implode(' ', $indexorder);
+	$indexorder = implode(' ', (array)$indexorder);
 }
 
 if ($dirindex) {
@@ -138,7 +138,7 @@ if ($blockips) {
 	}
 	$blockips = $biptemp;
 
-	$blockips = implode(' ', $blockips);
+	$blockips = implode(' ', (array)$blockips);
 }
 
 $acmechallenge_conf = getLinkCustomfile($globalspath, "acme-challenge.conf");

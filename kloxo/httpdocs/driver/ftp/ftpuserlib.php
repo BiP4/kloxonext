@@ -68,7 +68,7 @@ class ftpuser extends Lxclient
 		$web = $parent;
 		$param['realpass'] = $param['password'];
 
-		$param['password'] = crypt($param['password'], '$1$'.randomString(8).'$');
+		$param['password'] = lx_password_hash($param['password']);
 
 		if ($param['directory'] === '') {
 			$param['directory'] = '/';

@@ -195,7 +195,7 @@ class Domaind extends DomainBase
 	/*
 		$ftpuser = $web->getFromList('ftpuser', $web->ftpusername);
 		$ftpuser->realpass = $param['password'];
-		$ftpuser->password = crypt($param['password'], '$1$'.randomString(8).'$');
+		$ftpuser->password = lx_password_hash($param['password']);
 		$ftpuser->setUpdateSubaction('password');
 	*/	
 		return parent::updatePassword($param);
@@ -640,7 +640,7 @@ class Domaind extends DomainBase
 			$web->priv->phpfcgi_flag = 'off';
 		} else {
 			$this->realpass = $parent->realpass;
-			$this->password = crypt($this->realpass);
+			$this->password = lx_password_hash($this->realpass);
 
 			if ($this->isOn('use_resourceplan_f')) {
 				$template = getFromAny(array($login, $parent), 'resourceplan', $this->resourceplan_f);
@@ -788,7 +788,7 @@ class Domaind extends DomainBase
 		$dns->createSyncClass();
 
 		$ftpuser->realpass = $this->realpass;
-		$ftpuser->password = crypt($this->realpass, '$1$'.randomString(8).'$');
+		$ftpuser->password = lx_password_hash($this->realpass);
 		$mmail->remotelocalflag = 'local';
 
 		$web->stats_username = $this->nname;

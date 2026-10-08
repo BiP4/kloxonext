@@ -1,6 +1,6 @@
 <?php
 	if (!empty($ips)) {
-		$i = implode(",", $ips);
+		$i = implode(",", (array)$ips);
 		$str = "zone_transfer_acl = \"{$i}\"\n";
 	}
 

@@ -141,43 +141,39 @@ class Ipaddress__Redhat extends LxDriverclass
 
 	static function getCurrentIps()
 	{
-		global $gbl, $sgbl, $login, $ghtml;
+		// KloxoNext - devices come from the running kernel ('ip -j addr'), so it
+		// works with ifcfg files, NetworkManager keyfiles and Ubuntu netplan alike.
+		$result = array();
 
-		$path = $sgbl->__path_real_etc_root . "sysconfig/network-scripts";
-		
-		$flist = lscandir($path);
-		
-		foreach ($flist as $file) {
-			if (char_search_a($file, "ifcfg-")) {
-				$result1[] = self::get_network_data(str_replace("ifcfg-", "", "{$file}"));
-			}
-		}
-		
-		$path = $sgbl->__path_real_etc_root . "NetworkManager/system-connections";
-		
-		$flist = lscandir($path);
-		
-		foreach ($flist as $file) {
-			if (char_search_a($file, ".nmconnection")) {
-				$result1[] = self::get_network_data(str_replace(".nmconnection", "","{$file}"));
-			}
-		}
-		// For debug print ip addresses found
-		//print_r($result1);
-		$result = array(); // Initialize as array (expected return result)
-
-		foreach ($result1 as $res) {
-			$temp = explode(":", $res['devname']);
-
-			if (lx_count($temp) === 2) {
-				$res['devname'] = implode("-", $temp);
+		foreach (self::ip_json('addr show scope global') as $if) {
+			if (!isset($if['ifname']) || $if['ifname'] === 'lo') {
+				continue;
 			}
 
-			$result[] = $res;
+			foreach ((array)$if['addr_info'] as $ai) {
+				if (($ai['family'] ?? '') !== 'inet') {
+					continue;
+				}
 
+				// secondary addresses keep their label (eth0:1) -> 'eth0-1'
+				$dev = !empty($ai['label']) ? $ai['label'] : $if['ifname'];
+				$res = self::get_network_data($dev);
+				$res['devname'] = str_replace(':', '-', $res['devname']);
+
+				$result[] = $res;
+			}
 		}
 
-		return ($result);
+		return $result;
+	}
+
+	/** @return array decoded output of 'ip -j <args>' */
+	static function ip_json($args)
+	{
+		$out = shell_exec("ip -j {$args} 2>/dev/null");
+		$data = json_decode((string)$out, true);
+
+		return is_array($data) ? $data : array();
 	}
 
 	static function listSystemIps($machinename)
@@ -293,79 +289,54 @@ class Ipaddress__Redhat extends LxDriverclass
 
 	static function get_ifconfig_parse($devname)
 	{
-		// MR - mod from http://www.plugged.in/linux/getting-network-information-in-bash-scripts.html
-		// call ifconfig and ip must with full path!
-
-		$t = explode(":", $devname);
+		// KloxoNext - iproute2 JSON instead of parsing ifconfig output
+		$t = explode(":", str_replace('-', ':', $devname));
 		$pdevname = $t[0];
+		$label = implode(':', $t);
 
-		exec("/sbin/ifconfig {$devname}", $out);
-		$vifconfig = implode("\n", $out);
-		$out = null;
+		$list = array('DEVICE' => $devname, 'TYPE' => null, 'NETMASK' => null, 'IPADDR' => null,
+			'IPPREFIX' => null, 'IP6ADDR' => null, 'IP6PREFIX' => null, 'GATEWAY' => null,
+			'MACADDRESS' => null, 'BROADCAST' => null, 'BOOTPROTO' => null);
 
-		// MR -- use this trick to fix OpenVZ issue
-		if (stripos($devname, ':') !== false) {
-			exec("/sbin/ip addr show | grep '{$devname}'", $out);
-		} else {
-			exec("/sbin/ip addr show | grep '{$devname}'|grep -v '{$devname}:'", $out);
+		foreach (self::ip_json('addr show dev ' . escapeshellarg($pdevname)) as $if) {
+			$list['MACADDRESS'] = $if['address'] ?? null;
+			$list['TYPE'] = $if['link_type'] ?? null;
+
+			foreach ((array)$if['addr_info'] as $ai) {
+				if (($ai['scope'] ?? '') !== 'global') {
+					continue;
+				}
+
+				if ($ai['family'] === 'inet' && $list['IPADDR'] === null && (($ai['label'] ?? $pdevname) === $label)) {
+					$list['IPADDR'] = $ai['local'];
+					$list['IPPREFIX'] = $ai['prefixlen'];
+					$list['NETMASK'] = long2ip(-1 << (32 - (int)$ai['prefixlen']));
+					$list['BROADCAST'] = $ai['broadcast'] ?? $ai['local'];
+					$list['BOOTPROTO'] = !empty($ai['dynamic']) ? 'dhcp' : 'static';
+				} elseif ($ai['family'] === 'inet6' && $list['IP6ADDR'] === null) {
+					$list['IP6ADDR'] = $ai['local'];
+					$list['IP6PREFIX'] = $ai['prefixlen'];
+				}
+			}
 		}
 
-		$vip = implode("\n", $out);
-		$out = null;
-
-		$list = array();
-
-		$list['DEVICE']     =  $devname;
-		exec("echo '{$vifconfig}' | grep -w encap | awk '{print $3}' | cut -d \":\" -f 2", $out);
-		$list['TYPE']       =  $out[0];
-		$out = null;
-		// MR -- exception for OpenVZ
-		if (strpos($vifconfig, 'P-t-P') !== false) {
-			exec("echo '{$vifconfig}' | grep -w inet | awk '{print $5}' | cut -d \":\" -f 2", $out);
-		} else {
-			exec("echo '{$vifconfig}' | grep -w inet | awk '{print $4}' | cut -d \":\" -f 2", $out);
-		}
-		$list['NETMASK']    =  $out[0];
-		$out = null;
-		exec("echo '{$vip}' | grep 'inet' | grep 'scope global' | awk '{print $2}' | awk -F '/' '{print $1}'", $out);
-		$list['IPADDR']  = $out[0];
-		$out = null;
-		exec("echo '{$vip}' | grep 'inet' | grep 'scope global' | awk '{print $2}' | awk -F '/' '{print $2}'", $out);
-		$list['IPPREFIX']   =  $out[0];
-		$out = null;
-		exec("echo '{$vip}' | grep 'inet6' | grep 'scope global' | awk '{print $2}' | awk -F '/' '{print $1}'", $out);
-		$list['IP6ADDR'] =  $out[0];
-		$out = null;
-		exec("echo '{$vip}' | grep 'inet6' | grep 'scope global' | awk '{print $2}' | awk -F '/' '{print $2}'", $out);
-		$list['IP6PREFIX']  =  $out[0];
-		$out = null;
-		// MR -- exception for OpenVZ
-	//	if ($list['NETMASK'] === '255.255.255.255') {
-		if (strpos($vifconfig, 'P-t-P') !== false) {
-			$list['GATEWAY']   = $list['IPADDR'];
-		} else {
-		//	exec("/sbin/ip route show | grep {$pdevname} | grep link | awk '{ print $1}'", $out);
-			exec("/sbin/ip route show | grep {$pdevname} | grep default | awk '{ print $3}'", $out);
-			$list['GATEWAY']   =  $out[0];
-		}
-		$out = null;
-		exec("echo '{$vifconfig}' | grep HWaddr | awk '{ print $5 }'", $out);
-		$list['MACADDRESS'] =  $out[0];
-		$out = null;
-		// MR -- exception for OpenVZ
-	//	if ($list['NETMASK'] === '255.255.255.255') {
-		if (strpos($vifconfig, 'P-t-P') !== false) {
-			$list['BROADCAST']   = $list['IPADDR'];
-		} else {
-			exec("echo '{$vifconfig}' | grep -w inet | awk '{print $3}' | cut -d \":\" -f 2", $out);
-			$list['BROADCAST']  =  $out[0];
+		foreach (self::ip_json('route show default dev ' . escapeshellarg($pdevname)) as $r) {
+			if (!empty($r['gateway'])) {
+				$list['GATEWAY'] = $r['gateway'];
+				break;
+			}
 		}
 
-		$out = null;
+		// point-to-point (OpenVZ venet): no gateway, use the address itself
+		if ($list['GATEWAY'] === null && $list['IPPREFIX'] == 32) {
+			$list['GATEWAY'] = $list['IPADDR'];
+		}
 
-		// MR -- need info from ifcfg-* file for bproto
-		$list2 = self::get_ifcfgfile_parse($pdevname);
-		$list['BOOTPROTO'] = $list2['BOOTPROTO'];
+		$ifcfg = self::get_ifcfgfile_parse($pdevname);
+
+		if (!empty($ifcfg['BOOTPROTO'])) {
+			$list['BOOTPROTO'] = $ifcfg['BOOTPROTO'];
+		}
 
 		return $list;
 	}

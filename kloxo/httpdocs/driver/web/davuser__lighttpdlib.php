@@ -15,7 +15,7 @@ class davuser__lighttpd extends Lxdriverclass
 
 		$res = null;
 		foreach($result as $r) {
-			$cr = crypt($r['realpass'], '$1$'.randomString(8).'$');
+			$cr = lx_password_hash($r['realpass']);
 		//	$cr = $r['realpass'];
 			$res .= "{$r['username']}:$cr\n";
 		}

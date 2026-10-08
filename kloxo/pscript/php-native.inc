@@ -161,6 +161,18 @@ php_native_install() {
 		systemctl disable --now "php${d}-fpm" >/dev/null 2>&1
 	else
 		systemctl disable --now "php${xy}-php-fpm" >/dev/null 2>&1
+		php_neutralize_remi_httpd_conf "${xy}"
+	fi
+}
+
+# Remi's phpXY-php-fpm ships /etc/httpd/conf.d/phpXY-php.conf, which sends every
+# .php file of every vhost to Remi's own (disabled) fpm socket. Kloxo writes the
+# handler per domain, so the file is emptied (rpm keeps a modified %config file).
+php_neutralize_remi_httpd_conf() {
+	local f="/etc/httpd/conf.d/php${1}-php.conf"
+
+	if [ -f "${f}" ] && ! grep -q 'KloxoNext' "${f}" ; then
+		echo "# KloxoNext - disabled: PHP handlers are configured per domain by Kloxo" > "${f}"
 	fi
 }
 
@@ -217,6 +229,9 @@ php_set_branch() {
 	fi
 
 	ln -snf "/opt/php${xy}m" "${KLOXO_PATH}/init/php-branch"
+	# fcgid/suphp/lighttpd templates use /opt/php for the default branch
+	[ -d /opt/php ] && [ ! -L /opt/php ] && mv /opt/php "/opt/php.old.$(date +%s)"
+	ln -snf "/opt/php${xy}m" /opt/php
 	ln -snf "/opt/php${xy}m/custom/php-fpm.sh" "${KLOXO_PATH}/init/php-branch-fpm"
 	ln -snf "/opt/php${xy}m/custom/php-cli.sh" "${KLOXO_PATH}/init/php-branch-cli"
 	ln -snf "/opt/php${xy}m/custom/php-cgi.sh" "${KLOXO_PATH}/init/php-branch-cgi"

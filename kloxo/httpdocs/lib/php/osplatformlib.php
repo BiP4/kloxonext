@@ -228,7 +228,35 @@ final class OsPlatform
 				return 0;
 			}
 
-			return self::run(self::aptEnv() . 'apt-get -y -q -o Dpkg::Options::=--force-confold install ' . implode(' ', $ok));
+			// RHEL semantics: never start/enable a service just because it was installed
+			// (Kloxo installs every alternative driver: pdns, nsd, lighttpd, ...)
+			self::run('systemctl list-unit-files --type=service --state=enabled --no-legend', $before);
+			$before = array_map(function ($l) { return strtok(trim($l), ' '); }, $before);
+
+			$ownPolicy = !file_exists('/usr/sbin/policy-rc.d');
+
+			if ($ownPolicy) {
+				file_put_contents('/usr/sbin/policy-rc.d', "#!/bin/sh\nexit 101\n");
+				chmod('/usr/sbin/policy-rc.d', 0755);
+			}
+
+			$ret = self::run(self::aptEnv() . 'apt-get -y -q -o Dpkg::Options::=--force-confold install ' . implode(' ', $ok));
+
+			if ($ownPolicy) {
+				@unlink('/usr/sbin/policy-rc.d');
+			}
+
+			self::run('systemctl list-unit-files --type=service --state=enabled --no-legend', $after);
+
+			foreach ($after as $l) {
+				$u = strtok(trim($l), ' ');
+
+				if ($u && !in_array($u, $before, true)) {
+					self::run('systemctl disable ' . escapeshellarg($u));
+				}
+			}
+
+			return $ret;
 		}
 
 		return self::run("dnf -y install --setopt=strict=0 --skip-broken {$args}");

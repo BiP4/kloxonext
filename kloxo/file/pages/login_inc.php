@@ -160,7 +160,7 @@ if (!$cgi_forgotpwd) {
 
 		if ($email && hash_equals((string)$email[0]['contactemail'], $cgi_email)) {
 			$rndstring = randomString(12);
-			$pass = password_hash($rndstring, PASSWORD_BCRYPT);
+			$pass = lx_password_hash($rndstring);
 
 			$rawdb->rawQuery("update {$classname} set password = '{$pass}' where nname = '{$cgi_clientname}'");
 

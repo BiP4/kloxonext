@@ -60,7 +60,7 @@ function add_admin($pass)
 			$res['contacemail'] = 'info@kloxong.org';
 		}
 
-		$res['password'] = crypt($pass, '$1$'.randomString(8).'$');
+		$res['password'] = lx_password_hash($pass);
 		$res['cttype'] = 'admin';
 		$res['cpstatus'] = 'on';
 
@@ -125,7 +125,7 @@ function create_servername()
 
 	if (if_demo()) {
 		$pserver->realpass = 'admin';
-		$pserver->password = crypt("admin", '$1$'.randomString(8).'$');
+		$pserver->password = lx_password_hash("admin");
 		$pserver->cpstatus = 'on';
 	}
 

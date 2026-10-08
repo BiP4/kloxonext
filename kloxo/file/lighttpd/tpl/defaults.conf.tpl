@@ -65,7 +65,7 @@ foreach ($certnamelist as $ip => $certname) {
 }
 
 if ($indexorder) {
-	$indexorder = implode(' ', $indexorder);
+	$indexorder = implode(' ', (array)$indexorder);
 }
 
 $indexorder = '"' . $indexorder . '"';

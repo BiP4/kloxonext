@@ -67,7 +67,7 @@ foreach ($certnamelist as $ip => $certname) {
 $iplist = array('*');
 
 if ($indexorder) {
-	$indexorder = implode(' ', $indexorder);
+	$indexorder = implode(' ', (array)$indexorder);
 }
 
 // MR -- for future purpose, apache user have uid 50000

@@ -75,6 +75,28 @@ kloxo_create_database() {
 	cd / || exit 1
 }
 
+# Apache (EL): Kloxo's include files in conf.d; PHP is always served through php-fpm
+kloxo_apache_conf() {
+	os_is_el || return 0
+
+	step "Default Apache configuration"
+
+	local sp="${kloxopath}/file/apache/etc/conf.d" tp="/etc/httpd/conf.d" x
+
+	mkdir -p "${tp}"
+
+	for x in fastcgi.conf ssl.conf __version.conf '~lxcenter.conf' ; do
+		cp -f "${sp}/${x}" "${tp}/${x}"
+	done
+
+	for x in php fcgid ruid2 suphp ; do
+		cp -f "${sp}/_inactive_.conf" "${tp}/${x}.conf"
+	done
+
+	# httpd 2.4 (mod_proxy_fcgi available)
+	touch "${kloxopath}/etc/flag/use_apache24.flg"
+}
+
 kloxo_install_bye() {
 	local this_ip
 	this_ip=$(ip route get 1 2>/dev/null | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')
@@ -111,3 +133,5 @@ kloxo_prepare_dirs
 if [ "${kloxostate}" == 'none' ] ; then
 	kloxo_create_database
 fi
+
+kloxo_apache_conf

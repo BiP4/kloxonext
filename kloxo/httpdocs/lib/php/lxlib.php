@@ -142,22 +142,14 @@ function getAllOperatingSystemDetails()
 
 function findOperatingSystem($type = null)
 {
-	if (file_exists("/etc/fedora-release")) {
-		$ret['os'] = 'fedora';
-		$ret['version'] = file_get_contents("/etc/fedora-release");
-		$ret['pointversion'] = find_os_pointversion();
-	} else if (file_exists("/etc/redhat-release")) {
-		$ret['os'] = 'rhel';
-		$ret['version'] = file_get_contents("/etc/redhat-release");
-		$ret['pointversion'] = find_os_pointversion();
-	}
+	// KloxoNext - /etc/os-release based (AlmaLinux/Rocky/RHEL and Ubuntu).
+	// 'os' keeps the historical values: 'rhel' for the EL family, 'debian' otherwise.
+	$i = OsPlatform::info();
 
-/* -- not work because no driver for centos inside /usr/local/lxlabs/kloxo/file/conf
-
-	$ret['os'] = find_os_distro();
-	$ret['version'] = find_os_release();
+	$ret['os'] = OsPlatform::isDebian() ? 'debian' : 'rhel';
+	$ret['version'] = OsPlatform::prettyName();
 	$ret['pointversion'] = find_os_pointversion();
-*/
+
 	if (lxfile_exists("__path_program_etc/install_xen") || lxfile_exists("/proc/xen")) {
 		$ret['vpstype'] = "xen";
 		$ret['xenlocation'] = vg_complete();
@@ -182,76 +174,24 @@ function find_os_release()
 
 function find_os_pointversion()
 {
-/*
-	if (file_exists("/etc/fedora-release")) {
-		$release = trim(file_get_contents("/etc/fedora-release"));
-		$osv = explode(" ", $release);
-		if (strtolower($osv[1]) === 'core') {
-			$osversion = "fedora-" . $osv[3];
-		} else {
-			$osversion = "fedora-" . $osv[2];
-		}
-		return $osversion;
-	}
-
-	if (file_exists("/etc/redhat-release")) {
-		$release = trim(file_get_contents("/etc/redhat-release"));
-		$osv = explode(" ", $release);
-		if (isset($osv[6])) {
-			$osversion = "rhel-" . $osv[6];
-		} else {
-			$oss = explode(".", $osv[2]);
-			$osversion = "centos-" . $oss[0];
-		}
-		return $osversion;
-	}
-*/
 	return find_os_selecttype('pointversion');
 }
 
+// distro: 'almalinux' | 'rocky' | 'rhel' | 'ubuntu' ...; release: pretty name; pointversion: '<distro>-<major>'
 function find_os_selecttype($select)
 {
-	// list os support
-	$ossup = array('redhat' => 'rhel', 'fedora' => 'fedora', 'centos' => 'centos', 'almalinux' => 'almalinux');
-	
-	foreach(array_keys($ossup) as $k) {
-		$osrel = file_get_contents("/etc/{$k}-release");
-		
-		if ($osrel) {
-				if ($select === 'release') {
-					return $osrel;
-				}
-				
-				$osrel = strtolower(trim($osrel));
-				
-				break;
-		}
+	$i = OsPlatform::info();
+
+	switch ($select) {
+		case 'release':
+			return OsPlatform::prettyName();
+		case 'distro':
+			return $i['id'];
+		case 'pointversion':
+			return "{$i['id']}-{$i['major']}";
 	}
-	
-	// specific for 'red hat'
-	$osrel = str_replace('red hat', 'redhat', $osrel);
 
-	$osver = explode(" ", $osrel);
-
-	$verpos = sizeof($osver) - 2;
-
-	if (array_key_exists($osver[0], $ossup)) {
-		// specific for 'red hat'
-		if ($osrel === 'redhat') {
-			$oss = $osver[$verpos];
-		}
-		else {
-			$mapos = explode(".", $osver[$verpos]);
-			$oss = $mapos[0];
-		}
-
-		if ($select === 'distro') {
-			return $ossup[$osver[0]];
-		}
-		else if ($select === 'pointversion') {
-			return $ossup[$osver[0]]."-".$oss;
-		}
-	}
+	return null;
 }
 
 function lscandir_without_dot($arg, $dotflag = false)
@@ -2164,7 +2104,7 @@ function createEncName($name)
 function check_password($unenc, $enc)
 {
 	//Old Stuff Not reached
-	if (crypt($unenc, $enc) === $enc) {
+	if (is_string($enc) && $enc !== '' && hash_equals($enc, crypt((string)$unenc, $enc))) {
 		return true;
 	}
 
@@ -3070,7 +3010,7 @@ function add_superadmin($pass)
 
 	$ddb = new Sqlite(null, "superclient");
 	if (!$ddb->existInTable("nname", 'superclient')) {
-		$res['password'] = crypt($pass, '$1$'.randomString(8).'$');
+		$res['password'] = lx_password_hash($pass);
 		$res['cttype'] = 'superadmin';
 		$res['cpstatus'] = 'on';
 		if (if_demo()) {
@@ -3113,7 +3053,7 @@ function init_slave($pass)
 	global $gbl, $sgbl, $login, $ghtml;
 
 	$rm = new Remote();
-	$rm->password = crypt($pass, '$1$'.randomString(8).'$');
+	$rm->password = lx_password_hash($pass);
 	lfile_put_contents($sgbl->__path_slave_db, serialize($rm));
 }
 

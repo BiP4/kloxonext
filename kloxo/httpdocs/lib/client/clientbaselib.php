@@ -983,7 +983,7 @@ class ClientBase extends ClientCore
 		$param['used_s_client_num'] = '-';
 
 		$param['realpass'] = $param['password'];
-		$param['password'] = crypt($param['password'], '$1$'.randomString(8).'$');
+		$param['password'] = lx_password_hash($param['password']);
 
 		return $param;
 	}

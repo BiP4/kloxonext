@@ -1,52 +1,9 @@
-Kloxo 8 install instructions
+KloxoNext - install
 
-Note: for Almalinux 9, Rocky 9 and other RHEL 9 Derivative linux 
-(Will also work on Almalinux 8, Rocky 8)
+Supported: AlmaLinux/Rocky 9.x and 10.x, Ubuntu 26.04 LTS (fresh server, FQDN hostname).
 
-The quick method
+  git clone https://github.com/<you>/kloxonext.git /root/kloxonext
+  bash /root/kloxonext/kloxonext-install.sh
 
-sudo curl -O https://kloxo.org/kloxo8/kloxo.sh
-sudo sh kloxo.sh
-
-The longer method
-
-A. pre-install -- better for fresh install
-
-    #Not reallly necessary with modern linuxes
-    
-    cd /
-
-    # update centos to latest version
-    yum update -y
-    # install some packages like package-cleanup, etc
-    yum install yum-utils yum-priorities vim-minimal curl zip unzip -y
-    yum install telnet wget -y
-
-    cd /
-
-B. Install kloxo 8
-   - Install/reinstall/upgrade -- data not destroyed with this fork
-     for existing Kloxo (6.1.x), run 'sh /script/update' first. (don't trust this - needs to be confirmed )
-
-    # move to /tmp
-    cd /tmp
-
-    # remove old rpm
-    rm -f kloxong*
-	rm -f kloxo*
-	
-    # install rpm (read Warning)
-    rpm -ivh https://github.com/KloxoNGCommunity/kloxo/raw/initial-rpm/kloxo-release.rpm
-
-    # move to /
-    cd /
-
-    # update
-    yum clean all
-
-    yum update kloxo-* -y
-
-    yum install kloxo -y
-
-    sh /script/upcp
-
+The admin password is printed once at the end of the installation.
+See README.md for options, PHP management and third-party updates.

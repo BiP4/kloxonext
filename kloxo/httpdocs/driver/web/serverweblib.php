@@ -164,6 +164,12 @@ class serverweb extends lxdb
 					'php-fpm_event', 'php-fpm_worker',
 					'fcgid_event', 'fcgid_worker');
 
+				// KloxoNext - 'php-fpm_*' need mod_fastcgi (not packaged on EL9+/Ubuntu);
+				// 'proxy_fcgi_*' talk to the same php-fpm pools through httpd's mod_proxy_fcgi
+				if (!file_exists("/etc/httpd/modules/mod_fastcgi.so")) {
+					$a = array_values(array_diff($a, array('php-fpm_event', 'php-fpm_worker')));
+				}
+
 				if (file_exists("/etc/httpd/modules/libphp5.so")) {
 					// MR -- remove mod_php on 'php-type' select
 					$a = array_merge(array('mod_php_ruid2', 'mod_php_itk','suphp'), $a);
@@ -179,9 +185,9 @@ class serverweb extends lxdb
 				$d = db_get_value("serverweb", "pserver-". $this->syncserver, "php_type");
 	
 				if (!$d) {
-					db_set_default("serverweb", "php_type", "php-fpm_event", 
+					db_set_default("serverweb", "php_type", "proxy_fcgi_event", 
 						"nname = 'pserver-{$this->syncserver}'");
-					$this->setDefaultValue('php_type', 'php-fpm_event');
+					$this->setDefaultValue('php_type', 'proxy_fcgi_event');
 				} else {
 					$this->setDefaultValue('php_type', $d);
 				}

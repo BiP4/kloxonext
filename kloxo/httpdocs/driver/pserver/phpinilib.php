@@ -227,6 +227,11 @@ class phpini extends lxdb
 
 	function initPhpIni()
 	{
+		// KloxoNext - PHP 8 no longer auto-creates objects on property assignment
+		if (!is_object($this->phpini_flag_b ?? null)) {
+			$this->phpini_flag_b = new phpini_flag_b(null, null, $this->nname);
+		}
+
 		$this->setUpInitialValues();
 	}
 

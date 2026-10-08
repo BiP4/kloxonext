@@ -89,7 +89,7 @@ $serveralias = "{$domainname} www.{$domainname}";
 
 $excludedomains = array("cp", "webmail");
 
-$excludealias = implode("|", $excludedomains);
+$excludealias = implode("|", (array)$excludedomains);
 
 if ($wildcards) {
 	$serveralias .= "\n\t\t*.{$domainname}";
@@ -122,7 +122,7 @@ $webmailremote = str_replace("http://", "", $webmailremote);
 $webmailremote = str_replace("https://", "", $webmailremote);
 
 if ($indexorder) {
-	$indexorder = implode(' ', $indexorder);
+	$indexorder = implode(' ', (array)$indexorder);
 }
 
 if ($blockips) {
@@ -179,7 +179,7 @@ if ($general_header) {
 
 	$x[] = "\tadd_header X-Supported-By \"Kloxo 0.01\";";
 
-	$general_header_text = implode("\n", $x);
+	$general_header_text = implode("\n", (array)$x);
 }
 
 if ($https_header) {
@@ -191,7 +191,7 @@ if ($https_header) {
 		$x[] = "\tadd_header {$v};";
 	}
 
-	$https_header_text = implode("\n", $x);
+	$https_header_text = implode("\n", (array)$x);
 }
 
 if (intval($static_files_expire) > -1) {

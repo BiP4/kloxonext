@@ -35,3 +35,4 @@ fi
 sed -i 's/^#ForwardToWall=yes/ForwardToWall=no/g' /etc/systemd/journald.conf
 
 sh /script/fix-limits > /dev/null 2>&1
+os_debian_bind_compat

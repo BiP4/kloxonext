@@ -39,7 +39,7 @@ else
 			#if [ "$(command -v systemctl)" != "" ] ; then
 			#if [ "$(ps --no-headers -o comm 1)" == "systemd" ] ; then
 			if [ "${stype}" == "systemd" ] ; then
-				if [ "$(systemctl list-unit-files --type=service|grep ^${item}|grep 'enabled')" != "" ] ; then
+				if [ "$(systemctl is-enabled ${item} 2>/dev/null)" == "enabled" ] ; then
 					svc_on='yes'
 				fi
 			fi

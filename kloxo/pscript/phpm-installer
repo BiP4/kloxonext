@@ -60,6 +60,7 @@ mkdir -p "${main_path}"
 	fi
 
 	php_build_compat_layout "${base_name}"
+	os_is_el && php_neutralize_remi_httpd_conf "${xy}"
 } 2>&1 | tee -a "${log}"
 
 [ "${PIPESTATUS[0]}" != "0" ] && exit 1

@@ -26,7 +26,7 @@
 
 	if (!isServiceExists('maradns')) {
 		if ($action === 'fix') {
-			if (array_keys($domains)) {
+			if (array_keys((array)$domains)) {
 				exec_with_all_closed("service maradns reload");
 
 				foreach ($domains as $k => $v) {

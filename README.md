@@ -1,85 +1,109 @@
-![KloxoNG](https://kloxong.org/wp-content/uploads/2017/10/KloxoNG.jpg )
-# Kloxo
+# KloxoNext
 
-### A Kloxo fork by The Kloxo Next Generation Community
+A web hosting control panel based on [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo),
+rebuilt for current Linux distributions and PHP.
 
-Please use master branch
+## Supported systems
 
-===================
+| Distribution            | Package manager | PHP source                         |
+|-------------------------|-----------------|------------------------------------|
+| AlmaLinux / Rocky 9.x   | dnf             | Remi (`phpXY-php-*`), 7.4 – 8.5    |
+| AlmaLinux / Rocky 10.x  | dnf             | Remi (`phpXY-php-*`), 7.4 – 8.5    |
+| Ubuntu 26.04 LTS        | apt             | Ubuntu archive (8.5), ondrej/php when it supports 26.04 |
 
-Branch:
-- Master
+Every service comes from the distribution repositories (plus EPEL/Remi on EL): MariaDB, nginx,
+Apache, BIND, Pure-FTPd, Postfix, Dovecot. No custom Kloxo RPM repository is needed.
 
-===================
+## Install
 
-The current release Kloxo 8.0.0-18 - A Kloxo build for EL8 and EL9. 
+On a fresh server with a fully qualified hostname (`hostnamectl set-hostname server1.example.com`):
 
-<a href="https://copr.fedorainfracloud.org/coprs/kloxong/kloxo/package/kloxo/"><img src="https://copr.fedorainfracloud.org/coprs/kloxong/kloxo/package/kloxo/status_image/last_build.png" /></a>
+```bash
+git clone https://github.com/<you>/kloxonext.git /root/kloxonext
+bash /root/kloxonext/kloxonext-install.sh
+```
 
-## Kloxo
+Options (passed through to `kloxo/install/setup.sh`):
 
-This is a updated development path of Kloxo based on the work of Kloxo-MR.
+| Option                    | Meaning                                                        |
+|---------------------------|----------------------------------------------------------------|
+| `--php="84 85"`           | PHP branches for websites (default: 8.4 + newest available)   |
+| `--admin-password=...`    | password of `admin` (default: random, printed once at the end) |
+| `--install-type=slave`    | install as a slave node                                        |
+| `--yes`                   | do not ask for confirmation                                    |
 
-The aim of this project is to create a development pathway that is sustainable and dependent on a single individual.
+The panel listens on `https://<server>:7777` and `http://<server>:7778`.
 
-### URL
+## PHP
 
-1. More information about Kloxo Next Generation go to https://kloxong.org/ 
+* **Panel** – PHP 8.4 (`/opt/php84s`, `lxphp.exe`). Where 8.4 is not packaged (Ubuntu 26.04)
+  the oldest available branch newer than 8.4 is used.
+* **Websites** – every installed branch is available as `phpXYm`; the per-domain
+  *PHP Selected* option works as before. The default *php* branch always follows the
+  newest PHP installed on the server.
+* **Third-party apps served by the panel** (phpMyAdmin) run in their own php-fpm pool
+  (`kloxo-apps`, user `lxlabs`) on the newest installed PHP.
 
-2. To support Kloxo Next Generation Join our Patreon at https://patreon.com/KloxoNextGeneration 
+`/opt/phpXY[m|s]` is a symlink layout over the native packages (see `pscript/php-native.inc`),
+so every Kloxo driver, template and script keeps its historical paths.
 
-### Features 
+| Command                                   | Purpose                                         |
+|-------------------------------------------|-------------------------------------------------|
+| `sh /script/phpm-installer php85m`        | add a PHP branch for websites                   |
+| `sh /script/phpm-remover php81m --purge`  | remove a branch                                 |
+| `sh /script/php-branch-installer 85`      | choose the default *php* branch                 |
+| `sh /script/phpm-updater`                 | update all PHP packages and refresh the layouts |
 
-Note: struck out items may or may not work. They either haven't been tested yet or are still in the process of being repackaged for el8/9   
+## Third-party applications
 
-* OS: Redhat/EL 8 and 9
-* ~~Billing: AWBS, WHMCS, HostBill, TheHostingTool, AccountLab Plus, Blesta and BoxBilling (note: claim by billing's author)~~ To be tested and confirmed
-* Web server: Nginx, Nginx-Proxy and Lighttpd-proxy, Hiawatha, Hiawatha-proxy and Httpd 24, beside Httpd and Lighttpd; also Dual and Multiple Web server *)
-* Webcache server: ~~Squid,~~ Varnish ~~and ATS~~ *)
-* Php: Multiple-php with php 5.6, 7.4, and all php 8 versions *)
-* PHP-type for Apache: php-fpm_worker/_event and fcgid_worker/_event; beside mod_php/_ruid2/_itk and suphp/_worker/_event
-* Mail server: qmail-toaster instead special qmail (in progress: change from courier-imap to dovecot as imap/pop3) *)
-* Database: ~~MySQL or~~ MariaDB *)
-* Database Manager: PHPMyAdmin; ~~Adminer, MyWebSql and SqlBuddy as additional~~ **)
-* Webmail: Afterlogic Webmail Lite, ~~Telaen, Squirrelmail,~~ Roundcube and Rainloop; 
-* FTP server: Pure-ftpd
-* DNS Server: Bind ~~and Djbdns; add Powerdns,~~ ~~MaraDNS, NSD, myDNS and Yadifa~~ *)
-* Addons: ClamAV, Spamassassin/Bogofilter/Spamdyke, RKHunter and MalDetect
-* Free SSL: Let's Encrypt (via letsencrypt/certbot-auto and acme.sh) and StartAPI *)
-* Fixed many bugs of Kloxo Official (including security issues)
-* And many more!
+`sh /script/thirdparty-update` keeps these on their latest upstream release
+(daily via `kloxo-thirdparty-update.timer`):
 
-### Contributing
+* phpMyAdmin → `/usr/local/lxlabs/kloxo/httpdocs/thirdparty/phpMyAdmin`
+* Roundcube → `/home/kloxo/httpd/webmail/roundcube`
+* SnappyMail (maintained successor of RainLoop) → `/home/kloxo/httpd/webmail/snappymail`
 
-* The door is always open for developers and testers. Pull Requests are very welcome, browse the issues pages if you want to help but don't know where to start
+Downloads are checked against the SHA-256 published by upstream; the previous copy is kept as
+`<dir>.previous`. Flags in `/usr/local/lxlabs/kloxo/etc/flag/`:
 
-### Licensing - AGPLv3
+* `no-auto-update-php.flg` – do not apply PHP package updates from the timer
+* `auto-install-new-php.flg` – install a newly released PHP branch automatically
 
-* Like Kloxo Official, Kloxo will adopt AGPLv3 as well.
+## Updating the panel
 
-### How to install
+```bash
+sh /script/upcp        # pulls the configured git repository and runs cleanup
+```
 
-* Read https://github.com/KloxoNGCommunity/kloxo/blob/main/how-to-install.txt
+The repository is recorded in `/usr/local/lxlabs/kloxo/etc/conf/update-source.conf`.
 
-### Notes
-*) Features inheritited from Kloxo-MR and KloxoNG 7 (Note: these may change as we develop our road map)
+## Interface
 
-- OS: Redhat/CentOS 8 and EL 8/9 clones (64bit) 
-- Web server: Httpd 2.4 
-- Webcache server: ~~Squid,~~ Varnish ~~and ATS (Apache Traffic Server) (since 3 Oct 2013)~~
-- DNS server: Powerdns, NSD, MyDNS and Yadifa (since 16 Sep 2013)
-- Mail server: Dovecot (since 19 Jun 2016)
-- Database: using MariaDB 10.6 instead of MySQL 
-- Php: multiple Php versions
-  * suphp base (since 27 Jun 2014)
-  * fcgid base (since 5 Jul 2015)
-  * php-fpm/spawning base (since 24 May 2016)
-- Free SSL:
-  * Let's Encrypt (since 4 May 2016)
-  * StartAPI (since 29 Jun 2016)
-- Stats:
-  * Change URL from 'domain.com/stats' to 'stats.domain.com' (since 3 Sep 2016)
-  
+The default skin **nexus** is responsive (sidebar navigation that becomes a drawer on phones),
+has light and dark modes, and keeps every menu entry and permission rule of the original panel.
+The older *simplicity* and *feather* skins remain selectable in *Appearance*.
 
+## Project status
 
+| Phase | Scope                                                                  | Status        |
+|-------|------------------------------------------------------------------------|---------------|
+| 1     | OS abstraction (dnf/apt), installer, PHP 8.4 panel, nginx panel server | done          |
+| 2     | Modern responsive skin, login page                                     | done (iterating) |
+| 3     | Automatic third-party updates on the newest PHP                        | done          |
+| 4     | Postfix + Dovecot mail driver; Apache/BIND path layer for Ubuntu        | planned       |
 
+Until phase 4 lands, mail accounts cannot be managed from the panel (the qmail-toaster driver is
+not available on these distributions), and on Ubuntu the website driver is nginx.
+
+## Tests
+
+`tests/container-phase1.sh` – smoke test run inside fresh AlmaLinux 9, AlmaLinux 10 and Ubuntu 26.04
+containers:
+
+```bash
+docker run --rm -v "$PWD":/src almalinux:9 bash /src/tests/container-phase1.sh
+```
+
+## License
+
+AGPLv3, like Kloxo.

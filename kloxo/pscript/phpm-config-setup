@@ -327,7 +327,7 @@ else
 	sed -i 's:/var/log/php-error.log:/usr/local/lxlabs/kloxo/log/php-error.log:' ${main_path}/custom/php-fpm.ini
 	sed -i 's:/var/log/php-error.log:/usr/local/lxlabs/kloxo/log/php-error.log:' ${main_path}/custom/php.ini
 
-	ln -sf ${main_path} /opt/php
+	# KloxoNext - /opt/php is the default 'php' branch (newest phpXYm), see php_set_branch
 
 fi
 

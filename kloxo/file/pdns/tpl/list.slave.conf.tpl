@@ -16,7 +16,7 @@
 		}
 	}
 
-	$d2olds = array_diff($d2names, $d1names);
+	$d2olds = array_diff((array)$d2names, (array)$d1names);
 
 	// MR -- delete unwanted domains
 	if (!empty($d2olds)) {

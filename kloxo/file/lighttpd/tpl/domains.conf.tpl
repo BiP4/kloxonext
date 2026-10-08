@@ -55,7 +55,7 @@ $tmpdom = str_replace(".", "\.", $domainname);
 
 $excludedomains = array("cp", "webmail", "mail");
 
-$excludealias = implode("|", $excludedomains);
+$excludealias = implode("|", (array)$excludedomains);
 
 $serveralias = '';
 
@@ -98,7 +98,7 @@ $webmailremote = str_replace("http://", "", $webmailremote);
 $webmailremote = str_replace("https://", "", $webmailremote);
 
 if ($indexorder) {
-	$indexorder = implode(' ', $indexorder);
+	$indexorder = implode(' ', (array)$indexorder);
 }
 
 $indexorder = '"' . $indexorder . '"';
@@ -120,7 +120,7 @@ if ($blockips) {
 	}
 	$blockips = $biptemp;
 
-	$blockips = implode('|', $blockips);
+	$blockips = implode('|', (array)$blockips);
 }
 
 $userinfo = posix_getpwnam($user);

@@ -47,7 +47,7 @@ if ($general_header) {
 
 	$x[] = "\tCustomHeader = X-Supported-By:Kloxo-MR 7.0";
 
-	$general_header_text = implode("\n", $x);
+	$general_header_text = implode("\n", (array)$x);
 }
 
 if ($https_header) {
@@ -61,7 +61,7 @@ if ($https_header) {
 		$x[] = "\tCustomHeader = {$v}";
 	}
 
-	$https_header_text = implode("\n", $x);
+	$https_header_text = implode("\n", (array)$x);
 }
 
 $error_handler = "Alias = /error:/home/kloxo/httpd/error
@@ -164,7 +164,7 @@ if ($blockips) {
 	}
 	$blockips = $biptemp;
 
-	$blockips = implode(', ', $blockips);
+	$blockips = implode(', ', (array)$blockips);
 }
 
 $userinfo = posix_getpwnam($user);

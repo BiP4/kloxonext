@@ -134,6 +134,8 @@ os_setup_repos
 
 step "Install base packages"
 pkg_install_logical base archive sudo cron quota
+svc_enable cron
+svc_start cron
 
 if os_is_el ; then
 	pkg_install chkconfig initscripts-service dnf-utils
@@ -180,6 +182,7 @@ mkdir -p /var/log/named
 chown "${OS_NAMED_USER}":root /var/log/named
 chmod 755 /var/log/named
 rm -f /etc/rndc.conf
+os_debian_bind_compat
 
 step "Install mail services (Postfix + Dovecot)"
 if os_is_debian ; then
@@ -236,6 +239,8 @@ step "Select default drivers"
 if os_is_el ; then
 	sh /script/setdriver --server=localhost --class=web --driver=apache >/dev/null 2>&1
 	chkconfig httpd on >/dev/null 2>&1
+	# php-fpm through mod_proxy_fcgi: enables the per-domain 'PHP Selected'
+	(cd "${ppath}/httpdocs" && lxphp.exe ../bin/misc/set-default-phptype.php)
 else
 	# the nginx driver writes to /etc/nginx on every distribution
 	sh /script/setdriver --server=localhost --class=web --driver=nginx >/dev/null 2>&1
