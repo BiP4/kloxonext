@@ -1,5 +1,6 @@
 <?php 
 
+#[\AllowDynamicProperties]
 class Sgbl
 {
 	function __construct()

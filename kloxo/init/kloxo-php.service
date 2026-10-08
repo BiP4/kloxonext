@@ -1,15 +1,16 @@
 [Unit]
-Description=Startup script for Kloxo.
-Documentation=https://www.facebook.com/groups/KloxoNextGeneration
-After=network.target remote-fs.target nss-lookup.target
- 
+Description=KloxoNext panel PHP (php-fpm)
+Documentation=https://github.com/KloxoNGCommunity/kloxo
+After=network.target remote-fs.target nss-lookup.target mariadb.service
+
 [Service]
 Type=forking
 PIDFile=/usr/local/lxlabs/kloxo/init/kloxo-phpcgi.pid
-ExecStart=/usr/local/lxlabs/kloxo/init/kloxo-phpcgi -y /usr/local/lxlabs/kloxo/init/kloxo-php-fpm.conf -c /opt/php74s/custom/php.ini -R
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecStart=/usr/local/lxlabs/kloxo/init/kloxo-phpcgi -y /usr/local/lxlabs/kloxo/init/kloxo-php-fpm.conf -R
+ExecReload=/bin/kill -s USR2 $MAINPID
 ExecStop=/bin/kill -s QUIT $MAINPID
 PrivateTmp=true
- 
+Restart=on-failure
+
 [Install]
 WantedBy=multi-user.target

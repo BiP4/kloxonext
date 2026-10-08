@@ -1,53 +1,44 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-if [ "$1" == "--help" ] ; then
+. /script/os.inc
+. /script/php-native.inc
+
+if [ "$1" == "--help" ] || [ "$#" == 0 ] ; then
 	echo
 	echo " ------------------------------------------------------------------------------"
-	echo "  format: sh $0 <phpXYm|phpXYs>"
+	echo "  format: sh $0 <phpXYm|phpXYs> [--purge]"
 	echo " ------------------------------------------------------------------------------"
-	echo "  phpXYm/phpXYs"
-	echo "      - start from php52m/php52s"
-	echo "      - phpXYm for 'multiple php'"
-	echo "      - phpXYs for 'special php' for Kloxo panel"
-	echo
-	exit;
-fi
-
-if [ "$#" == 0 ] ; then
-	echo
-	echo "- For help, type '$0 --help'"
+	echo "  --purge also removes the native packages when no other layout uses them"
 	echo
 	exit
 fi
 
 base_name="${1}"
 
-main_path="/opt/${base_name}"
+if ! [[ "${base_name}" =~ ^php[0-9]{2}[ms]$ ]] ; then
+	echo "* WARNING: only for phpXYm or phpXYs"
+	exit 1
+fi
 
 . /script/counter-start.inc
 
-## MR -- remove last char (default m or s)
-src_name="${base_name%?}"
+xy="${base_name:3:2}"
 
-if [ "$(grep 's' <<<${base_name})" == "" ] && [ "$(grep 'm' <<<${base_name})" == "" ] ; then
-	echo "* WARNING: only for phpXYm or phpXYs (change XY from 52)"
-else
-	echo "- Remove ${base_name}-fpm service"
+echo "- Remove ${base_name}-fpm service"
+systemctl disable --now "${base_name}-fpm" >/dev/null 2>&1
+rm -f "${OS_SYSTEMD_DIR}/${base_name}-fpm.service" "/etc/systemd/system/${base_name}-fpm.service"
+systemctl daemon-reload >/dev/null 2>&1
 
-	stype=$(ps --no-headers -o comm 1)
+php_remove_compat_layout "${base_name}"
 
-	if [ -f ${main_path}/usr/sbin/php-fpm ] ; then
-		service ${base_name}-fpm stop
-		'rm' -rf ${main_path} >/dev/null 2>&1
-		chkconfig ${base_name}-fpm off >/dev/null 2>&1
-		chkconfig --del ${base_name}-fpm >/dev/null 2>&1
-		if [ "${stype}" == "systemd" ] ; then
-			'rm' -f /usr/lib/systemd/system/${base_name}-fpm.service >/dev/null 2>&1
-			systemctl daemon-reload >/dev/null 2>&1
-		else
-			'rm' -f /etc/rc.d/init.d/${base_name}-fpm >/dev/null 2>&1
-		fi
-	fi
+if [ "${2}" == "--purge" ] && [ ! -d "/opt/php${xy}m" ] && [ ! -d "/opt/php${xy}s" ] ; then
+	echo "- Remove native PHP $(php_dotted "${xy}") packages"
+	# shellcheck disable=SC2046
+	pkg_remove $(php_native_packages "${xy}")
 fi
+
+# keep the 'php' branch pointing to an existing version
+php_set_branch "$(php_latest_installed)"
 
 . /script/counter-end.inc

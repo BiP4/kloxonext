@@ -9,6 +9,7 @@ ini_set('memory_limit', '-1');
 * so we should first properly get the vars then remove these warnings
 */
 
+#[\AllowDynamicProperties]
 class Sqlite
 {
 	private $__sqtable;

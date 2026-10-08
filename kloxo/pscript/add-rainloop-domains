@@ -1,33 +1,61 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-echo "*** Add domain ini for Rainloop webmail ***"
+#    KloxoNext - write the per-domain IMAP/SMTP settings used by RainLoop and
+#    SnappyMail (SnappyMail imports RainLoop '.ini' domain files).
+#
+#      sh /script/add-rainloop-domains [--domain=example.com]
 
-read -r -d '' ini_content << EOF
-imap_host = "127.0.0.1"
+echo "*** Add domain ini for RainLoop/SnappyMail webmail ***"
+
+domain=""
+for a in "$@" ; do
+	case "${a}" in
+		--domain=*) domain="${a#*=}" ;;
+		-*)         ;;
+		*)          domain="${a}" ;;
+	esac
+done
+
+ini_content='imap_host = "127.0.0.1"
 imap_port = 993
 imap_secure = "SSL"
+imap_short_login = Off
+sieve_use = On
+sieve_host = "127.0.0.1"
+sieve_port = 4190
+sieve_secure = "TLS"
 smtp_host = "127.0.0.1"
 smtp_port = 587
 smtp_secure = "TLS"
+smtp_short_login = Off
 smtp_auth = On
-EOF
+smtp_php_mail = Off'
 
-rdir="/home/kloxo/httpd/webmail/rainloop"
-
-if [ -d ${rdir}/data/_data_ ] ; then
-	dir=$(dirname ${rdir}/data/_data_*/_default_/domains)/domains
-
-	if [ "${1}" == "" ] ; then
-		doms=$(/home/vpopmail/bin/vdominfo|grep 'domain:'|awk '{print $2}')
-	
-		for x in ${doms} ; do
-			echo "- '${x}.ini' added"
-			echo "${ini_content}" > ${dir}/${x}.ini
-		done
-	else
-		echo "- '${1}.ini' added"
-		echo "${ini_content}" > ${dir}/${1}.ini
-	fi
+if [ -n "${domain}" ] ; then
+	doms="${domain}"
 else
-	echo "- Need browse 'your webmail.yourdomain.com' and then select rainloop"
+	rootpass=$(cd /usr/local/lxlabs/kloxo/httpdocs && lxphp.exe ../bin/common/mp.php)
+	doms=$(mysql -u root -p"${rootpass}" -N -e "SELECT nname FROM kloxo.domain" 2>/dev/null)
 fi
+
+found=""
+
+for app in rainloop snappymail ; do
+	rdir="/home/kloxo/httpd/webmail/${app}"
+
+	for dir in "${rdir}"/data/_data_*/_default_/domains ; do
+		[ -d "${dir}" ] || continue
+		found=1
+
+		for x in ${doms} ; do
+			echo "- ${app}: '${x}.ini' added"
+			echo "${ini_content}" > "${dir}/${x}.ini"
+			chown apache:apache "${dir}/${x}.ini"
+		done
+	done
+done
+
+[ -z "${found}" ] && echo "- Open webmail once (webmail.yourdomain.com) so RainLoop/SnappyMail create their data directory"
+
+exit 0

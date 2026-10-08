@@ -1,18 +1,29 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-echo "*** Delete domain ini for Rainloop webmail ***"
+#    KloxoNext - remove the per-domain settings of RainLoop/SnappyMail
+#      sh /script/del-rainloop-domains --domain=example.com
 
-rdir="/home/kloxo/httpd/webmail/rainloop"
+echo "*** Delete domain ini for RainLoop/SnappyMail webmail ***"
 
-if [ "${1}" == "" ] ; then
-	echo "Format: $0 <domainname>"
-else
-	a=$(dir -l ${rdir}/data/*/_default_/domains|grep ^'${1}.ini')
-	
-	if [ "${a}" != "" ] ; then
-		echo "- '${1}.ini' deleted"
-		'rm' -f ${rdir}/data/*/_default_/domains/${1}.ini
-	else
-		echo "- '${1}.ini' no exists"
-	fi
+domain=""
+for a in "$@" ; do
+	case "${a}" in
+		--domain=*) domain="${a#*=}" ;;
+		-*)         ;;
+		*)          domain="${a}" ;;
+	esac
+done
+
+if [ -z "${domain}" ] ; then
+	echo "Format: $0 --domain=<domainname>"
+	exit 1
 fi
+
+for app in rainloop snappymail ; do
+	for f in /home/kloxo/httpd/webmail/${app}/data/_data_*/_default_/domains/"${domain}".{ini,json} ; do
+		[ -f "${f}" ] || continue
+		rm -f "${f}"
+		echo "- ${app}: '$(basename "${f}")' deleted"
+	done
+done

@@ -1,13 +1,31 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-if [ "${1}" == "-y" ] || [ "${1}" == "--force" ] ; then
-	action=${1}
-else
-	action=""
+#    KloxoNext - update every installed PHP branch from the package manager
+#    and refresh the /opt/phpXY[m|s] layouts.
+
+. /script/os.inc
+. /script/php-native.inc
+
+pkgs=""
+for d in /opt/php[0-9][0-9][ms] ; do
+	[ -d "${d}" ] || continue
+	xy="$(basename "${d}" | cut -c4-5)"
+	pkgs="${pkgs} $(php_native_packages "${xy}")"
+done
+
+if [ -n "${pkgs}" ] ; then
+	echo "- Upgrading native PHP packages"
+	# shellcheck disable=SC2086
+	pkg_upgrade $(echo ${pkgs} | tr ' ' '\n' | sort -u | tr '\n' ' ')
 fi
 
-for i in $(ls -ld /opt/php* | awk '{print $9}' | sed 's:/opt/::g' | tr '\n' ' ') ; do
-	if [ "$(readlink /usr/bin/${i}-cli)" == "/opt/${i}/custom/php-cli.sh" ] ; then
-		sh /script/phpm-installer $i $action
-	fi
+for d in /opt/php[0-9][0-9][ms] ; do
+	[ -d "${d}" ] || continue
+	b="$(basename "${d}")"
+	php_build_compat_layout "${b}"
+	[ "${1}" == "-y" ] || [ "${1}" == "--force" ] && sh /script/phpm-config-setup "${b}"
 done
+
+# 'php' branch always follows the newest installed version
+php_set_branch "$(php_latest_installed)"

@@ -1,44 +1,27 @@
-#/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-#!/bin/sh
+#    KloxoNext - choose the PHP branch used by the panel (always php-fpm behind nginx)
+
+. /script/os.inc
+. /script/php-native.inc
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
 	echo
 	echo " ------------------------------------------------------------------------------"
-	echo "  format: sh $0 <fpm/cgi> <phpXYs>"
+	echo "  format: sh $0 [fpm] [phpXYs]     (default: php${PHP_PANEL_BRANCH}s)"
 	echo " ------------------------------------------------------------------------------"
 	echo
 	exit
 fi
 
-echo
-echo "- For help, type '$0 --help'"
+# 'cgi' mode belonged to Hiawatha; nginx always talks to php-fpm
+rm -f "${KLOXO_PATH}/init/kloxo_use_php-cgi"
 
-if [ "$#" == 0 ] ; then
-	echo "- No argument supplied. Defaulting to 'fpm' and 'php74s'"
-	echo
-fi
+echo 'lxlabs ALL=(ALL:ALL) NOPASSWD:/usr/local/lxlabs/kloxo' > /etc/sudoers.d/mount
+chmod 0440 /etc/sudoers.d/mount
 
-if [ "${1}" == 'cgi' ] ; then
-	echo '' > /usr/local/lxlabs/kloxo/init/kloxo_use_php-cgi
-else
-	if [ -f /usr/local/lxlabs/kloxo/init/kloxo_use_php-cgi ] ; then
-		'rm' -f /usr/local/lxlabs/kloxo/init/kloxo_use_php-cgi
-	fi
-fi
+target="${2:-php${PHP_PANEL_BRANCH}s}"
 
-#if [ ! -f /etc/sudoers.d/mount ] ; then
-	echo 'lxlabs ALL=(ALL:ALL) NOPASSWD:/usr/local/lxlabs/kloxo' > /etc/sudoers.d/mount
-	chmod 0440 /etc/sudoers.d/mount
-#fi
-
-if [ "${2}" == "" ] ; then
-	echo "- No php selected. Defaulting to 'php74s'"
-	echo
-	echo "php74s" > /usr/local/lxlabs/kloxo/init/kloxo_php_active
-else
-	sh /script/phpm-installer ${2}
-	echo "${2}" > /usr/local/lxlabs/kloxo/init/kloxo_php_active
-fi
-
+sh /script/fixlxphpexe "${target}"
 sh /script/restart -y

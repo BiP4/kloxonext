@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 echo "*** Enable SELinux (in 'permissive' mode)"
 
@@ -37,6 +38,6 @@ if [ "$1" == "--relabel" ] || [ "$2" == "--relabel" ] ; then
 	fixfiles relabel /
 fi
 
-echo "WARNING: - Run with:
+echo "WARNING: - Run with:"
 echo " - '$0 --relabel' if want relabel files/directories"
 echo " - '$0 enforcing' if want as 'enforcing' mode (default: 'permissive')"

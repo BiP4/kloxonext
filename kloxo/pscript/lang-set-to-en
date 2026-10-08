@@ -1,2 +1,3 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 /script/update --class=sp_specialplay --name=client-admin --subaction=skin --v-specialplay_b_s_language=en-us

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 function args()
 {
@@ -81,14 +82,16 @@ if [ ! -f /script/programname ] ; then
 fi
 
 
-if [ "$(rpm -qa MariaDB-server)" != "" ] ; then
-	echo "Already use MariaDB. No replace"
-else
-	if [ "$(rpm -qa mysql)" != "" ] ; then
-		echo "Replace mysql to MariaDB-server"
-		yum swap mysql MariaDB-server -y
-	fi
+. /script/os.inc
+
+# KloxoNext uses the distribution MariaDB on every OS
+if ! pkg_installed mariadb-server && ! pkg_installed MariaDB-server ; then
+	echo "Install mariadb-server"
+	pkg_install_logical mariadb-server
 fi
+
+# pull the newest panel code when installed from git
+[ -f /usr/local/lxlabs/kloxo/etc/conf/update-source.conf ] && sh /script/kloxonext-update
 
 ppath="/usr/local/lxlabs/kloxo"
 
@@ -98,15 +101,9 @@ if ! [ -d ${ppath}/log ] ; then
 fi
 
 if [ "$REMOVE" ] ; then
-	if [ -f /etc/rc.d/init.d/mysqld ] || [ -f /usr/lib/systemd/system/mysqld.service ] ; then
-		service mysqld stop
-		'rm' -rf /var/lib/mysql/kloxo
-		service mysqld start
-	else
-		service mysql stop
-		'rm' -rf /var/lib/mysql/kloxo
-		service mysql start
-	fi
+	svc_stop mariadb
+	'rm' -rf /var/lib/mysql/kloxo
+	svc_start mariadb
 fi
 
 if [ "$FORCE" ]  ; then

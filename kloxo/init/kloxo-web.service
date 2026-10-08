@@ -1,16 +1,19 @@
 [Unit]
-Description=Startup script for Kloxo.
-Documentation=https://www.facebook.com/groups/KloxoNextGeneration
-After=network.target remote-fs.target nss-lookup.target
- 
+Description=KloxoNext panel web server (nginx)
+Documentation=https://github.com/KloxoNGCommunity/kloxo
+After=network.target remote-fs.target nss-lookup.target kloxo-php.service
+Wants=kloxo-php.service kloxo-apps.service
+
 [Service]
 Type=forking
-PIDFile=/usr/local/lxlabs/kloxo/init/kloxo-hiawatha.pid
+PIDFile=/usr/local/lxlabs/kloxo/init/kloxo-nginx.pid
 ExecStartPre=/usr/bin/lxphp.exe -f /usr/local/lxlabs/kloxo/init/changeport.php
-ExecStart=/usr/local/lxlabs/kloxo/init/kloxo-hiawatha -c /usr/local/lxlabs/kloxo/init
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecStartPre=/usr/local/lxlabs/kloxo/init/kloxo-nginx -t -q -c /usr/local/lxlabs/kloxo/init/kloxo-nginx.conf
+ExecStart=/usr/local/lxlabs/kloxo/init/kloxo-nginx -c /usr/local/lxlabs/kloxo/init/kloxo-nginx.conf
+ExecReload=/usr/local/lxlabs/kloxo/init/kloxo-nginx -s reload -c /usr/local/lxlabs/kloxo/init/kloxo-nginx.conf
 ExecStop=/bin/kill -s QUIT $MAINPID
 PrivateTmp=true
- 
+Restart=on-failure
+
 [Install]
 WantedBy=multi-user.target

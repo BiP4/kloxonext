@@ -84,8 +84,7 @@ function updatecleanup_main()
 	log_cleanup('Updating all packages - this may take a while');
 	log_cleanup('- WAIT to process...');
 //	exec("'rm' -f /var/run/yum.pid");
-	lxshell_return("yum", "clean", "expire-cache");
-	$ret = lxshell_return("yum", "update", "-y");
+	$ret = OsPlatform::upgrade();
 
 	if (!$ret) {
 		log_cleanup("- No update found/not installed");

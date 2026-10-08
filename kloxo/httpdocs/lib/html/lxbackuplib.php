@@ -508,7 +508,7 @@ class lxbackup extends Lxdb
 	{
 		global $sgbl;
 		$val = $param['_accountselect'];
-		$res = implode($val, ",");
+		$res = implode(",", $val);
 		$res = str_replace("-", ":", $res);
 	//	$res = str_replace("_s_vv_p_", ":", $res);
 

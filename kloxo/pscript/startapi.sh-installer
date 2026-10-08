@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 echo "WARNING: StartAPI free ssl already stopped (read 'http://startssl.com/'). So disabled"
 exit

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 php_rc='/opt/__phpm__/custom/php.ini'
 php_scan='/opt/__phpm__/etc/php.d'

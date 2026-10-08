@@ -17,35 +17,29 @@ $text = str_replace("'PWORD123'", "'{$pass}'", $text);
 if(!is_dir($tpath)) mkdir($tpath);
 file_put_contents("{$tpath}/reset-mysql-password.sql", $text);
 
+chmod("{$tpath}/reset-mysql-password.sql", 0600);
+
+$svc = isServiceExists('mariadb') ? 'mariadb' : (isServiceExists('mysqld') ? 'mysqld' : 'mysql');
+$daemon = file_exists('/usr/sbin/mariadbd') ? '/usr/sbin/mariadbd' : '/usr/sbin/mysqld';
+
 print("Stop MySQL/mariadb service...\n");
-if (isServiceExists('mariadb')) {
-	exec("service mysql stop");
-} elseif(isServiceExists('mysqld')) {
-	exec("service mysqld stop");
-} else {
-	exec("service mysql stop");
-}
-system("killall mariadbd");
+exec("systemctl stop {$svc}");
+system("killall -q mariadbd mysqld");
 print("MySQL ROOT password reset...\n");
-sleep(10);
+sleep(5);
 
-//system("mariadbd-safe --skip-grant-tables  >/dev/null 2>&1 &");
-system("mariadbd  --user=mysql --init-file={$tpath}/reset-mysql-password.sql >/dev/null 2>&1 &");
+// Ubuntu removes the socket directory when the unit stops
+exec("mkdir -p /run/mysqld /var/run/mysqld; chown mysql:mysql /run/mysqld");
 
-//system("mysql -u root < {$tpath}/reset-mysql-password.sql");
+system("{$daemon} --user=mysql --init-file={$tpath}/reset-mysql-password.sql >/dev/null 2>&1 &");
+
 sleep(15);
 
-//system("mysqladmin -u root -p='{$pass}' shutdown");
 print("Start MySQL service...\n");
-system("killall mariadbd");
+system("killall -q mariadbd mysqld");
+sleep(5);
 exec("'rm' -f {$tpath}/reset-mysql-password.sql");
-if (isServiceExists('mariadb')) {
-	exec("service mariadb start");
-} elseif(isServiceExists('mysqld')) {
-	exec("service mysqld start");
-} else {
-	exec("service mysql start");
-}
+exec("systemctl start {$svc}");
 
 
 

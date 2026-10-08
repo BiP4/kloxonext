@@ -1,0 +1,50 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - update the panel code from the configured git repository
+#    (etc/conf/update-source.conf, written by kloxonext-install.sh).
+#
+#    Local customisations survive: Kloxo only reads 'custom.*' files, which are
+#    never part of the repository, and etc/conf, etc/slavedb, etc/flag,
+#    init/*active, log, session are excluded from the copy.
+
+. /script/os.inc
+
+conf="${KLOXO_PATH}/etc/conf/update-source.conf"
+
+if [ ! -f "${conf}" ] ; then
+	echo "- ${conf} not found; nothing to update from"
+	exit 1
+fi
+
+REPO_URL="$(sed -n 's/^REPO_URL *= *"\(.*\)"/\1/p' "${conf}")"
+BRANCH="$(sed -n 's/^BRANCH *= *"\(.*\)"/\1/p' "${conf}")"
+BRANCH="${BRANCH:-main}"
+
+[ -z "${REPO_URL}" ] && { echo "- REPO_URL empty in ${conf}" ; exit 1 ; }
+
+command -v git >/dev/null 2>&1 || pkg_install git
+command -v rsync >/dev/null 2>&1 || pkg_install rsync
+
+tmp="$(mktemp -d)"
+trap 'rm -rf "${tmp}"' EXIT
+
+echo "- Fetching ${REPO_URL} (${BRANCH})"
+git clone -q --depth 1 --branch "${BRANCH}" "${REPO_URL}" "${tmp}/src" || exit 1
+
+old="$(cat "${KLOXO_PATH}/bin/kloxoversion" 2>/dev/null)"
+new="$(cat "${tmp}/src/kloxo/bin/kloxoversion" 2>/dev/null)"
+
+echo "- Installed: ${old:-unknown}  Available: ${new:-unknown}"
+
+rsync -a \
+	--exclude '/etc/conf/' --exclude '/etc/slavedb/' --exclude '/etc/flag/' \
+	--include '/etc/list/set.*.lst' --exclude '/etc/list/*.lst' \
+	--exclude '/init/*_active' --exclude '/init/kloxo-nginx.conf' --exclude '/init/tmp/' \
+	--exclude '/log/' --exclude '/session/' --exclude '/pid/' --exclude '/serverfile/' \
+	--exclude '/httpdocs/thirdparty/' --exclude 'custom.*' \
+	"${tmp}/src/kloxo/" "${KLOXO_PATH}/"
+
+chown -R lxlabs:lxlabs "${KLOXO_PATH}/httpdocs"
+
+echo "- KloxoNext updated to ${new:-latest}. Run 'sh /script/cleanup' to apply."

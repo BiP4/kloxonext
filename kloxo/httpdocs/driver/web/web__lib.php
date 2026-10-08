@@ -44,8 +44,9 @@ class web__ extends lxDriverClass
 
 	static function setUnnstallPhpfpm()
 	{
-		// MR -- change to it for speedup process
-		exec("yum remove php*-fpm -y");
+		// KloxoNext - php-fpm binaries are shared by the multi-php layouts
+		// (/opt/phpXYm), never uninstall them; only stop the branch service.
+		exec("systemctl disable --now php-fpm >/dev/null 2>&1");
 	}
 
 	static function setInstallPhpfpm()

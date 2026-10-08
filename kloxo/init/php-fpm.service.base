@@ -12,9 +12,11 @@ After=syslog.target network.target
 
 [Service]
 Type=notify
+RuntimeDirectory=php-fpm
+RuntimeDirectoryPreserve=yes
 PIDFile=/run/php-fpm/php-fpm.pid
-ExecStartPre=/usr/bin/rm -f /opt/configs/php-fpm/sock/php-*.sock >/dev/null 2>&1
-ExecStart=/usr/sbin/__custom_name__-fpm -y /opt/configs/php-fpm/conf/php/php-fpm.conf --nodaemonize
+ExecStartPre=/bin/sh -c 'rm -f /opt/configs/php-fpm/sock/php-*.sock'
+ExecStart=/usr/local/lxlabs/kloxo/init/php-branch-fpm -y /opt/configs/php-fpm/conf/php/php-fpm.conf --nodaemonize
 ExecReload=/bin/kill -USR2 $MAINPID
 ExecStop=/bin/kill -s QUIT $MAINPID
 PrivateTmp=true

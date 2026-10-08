@@ -1,0 +1,35 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - point the 'kloxo-apps' php-fpm (phpMyAdmin & co. served by the
+#    panel) to the newest PHP installed on the server. Called after every PHP
+#    install/update and by the daily third-party updater.
+
+. /script/os.inc
+. /script/php-native.inc
+
+xy="${1:-$(php_latest_installed)}"
+xy="$(echo "${xy}" | tr -dc '0-9' | cut -c1-2)"
+
+if [ -z "${xy}" ] ; then
+	echo "- No native PHP installed"
+	exit 1
+fi
+
+php_native_paths "${xy}"
+
+mkdir -p "${KLOXO_PATH}/init/tmp/apps" "${KLOXO_PATH}/init/tmp/apps-session"
+chown lxlabs:lxlabs "${KLOXO_PATH}/init/tmp/apps" "${KLOXO_PATH}/init/tmp/apps-session"
+chmod 0700 "${KLOXO_PATH}/init/tmp/apps" "${KLOXO_PATH}/init/tmp/apps-session"
+
+old="$(readlink "${KLOXO_PATH}/init/kloxo-apps-fpm" 2>/dev/null)"
+
+# use the native binary with its native configuration (extensions enabled
+# by the package manager), overrides live in kloxo-apps-fpm.conf
+ln -snf "${NATIVE_PHP_FPM}" "${KLOXO_PATH}/init/kloxo-apps-fpm"
+echo "${xy}" > "${KLOXO_PATH}/init/kloxo_apps_php_active"
+
+if [ "${old}" != "${NATIVE_PHP_FPM}" ] ; then
+	echo "- Third-party apps now use PHP $(php_dotted "${xy}")"
+	systemctl restart kloxo-apps >/dev/null 2>&1
+fi

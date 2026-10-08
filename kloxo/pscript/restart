@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 #list=(kloxo)
 
@@ -18,7 +19,9 @@ if [ -f ${bpath}/init/php_active ] ; then
 	mv -f ${bpath}/init/php_active ${bpath}/init/kloxo_php_active
 fi
 
-ln -sf /usr/sbin/hiawatha ${bpath}/init/kloxo-hiawatha
+ln -sf /usr/sbin/nginx ${bpath}/init/kloxo-nginx
+rm -f ${bpath}/init/kloxo-hiawatha
+[ -L ${bpath}/init/kloxo-apps-fpm ] || sh /script/set-kloxo-apps-php
 ln -sf /opt/$(cat ${bpath}/init/kloxo_php_active)/custom/php-fpm.sh ${bpath}/init/kloxo-phpcgi
 
 if [ ! -f ${bpath}/sbin/kloxo.exe ] ; then
@@ -29,7 +32,7 @@ cp -f ${spath}/default_index.php ${tpath}/index.php
 cp -f ${spath}/login_inc.php ${tpath}/inc.php
 cp -f ${spath}/login_inc2.php ${tpath}/inc2.php
 
-for i in kloxo-web kloxo-php kloxo-wrap ; do
+for i in kloxo-web kloxo-php kloxo-apps kloxo-wrap ; do
 	chkconfig ${i} on  >/dev/null 2>&1
 done
 

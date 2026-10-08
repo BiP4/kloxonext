@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+#    KloxoNext - minimal 'chkconfig' replacement for distributions without it
+#    (Ubuntu). Translates the calls used by Kloxo scripts to systemctl.
+#
+#      chkconfig <svc> on|off
+#      chkconfig --add|--del <svc>
+#      chkconfig --list [svc]        (RHEL-like output: '<svc> 0:off ... 3:on ...')
+#      chkconfig <svc>               (exit 0 when enabled)
+#
+
+unit_state() {
+	systemctl is-enabled "$1" 2>/dev/null
+}
+
+print_line() {
+	local svc="$1" s
+	s="$(unit_state "${svc}")"
+	if [ "${s}" == "enabled" ] || [ "${s}" == "alias" ] ; then
+		echo "${svc}	0:off	1:off	2:on	3:on	4:on	5:on	6:off"
+	else
+		echo "${svc}	0:off	1:off	2:off	3:off	4:off	5:off	6:off"
+	fi
+}
+
+case "$1" in
+	--list)
+		if [ -n "$2" ] ; then
+			systemctl list-unit-files --type=service --no-legend "$2.service" 2>/dev/null | grep -q . || exit 1
+			print_line "$2"
+		else
+			systemctl list-unit-files --type=service --no-legend 2>/dev/null | awk '{print $1}' | \
+				grep -v '@' | sed 's/\.service$//' | while read -r s ; do print_line "${s}" ; done
+		fi
+		;;
+	--add)
+		systemctl daemon-reload ;;
+	--del|-del)
+		systemctl disable "$2" >/dev/null 2>&1 ; systemctl daemon-reload ;;
+	--level)
+		shift 2 ; exec "$0" "$@" ;;
+	"")
+		echo "usage: chkconfig [--list [name]] [--add|--del name] [name on|off]" ; exit 2 ;;
+	*)
+		case "$2" in
+			on)    systemctl enable "$1" ;;
+			off)   systemctl disable "$1" ;;
+			reset) systemctl preset "$1" ;;
+			"")    [ "$(unit_state "$1")" == "enabled" ] ;;
+		esac
+		;;
+esac

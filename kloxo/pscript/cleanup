@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 echo ">>> cleanup <<<"
 sh /script/cleanup.inc
 	

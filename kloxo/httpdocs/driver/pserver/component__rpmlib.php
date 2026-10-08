@@ -4,7 +4,11 @@ class Component__rpm extends lxDriverClass
 {
 	static function getDetailedInfo($name)
 	{
-		$ret = lxshell_output("rpm", "-qi", $name);
+		if (OsPlatform::isDebian()) {
+			$ret = lxshell_output("dpkg-query", "-s", OsPlatform::mapPackage($name));
+		} else {
+			$ret = lxshell_output("rpm", "-qi", $name);
+		}
 
 		return $ret;
 	}
@@ -47,8 +51,13 @@ class Component__rpm extends lxDriverClass
 				$list = array_values(array_unique($list));
 			}
 
-			$out = null;
-			exec('rpm -q ' . implode(" ", $list), $out);
+			// same output contract as 'rpm -q <list>'
+			$out = array();
+
+			foreach ($list as $v) {
+				$ver = OsPlatform::installedVersion($v);
+				$out[] = ($ver === '0.0.0') ? "package {$v} is not installed" : "{$v}-{$ver}";
+			}
 
 			foreach ($list as $k => $v) {
 				$nname = "{$v}___{$syncserver}";

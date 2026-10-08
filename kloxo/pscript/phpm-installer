@@ -1,250 +1,77 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#
+#    KloxoNext - install one PHP branch for Kloxo
+#
+#    Same interface as the historical Kloxo script, but PHP now comes from the
+#    distribution package manager (Remi on EL, ondrej/php or Ubuntu archive on
+#    Ubuntu) and /opt/phpXY[m|s] is a symlink layout built on top of it.
+#
+
+. /script/os.inc
+. /script/php-native.inc
+
 echo "=== BEGIN phpm-installer ==="
-if [ "$1" == "--help" ] ; then
+
+if [ "$1" == "--help" ] || [ "$#" == 0 ] ; then
 	echo
 	echo " ------------------------------------------------------------------------------"
 	echo "  format: sh $0 <phpXYm|phpXYs> [--force]"
 	echo " ------------------------------------------------------------------------------"
 	echo "  phpXYm/phpXYs"
-	echo "      - start from php52m/php52s"
-	echo "      - phpXYm for 'multiple php'"
-	echo "      - phpXYs for 'special php' for Kloxo panel"
+	echo "      - phpXYm for 'multiple php' (domains)"
+	echo "      - phpXYs for 'special php' (Kloxo panel)"
+	echo "      - available on this server: $(for b in $(php_available_branches) ; do echo -n "php${b} " ; done)"
 	echo "  --force"
-	echo "      - for re-install"
-	echo
-	exit;
-fi
-
-if [ "$#" == 0 ] ; then
-	echo
-	echo "- For help, type '$0 --help'"
+	echo "      - re-create the layout even if already present"
 	echo
 	exit
 fi
 
 base_name="${1}"
 
-if [ "${base_name}" == "php" ] ; then
-	main_path=""
-else
-	main_path="/opt/${base_name}"
+if ! [[ "${base_name}" =~ ^php[0-9]{2}[ms]$ ]] ; then
+	echo "* WARNING: only for phpXYm or phpXYs (XY = $(echo ${PHP_KNOWN_BRANCHES} | sed 's/ /, /g'))"
+	exit 1
 fi
 
-if [ "${base_name}" != "php" ] ; then
-	if [ "$(grep 's' <<<${base_name})" == "" ] && [ "$(grep 'm' <<<${base_name})" == "" ] ; then
-		echo "* WARNING: only for phpXYm or phpXYs (change XY to 52 - 74)"
-		exit
-	fi
-fi
+xy="${base_name:3:2}"
+main_path="/opt/${base_name}"
+log="${main_path}/${base_name}_install.log"
+
+mkdir -p "${main_path}"
 
 . /script/counter-start.inc
 
-## MR -- remove last char (default m or s)
-src_name="${base_name%[s,m]}"
+{
+	echo "=== BEGIN '${base_name}' install ($(date)) on ${OS_ID} ${OS_VERSION} ==="
 
-
-if [ "${base_name}" == "php52s" ] || [ "${base_name}" == "php53s" ] || [ "${base_name}" == "php54s" ] ;  then
-	if [ "$(rpm -qa ${base_name}-cli)" != "" ] ; then
-		yum remove ${base_name}* -y -q >/dev/null 2>&1
-		'rpm' -e ${base_name}-fpm --noscripts >/dev/null 2>&1
-	fi
-fi
-
-mkdir -p ${main_path} >/dev/null 2>&1
-
-cd ${main_path} >/dev/null 2>&1
-
-rm -f ${main_path}/${base_name}_install.log >/dev/null 2>&1
-
-## MR -- use 'echo "$var"' instead 'echo $var'!!!
-end_note="
-Note:
-- See '${main_path}/${base_name}_install.log' for detail install process
-- Example: copy 'xcache.nonini' to '_xcache.ini' or 'xcache_used.ini'
-           for enable 'xcache' module in '/etc/${base_name}/etc/php.d'
-- For config setup only, run 'sh /script/phpm-config-setup ${base_name}
-"
-
-x="=== BEGIN '$1' install ==="
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-if yum list ${src_name}u-cli >/dev/null 2>&1 ; then
-	pack_name="${src_name}u"
-elif yum list ${src_name}-cli >/dev/null 2>&1 ; then
-	pack_name="${src_name}"
-elif yum list ${src_name}w-cli >/dev/null 2>&1 ; then
-	pack_name="${src_name}w"
-elif yum list ${src_name}-php-cli >/dev/null 2>&1 ; then
-	pack_name="${src_name}-php"
-else
-	echo "- No PHP packages exists. Only detecting '${src_name}u', '${src_name}' or '${src_name}w'. Exit"
-	echo
-	exit
-fi
-
-if [ "$(uname -m)" == "x86_64" ] ; then
-	v=".x86_64"
-else
-	v=""
-fi
-
-if [ "$(rpm -qa yum-utils)" == "" ] ; then
-	yum install yum-utils -y
-fi
-
-if [ -f ${main_path}/${base_name} ] ; then
-	## remove from previous process
-	'rm' -f ${main_path}/${base_name}
-fi
-
-pack_verrel=$(repoquery --latest-limit 1 --qf='%{version}-%{release}' ${pack_name}-cli)
-
-if [ -f ${main_path}/version ] ; then
-	if [ "${2}" == "-y" ] || [ "${2}" == "--force" ] ; then
-		echo "${pack_verrel}" > ${main_path}/version
+	if ! php_native_installed "${xy}" || [ "${2}" == "-y" ] || [ "${2}" == "--force" ] ; then
+		os_setup_repos
+		php_native_install "${xy}"
 	else
-		cver=$(cat ${main_path}/version)
-
-		if [ "$(rpm -qa rpmdevtools)" == "" ] ; then
-			yum install rpmdevtools -y
-		fi
-
-		rpmdev-vercmp ${cver} ${pack_verrel} >/dev/null 2>&1
-		status="$?"
-
-		if [ "$?" != "12" ] ; then
-			x="- '${pack_name}-${pack_verrel}' already installed"
-			echo $x
-			echo $x >>${main_path}/${base_name}_install.log
-			. /script/counter-end.inc
-
-			cd /
-			sh /script/phpm-config-setup $base_name
-
-			echo -e "$end_note"
-
-			exit
-		fi
-
-		echo "${pack_verrel}" >${main_path}/version
+		echo "- PHP $(php_dotted "${xy}") already installed from packages"
 	fi
-else
-	echo "${pack_verrel}" >${main_path}/version
+
+	if ! php_native_installed "${xy}" ; then
+		echo "- ERROR: PHP $(php_dotted "${xy}") is not provided by the repositories of ${OS_ID} ${OS_VERSION}"
+		exit 1
+	fi
+
+	php_build_compat_layout "${base_name}"
+} 2>&1 | tee -a "${log}"
+
+[ "${PIPESTATUS[0]}" != "0" ] && exit 1
+
+sh /script/phpm-config-setup "${base_name}"
+
+if [[ "${base_name}" == *m ]] ; then
+	sh /script/enable-php-fpm
 fi
-
-x="- Dependencies rpms... Please wait!"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-c=""
-
-x="-- Check dependencies rpms"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-repoquery --qf='%{name}' --requires --resolve ${pack_name}-*|egrep -iv "(${src_name}|mysql|postgresql|mariadb|httpd|openssl|nginx|tengine|pear1u|common)(.*)|php[0-9][0-9]"|sort -u > ${main_path}/dependencies
-
-yum -y install libmemcached-awesome coreutils libcurl  --skip-broken
-
-#Default libmemcached is now greated than IUS libmemcached10
-#if [ "$(yum list|grep libmemcached10)" != "" ] ; then
-#	libm1=$(yum info libmemcached10${v}|grep Version|awk '{print $3}')
-#else
-#	libml="0.0.0"
-#fi
-
-#libm2=$(yum info libmemcached${v}|grep Version|awk '{print $3}')
-
-#if [[ $libm1 < $libm2 ]] ; then
-#	if [ "$(rpm -qa libmemcached10)" != "" ] ; then
-#		yum replace libmemcached10 --replace-with=libmemcached -y >/dev/null 2>&1
-#	fi
-#	sed -i 's/libmemcached10/libmemcached/g' ${main_path}/dependencies ${main_path}/dependencies
-#else
-#	if [ "$(rpm -qa libmemcached)" != "" ] ; then
-#		yum replace libmemcached --replace-with=libmemcached10 -y >/dev/null 2>&1
-#	fi
-#fi
-
-x="-- Install dependencies rpms"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-yum -y install $(cat ${main_path}/dependencies) --skip-broken --exclude=libcurl-minimal --exclude=coreutils-single >>${main_path}/${base_name}_install.log
-
-x="- Download all rpms (not including debuginfo)... Please wait!"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-
-if [ -f ${main_path}/etc ] ; then
-	find ${main_path}/etc ! \( -name "_*.ini" -or -name "*_used.ini" \) -exec rm -rf {} \;
-fi
-
-yumdownloader ${pack_name}-* -x *debuginfo* >>${main_path}/${base_name}_install.log
-#'rm' -rf *-debuginfo*
-
-#rpmrebuild -v --change-spec-whole='sed -e "s/^Prefix:.*/Prefix: \//"' \
-#	--change-spec-whole='sed -e "s/^\(.*:[ ]\+\..*\)/#ERROR \1/"' \
-#	--notest-install -p -d ${main_path}/rpms-patch ${main_path}/rpms-original \
-#	>>${main_path}/${base_name}_install.log
-#rpm -i --dbpath /rpm force --root ${main_path} --nopre --nopost --nodeps ${main_path}/rpms-patch \
-#	>>${main_path}/${base_name}_install.log
-
-
-x="- Extract all rpms to '${main_path}'"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-for i in $(ls ./*.rpm) ; do
-	rpm2cpio $i | cpio -idmv >/dev/null 2>$1
-done
-
-'rm' -rf ./*.rpm
-
-if [ -d ${main_path}/opt/remi ] ; then
-x="- Remi found, rearranging folders"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-    echo 1 > ${main_path}/remi
-    /bin/cp -r -v ${main_path}/opt/remi/${src_name}/root/usr/* ${main_path}/usr >>${main_path}/${base_name}_install.log
-    /bin/cp -r -v ${main_path}/etc/opt/remi/${src_name}/* ${main_path}/etc >>${main_path}/${base_name}_install.log
-    /bin/cp -r -v ${main_path}/var/opt/remi/${src_name}/* ${main_path}/var >>${main_path}/${base_name}_install.log
-    rm -r -v ${main_path}/opt >>${main_path}/${base_name}_install.log	
-    rm -r -v ${main_path}/etc/opt	>>${main_path}/${base_name}_install.log	
-    rm -r -v ${main_path}/var/opt	>>${main_path}/${base_name}_install.log
-fi  
-if [ -d ${main_path}/opt/rh ] ; then
-x="- Remi found, rearranging folders"
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
-
-    echo 1 > ${main_path}/rh
-    /bin/cp -r -v ${main_path}/opt/rh/${src_name}/root/usr/* ${main_path}/usr >>${main_path}/${base_name}_install.log
-    /bin/cp -r -v ${main_path}/etc/opt/rh/${src_name}/* ${main_path}/etc >>${main_path}/${base_name}_install.log
-    /bin/cp -r -v ${main_path}/var/opt/rh/${src_name}/* ${main_path}/var >>${main_path}/${base_name}_install.log
-    rm -r -v ${main_path}/opt >>${main_path}/${base_name}_install.log	
-    rm -r -v ${main_path}/etc/opt	>>${main_path}/${base_name}_install.log	
-    rm -r -v ${main_path}/var/opt	>>${main_path}/${base_name}_install.log
-fi  
-
-
-cd /
-sh /script/phpm-config-setup $base_name
-
-if [ -f ${main_path}/${base_name} ] ; then
-	'rm' -f ${main_path}/${base_name}
-fi
-
-#sh /script/set-php-fpm $base_name
-sh /script/enable-php-fpm
-
-x="=== END '$1' install ==="
-echo $x
-echo $x >>${main_path}/${base_name}_install.log
 
 . /script/counter-end.inc
 
-echo -e "$end_note"
+echo "- See '${log}' for detail install process"
+echo "- For config setup only, run 'sh /script/phpm-config-setup ${base_name}'"
 echo "=== END phpm-installer ==="

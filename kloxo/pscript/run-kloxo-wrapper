@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(ps aux|grep kloxo|grep '/usr/local/lxlabs/kloxo/sbin/kloxo'|grep -v 'grep')" == "" ] ; then
 	sh /usr/local/lxlabs/kloxo/sbin/kloxo-wrapper.sh &

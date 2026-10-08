@@ -1,4 +1,4 @@
-list_kloxo=(kloxo-web kloxo-php kloxo-wrap)
+list_kloxo=(kloxo-php kloxo-apps kloxo-web kloxo-wrap)
 
 #if [ "$(command -v systemctl)" != "" ] ; then
 if [ "$(ps --no-headers -o comm 1)" == "systemd" ] ; then

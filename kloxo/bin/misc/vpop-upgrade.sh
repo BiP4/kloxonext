@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 'cp' -a /home/vpopmail ~/vpopmail-backup
 rpm -e courier-imap vpopmail

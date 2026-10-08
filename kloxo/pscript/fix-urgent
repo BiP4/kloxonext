@@ -1,74 +1,37 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - small sanity fixes run before install/update.
+#
+#    Older Kloxo versions added 'exclude=mysql* mariadb*' and 'sslverify=false'
+#    to /etc/yum.conf, ran 'chmod 777 /var/run' and forced dhclient on every
+#    interface. KloxoNext reverts those changes instead of applying them.
 
 echo ">>> fix-urgent <<<"
 
-#if [ "$(rpm -qa yum-presto)" == "" ] ; then
-#if [ "$(rpm -q yum-presto | grep -v 'package .* is not installed')" == "" ] ; then
-#	if [ "$(yum list *yum*|grep '@')" != "" ] ; then
-#		yum install -y yum-presto deltarpm >/dev/null 2>&1
-#	fi
-#fi
+. /script/os.inc
 
-## trouble with mysql for qmail-toaster
-if [ "$(cat /etc/yum.conf|grep 'exclude=')" != "" ] ; then
-	sed -i 's/\(exclude\=\)\(.*\)\(mysql5\*\|mysql5?\*\|MariaDB\*\|dovecot\*\)\(.*\)/\1\4 mysql\*/g' /etc/yum.conf
-else
-	echo "exclude=mysql* mariadb*" >> /etc/yum.conf
+if os_is_el ; then
+	for f in /etc/yum.conf /etc/dnf/dnf.conf ; do
+		[ -f "${f}" ] || continue
+		sed -i '/^sslverify=false$/d' "${f}"
+		sed -i '/^exclude=mysql\* mariadb\*$/d' "${f}"
+	done
 fi
 
-if [ ! -L /usr/bin/chkconfig ] ; then
-	## MR -- fix issue if running restart in cron
-	ln -s /sbin/chkconfig /usr/bin/chkconfig
+# sudo is needed by the panel (lxlabs runs helpers through it)
+command -v sudo >/dev/null 2>&1 || pkg_install sudo
+
+# old Kloxo made /var/run world writable
+[ "$(stat -c %a /run 2>/dev/null)" == "777" ] && chmod 755 /run
+
+# chkconfig shim (Ubuntu) / historical /usr/bin path used by cron jobs
+if ! command -v chkconfig >/dev/null 2>&1 ; then
+	install -m 0755 /usr/local/lxlabs/kloxo/file/linux/compat/chkconfig /usr/sbin/chkconfig
 fi
+[ -e /usr/bin/chkconfig ] || ln -s "$(command -v chkconfig)" /usr/bin/chkconfig
 
-#if [ "$(rpm -qa sudo)" == "" ] ; then
-if [ "$(rpm -q sudo | grep -v 'package .* is not installed')" == "" ] ; then
-	## Add sudo
-	yum install -y sudo >/dev/null 2>&1
-fi
-
-if [ "$(cat /etc/yum.conf|grep 'sslverify')" != "" ] ; then
-	sed -i '/sslverify/d' /etc/yum.conf
-fi
-
-echo 'sslverify=false' >> /etc/yum.conf
-
-# Stop annoying journald logging in messages log
+# Stop annoying journald wall messages
 sed -i 's/^#ForwardToWall=yes/ForwardToWall=no/g' /etc/systemd/journald.conf
-
-
-## MR -- make install x86_64 only in 64bit OS
-if [ ! -f ~/.rpmmacros ] || [ "$(cat ~/.rpmmacros|grep '_query_all_fmt')" == "" ] ; then
-	echo "%_query_all_fmt %%{name}-%%{version}-%%{release}.%%{arch}" >> ~/.rpmmacros
-fi
-
-## MR -- remove 32bit packages in 64bit OS
-if [ "$(uname -m)" == "x86_64" ] ; then
-	yum remove -y *.i386 *.i686 >/dev/null 2>&1
-fi
-
-#if [ "$(rpm -qa redhat-lsb)" == "" ] ; then
-if [ "$(rpm -q redhat-lsb | grep -v 'package .* is not installed')" == "" ] ; then
-	yum install -y redhat-lsb >/dev/null 2>&1
-fi
-
-#if [ "$(rpm -qa dhclient)" == "" ] ; then
-if [ "$(rpm -q dhclient | grep -v 'package .* is not installed')" == "" ] ; then
-	yum install -y dhclient >/dev/null 2>&1
-fi
-
-path='/etc/sysconfig/network-scripts'
-for x in $(dir -l ${path}/ifcfg-*|awk '{print $9}'|tr '\', ' ') ; do
-	if [ "$(cat ${x}|grep -i 'dhcp')" != "" ] ; then
-		y=${x#${path}/ifcfg-}
-		dhclient ${y} >/dev/null 2>&1
-	fi
-done
-
-if [ ! -d /var/log/hiawatha ] ; then
-	mkdir -p /var/log/hiawatha
-fi
-
-chmod 777 /var/run
 
 sh /script/fix-limits > /dev/null 2>&1

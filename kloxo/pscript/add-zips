@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 yum install -y zip unzip xz xz-libs p7zip p7zip-plugins
 yum install -y rar unrar --enablerepo=*rpmforge*

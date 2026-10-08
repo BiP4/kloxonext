@@ -98,6 +98,7 @@ function isUpdating()
 	return lx_core_lock_check_only("update.php");
 }
 
+#[AllowDynamicProperties]
 class lxException extends Exception
 {
 	public $syncserver;
@@ -1025,6 +1026,7 @@ function getShellCommand($cmd, $arglist)
 	return $cmd;
 }
 
+#[\AllowDynamicProperties]
 class Remote
 {
 	/*
@@ -2006,6 +2008,7 @@ function lx_strip_tags($str)
 	return $nstr;
 }
 
+#[\AllowDynamicProperties]
 class Language_Mes
 {
 

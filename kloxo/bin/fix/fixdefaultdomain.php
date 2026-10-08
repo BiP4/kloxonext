@@ -10,7 +10,7 @@ foreach($list as $c) {
 	$dlist = $c->getList('domain');
 	$d = getFirstFromList($dlist);
 	lunlink("/home/$c->nname/www");
-	lxfile_symlink("/home/{$c->nname/domain}/{$d->nname}/www", "/home/{$c->nname}/www");
+	lxfile_symlink("/home/{$c->nname}/domain/{$d->nname}/www", "/home/{$c->nname}/www");
 
 	foreach($dlist as $l) {
 		$web = $l->getObject('web');

@@ -1,0 +1,33 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - daily maintenance run by kloxo-thirdparty-update.timer
+#
+#    1. security/bugfix updates of the installed PHP branches (same major.minor)
+#       - disable with: touch /usr/local/lxlabs/kloxo/etc/flag/no-auto-update-php.flg
+#    2. optional: install a newly released PHP branch as phpXYm
+#       - enable with:  touch /usr/local/lxlabs/kloxo/etc/flag/auto-install-new-php.flg
+#    3. latest upstream phpMyAdmin / Roundcube / SnappyMail
+#    4. third-party apps switched to the newest PHP installed
+
+. /script/os.inc
+. /script/php-native.inc
+
+flag="${KLOXO_PATH}/etc/flag"
+
+if [ ! -f "${flag}/no-auto-update-php.flg" ] ; then
+	sh /script/phpm-updater
+	sh /script/restart-php-fpm >/dev/null 2>&1
+fi
+
+if [ -f "${flag}/auto-install-new-php.flg" ] ; then
+	latest="$(php_latest_available)"
+	if [ -n "${latest}" ] && [ ! -d "/opt/php${latest}m" ] ; then
+		echo "- New PHP branch $(php_dotted "${latest}") available, installing php${latest}m"
+		sh /script/phpm-installer "php${latest}m"
+		php_set_branch "${latest}"
+		sh /script/fixphp >/dev/null 2>&1
+	fi
+fi
+
+sh /script/thirdparty-update

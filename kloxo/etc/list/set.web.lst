@@ -1,1 +1,1 @@
-httpd,lighttpd,nginx,nginx-stable,tengine,ulyaoth-nginx-mainline-pagespeed,ulyaoth-nginx-pagespeed,nginx1w,hiawatha,ulyaoth-hiawatha,ulyaoth-hiawatha-letsencrypt
+httpd,nginx,lighttpd,hiawatha

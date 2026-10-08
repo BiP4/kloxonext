@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 #if [ "$(rpm -qa qmail-toaster)" != "" ] ; then
 if [ "$(rpm -q qmail-toaster | grep -v 'package .* is not installed')" != "" ] ; then

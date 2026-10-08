@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 echo;
 echo "- This patch apply to Kloxo 6.1.x for to make NO 'could_not_zip_dir' warning";

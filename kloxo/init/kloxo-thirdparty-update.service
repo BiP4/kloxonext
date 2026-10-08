@@ -1,0 +1,10 @@
+[Unit]
+Description=KloxoNext - update third-party apps (phpMyAdmin, webmail) and PHP packages
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Nice=10
+IOSchedulingClass=idle
+ExecStart=/bin/bash /usr/local/lxlabs/kloxo/pscript/auto-update

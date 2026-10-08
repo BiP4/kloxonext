@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(dir -l /usr/bin/lxphp.exe|grep 'php-cli.sh')" == "" ] ; then
 	echo

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(rpm -qa httpry)" == "" ] ; then
 	yum -y remove httpry

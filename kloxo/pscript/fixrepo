@@ -1,33 +1,21 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - make sure the repositories KloxoNext needs are enabled.
+#    (EPEL + CRB + Remi on EL, ondrej/php on Ubuntu; no Kloxo rpm repo anymore)
 
 echo ">>> fixrepo <<<"
 
-# declaring Variables
-reponame="kloxo"
-repourl="https://github.com/KloxoNGCommunity/kloxo/raw/initial-rpm/"
-relrpmname="kloxo-release.rpm"
+. /script/os.inc
 
-yum clean all
-
-if [ "$(rpm -qa|grep $reponame-release)" != "" ] ; then
-	yum update $reponame* -y
-else
-	cd /tmp
-
-	'rm' -rf /etc/yum.repos.d/kloxo-mr.repo
-	'rm' -rf /etc/yum.repos.d/kloxo-custom.repo
-	'rm' -rf /etc/yum.repos.d/lxcenter.repo
-	'rm' -rf /etc/yum.repos.d/lxlabs.repo	
-	'rm' -rf /etc/yum.repos.d/kloxong.repo.*
-	'rm' -rf /tmp/kloxong*
-	'rm' -rf /tmp/kloxo*
-	
-	if [ "$(rpm -qa|grep wget)" == "" ] ; then
-		yum install wget -y
-	fi
-	wget $repourl/$relrpmname --no-check-certificate
-	rpm -ivh $relrpmname
-	yum update $reponame-* -y
+if os_is_el ; then
+	# repos of older Kloxo releases ship conflicting qmail/php/hiawatha builds
+	for r in kloxo kloxo-mr kloxo-custom kloxong lxcenter lxlabs ; do
+		[ -f "/etc/yum.repos.d/${r}.repo" ] && mv -f "/etc/yum.repos.d/${r}.repo" "/etc/yum.repos.d/${r}.repo.disabled"
+	done
 fi
+
+os_setup_repos
+pkg_clean
 
 . /script/fix-urgent

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 for x in cp mv rm ; do
 	for y in bashrc cshrc tcshrc ; do

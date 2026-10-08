@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(cat /etc/yum.conf|grep 'http_caching=none')" == "" ] ; then
 	echo 'http_caching=none' >> /etc/yum.conf

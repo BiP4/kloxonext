@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-#	Kloxo - Control Panel
+#	KloxoNext - Control Panel
 #
 #	Copyright (C) 2018 - KloxoCommunity
 #
@@ -18,278 +19,237 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# Kloxo 8 Release Setup
+# KloxoNext setup - installs every service from the distribution package
+# manager (dnf on AlmaLinux/Rocky 9-10, apt on Ubuntu 26.04).
 #
-# Version: 1.0 (2013-01-11 - by Mustafa Ramadhan <mustafa@bigraf.com>)
-# Version: 1.1 (2018-01-27 - by Dionysis Kladis <dkstiler@gmail.com>)
+# Options:
+#   --php="84 85"         PHP branches for domains (default: 8.4 + newest available)
+#   --admin-password=XXX  password for 'admin' (default: random, printed at the end)
+#   --install-type=slave  install as slave node
+#   --yes                 do not ask for confirmation
 #
-
-#define variables 
-
-mainreponame='kloxo'
-main_repo_url="https://github.com/KloxoNGCommunity/kloxo/raw/initial-rpm/"
-main_release_rpm="kloxo-release.rpm"
-rpm_main_pck='kloxo'
-#this is for installing base packages
-yum_pack1="wget zip unzip yum-utils yum-priorities net-tools chkconfig\
-	vim-minimal subversion curl sudo expect mkpasswd initscripts"
-#this is for remove packages
-yum_pack2="nsd* pdns* mydns* yadifa* maradns djbdns* mysql mysql-* mariadb mariadb-* MariaDB-* php* php54* php55* php56*\
-		httpd-* mod_* httpd24u* mod24u_* nginx* lighttpd* varnish* squid* trafficserver* \
-		*-toaster postfix* exim* opensmtpd* esmtp* libesmtp* libmhash*"
-# database specific pagkages
-yum_database_pack="MariaDB MariaDB-client MariaDB-common MariaDB-shared MariaDB-server"
-## MR -- prohibit to install to CentOS 5 (EOL since 31 Mar 2017)
-#if [ "$(yum list|grep ^yum|awk '{print $3}'|grep '@')" == "" ] ; then
-#	echo "*** No permit to install to CentOS 5 (because EOL since 31 Mar 2017)"
-#	exit
-#fi
 
 ppath="/usr/local/lxlabs/kloxo"
 
-if ! [ -d ${ppath}/log ] ; then
-	### must create log path because without it possible segfault for php!
-	mkdir -p ${ppath}/log
+if [ ! -d "${ppath}/pscript" ] ; then
+	echo "KloxoNext files not found in ${ppath}. Use kloxonext-install.sh to bootstrap."
+	exit 1
 fi
 
-if [ -e /var/run/yum.pid ] ; then
-	'rm' -f /var/run/yum.pid
+# /script must exist before anything else (every helper lives there)
+if [ ! -L /script ] ; then
+	rm -rf /script
+	ln -sf "${ppath}/pscript" /script
 fi
 
-cd /
+[ -f /script/programname ] || echo 'kloxo' > /script/programname
 
+. /script/os.inc
+. /script/php-native.inc
 
+APP_NAME='KloxoNext'
+OPT_PHP=""
+OPT_ADMIN_PASS=""
+OPT_YES=""
 
-yum clean all
-
-if rpm -qa|grep 'kloxo-release' >/dev/null 2>&1 ; then
-	yum update $mainreponame* -y
-else
-	cd /tmp
-	rpm -Uvh $main_repo_url/$main_release_rpm
-	yum update $mainreponame-* -y
-	
-	'rm' -rf /etc/yum.repos.d/kloxo-mr.repo
-	'rm' -rf /etc/yum.repos.d/kloxo-custom.repo
-	'rm' -rf /etc/yum.repos.d/lxcenter.repo
-	'rm' -rf /etc/yum.repos.d/lxlabs.repo
-	'rm' -rf /etc/yum.repos.d/kloxong.repo
-	'rm' -rf /etc/yum.repos.d/epel*.repo
-fi
-
-## trouble with mysql55 for qmail-toaster
-#sed -i 's/exclude\=mysql51/exclude\=mysql5/g' /etc/yum.repos.d/$mainreponame.repo
-
-cd /
-
-checktmpfs=$(cat /etc/fstab|grep '/tmp'|grep 'tmpfs')
-
-if [ "${checktmpfs}" != "" ] ; then
-	echo "This server have '/tmp' with 'tmpfs' detect."
-	echo "Modified '/etc/fstab' where remove 'tmpfs' in '/tmp' line and then reboot."
-	echo "Without remove, backup/restore may have a trouble."
-	exit
-fi
-
-echo
-echo "*** Ready to begin $APP_NAME setup. ***"
-echo
-echo "- Note some file downloads may not show a progress bar so please,"
-echo "  do not interrupt the process."
-echo
-echo "- When it's finished, you will be presented with a welcome message and"
-echo "  further instructions."
-echo
-#read -n 1 -p "Press any key to continue ..."
-echo
-
-APP_NAME='Kloxo'
-
-if [ -f ${ppath}/etc/conf/slave-db.db ] ; then
+if [ -f "${ppath}/etc/conf/slave-db.db" ] ; then
 	APP_TYPE='slave'
 else
 	APP_TYPE='master'
 fi
 
-SELINUX_CHECK=/usr/sbin/selinuxenabled
-SELINUX_CFG=/etc/selinux/config
-ARCH_CHECK=$(eval uname -m)
+for arg in "$@" ; do
+	case "${arg}" in
+		--php=*)            OPT_PHP="${arg#*=}" ;;
+		--admin-password=*) OPT_ADMIN_PASS="${arg#*=}" ;;
+		--install-type=*)   APP_TYPE="${arg#*=}" ;;
+		--yes|-y)           OPT_YES=1 ;;
+	esac
+done
 
-E_SELINUX=50
-E_ARCH=51
-E_NOYUM=52
-E_NOSUPPORT=53
-E_HASDB=54
-E_REBOOT=55
-E_NOTROOT=85
+C_OK="\e[32m OK \e[0m"
+C_NO="\e[31m NO \e[0m"
 
-C_OK=" OK \n"
-C_NO=" NO \n"
-C_MISS=" UNDETERMINED \n"
+step() {
+	echo
+	echo -e "\e[1;34m>>> $* \e[0m"
+}
 
-# clear
+die() {
+	echo -e "\e[31m*** $* \e[0m"
+	exit 1
+}
 
-# Check if user is root.
-if [ "$UID" -ne "0" ] ; then
-	echo -en "Installing as \"root\"   " $C_NO
-	echo -e "\a\nYou must be \"root\" to install $APP_NAME.\n\nAborting ...\n"
-	exit $E_NOTROOT
+# ---------------------------------------------------------------------------
+# Pre-flight checks
+# ---------------------------------------------------------------------------
+
+step "Pre-flight checks"
+
+[ "$(id -u)" -eq 0 ] || die "You must be 'root' to install ${APP_NAME}"
+echo -e "Installing as root            ${C_OK}"
+
+if os_is_supported ; then
+	echo -e "Operating system              ${C_OK} (${OS_ID} ${OS_VERSION})"
 else
-	echo -en "Installing as \"root\"   " $C_OK
+	echo -e "Operating system              ${C_NO} (${OS_ID} ${OS_VERSION})"
+	echo "  Supported: AlmaLinux/Rocky 9.x and 10.x, Ubuntu 26.04 LTS"
+	[ -n "${OPT_YES}" ] || die "Unsupported OS (use --yes to force at your own risk)"
 fi
 
-# Check if selinuxenabled exists
-if [ ! -f $SELINUX_CHECK ] ; then
-	echo -en "SELinux not installed      " $C_MISS
+[ "$(uname -m)" == "x86_64" ] || [ "$(uname -m)" == "aarch64" ] || die "Only x86_64 and aarch64 are supported"
+
+if [ "$(hostname -f 2>/dev/null)" == "$(hostname -s)" ] ; then
+	die "Hostname '$(hostname)' is not a FQDN. Run: hostnamectl set-hostname server1.example.com"
+fi
+echo -e "FQDN hostname                 ${C_OK} ($(hostname -f))"
+
+if grep -q '^[^#].*[[:space:]]/tmp[[:space:]].*tmpfs' /etc/fstab ; then
+	die "'/tmp' is mounted as tmpfs in /etc/fstab; remove it and reboot (backups need a real /tmp)"
+fi
+
+if os_is_el && command -v selinuxenabled >/dev/null 2>&1 && selinuxenabled ; then
+	echo "SELinux enabled - switching to permissive/disabled (Kloxo manages many paths outside policy)"
+	setenforce 0
+	sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+fi
+
+mkdir -p "${ppath}/log" "${ppath}/etc/conf" "${ppath}/etc/flag" "${ppath}/pid"
+
+if [ -d /var/lib/mysql/kloxo ] ; then
+	kloxostate='installed'
 else
-	# Check if SElinux is enabled from exit status. 0 = Enabled; 1 = Disabled;
-	eval $SELINUX_CHECK
-	OUT=$?
-	if [ $OUT -eq "0" ] ; then
-		echo -en "SELinux disabled       " $C_NO
-		setenforce 0
-		echo "SELINUX=disabled" > $SELINUX_CFG
-		echo -e "SELinux disabled successfully\n"
-	elif [ $OUT -eq "1" ] ; then
-		echo -en "SELinux disabled       " $C_OK
-	fi
+	kloxostate='none'
 fi
 
-# Check if yum is installed.
-if ! [ -f /usr/sbin/yum ] && ! [ -f /usr/bin/yum ] ; then
-	echo -en "Yum installed          " $C_NO
-	echo -e "\a\nThe installer requires YUM to continue. Please install it and try again.\nAborting ...\n"
-	exit $E_NOYUM
+# ---------------------------------------------------------------------------
+# Repositories and base packages
+# ---------------------------------------------------------------------------
+
+step "Configure repositories (${OS_PKG})"
+pkg_refresh
+os_setup_repos
+
+step "Install base packages"
+pkg_install_logical base archive sudo cron quota
+
+if os_is_el ; then
+	pkg_install chkconfig initscripts-service dnf-utils
+fi
+
+# Kloxo scripts call 'chkconfig'; Ubuntu does not ship it
+if ! command -v chkconfig >/dev/null 2>&1 ; then
+	install -m 0755 "${ppath}/file/linux/compat/chkconfig" /usr/sbin/chkconfig
+fi
+
+step "System accounts"
+os_compat_accounts
+
+# ---------------------------------------------------------------------------
+# Services
+# ---------------------------------------------------------------------------
+
+step "Remove conflicting mail servers"
+if os_is_el ; then
+	pkg_remove sendmail exim opensmtpd ssmtp 2>/dev/null
 else
-	echo -en "Yum installed          " $C_OK
+	pkg_remove exim4 exim4-base exim4-config exim4-daemon-light 2>/dev/null
 fi
 
-echo
-
-# Start install
-
-if [ -d /script ] ; then
-	'rm' -rf /script
-	ln -sf ${ppath}/pscript /script
-fi
-
-cd /
-
-'rm' -rf *.rpm
-
-#yum clean all
-
-yum -y install $yum_pack1 --skip-broken
-
-#echo "Set MariaDB version in yum"
-# Set MariaDB version
-# Ensure that MariaDB isn't downgraded during update process
-
-if [ "$(rpm -qa rpmdevtools)" == "" ] ; then
-	yum install rpmdevtools -y
-fi
-
-# crb required for some packages
-
-	# For el9
-	yum-config-manager --enable crb
-	
-	# For el8
-	yum-config-manager --enable powertools
-
-if [ "$(rpm -q MariaDB-server) | grep -v 'package .* is not installed')" != "" ] ; then
-	MDBver=$(rpm -q --queryformat '%{VERSION}' MariaDB-server)
-	Refver="10.6"
-	rpmdev-vercmp ${Refver} ${MDBver} >/dev/null 2>&1
-	status="$?"
-	if [ "${status}" == "12" ] ; then
-		sed -i -e "s:rpm.mariadb.org/\(.*\)/rhel/:rpm.mariadb.org/${Refver}/rhel/\2:g" /etc/yum.repos.d/kloxo.repo
-		yum clean all
-	fi
-fi
-
-
-echo "Remove old and not required packages. Delete postfix user"
-yum remove -y $yum_pack2
-rpm -e pure-ftpd --noscripts
-userdel postfix
-rpm -e vpopmail-toaster --noscripts
-
-if id -u postfix >/dev/null 2>&1 ; then
-	userdel postfix
-fi
-
-
-echo "Install database"
-yum -y install $yum_database_pack
-if ! [ -d /var/lib/mysqltmp ] ; then
-	mkdir -p /var/lib/mysqltmp
-fi
-
+step "Install database server (MariaDB)"
+pkg_install_logical mariadb-server mariadb-client
+mkdir -p /var/lib/mysqltmp
 chown mysql:mysql /var/lib/mysqltmp
-	
-# MR -- always disable mysql-aio
-sh /script/disable-mysql-aio
-#sh /script/set-mysql-default
+sh /script/set-mysql-default
+svc_enable mariadb
+svc_start mariadb
 
+step "Install web servers"
+pkg_install_logical nginx apache
+# the domain web server is started by Kloxo after its configuration is written
+svc_disable apache
+svc_stop apache
+svc_disable nginx
+svc_stop nginx
 
+step "Install DNS server (BIND)"
+pkg_install_logical bind
+mkdir -p /var/log/named
+chown "${OS_NAMED_USER}":root /var/log/named
+chmod 755 /var/log/named
+rm -f /etc/rndc.conf
 
-echo "Install php"
-# ToDo - probably needs reworking - currently falls back to php56 if php74 isn't available
-if [ "$(yum list php74*|grep ^'php74')" != "" ] ; then
-	phpused="php74"
-#	yum -y install ${phpused}u-cli ${phpused}u-mysqlnd ${phpused}u-fpm
-	#sh /script/php-branch-installer ${phpused}
+step "Install mail services (Postfix + Dovecot)"
+if os_is_debian ; then
+	# preseed postfix so apt does not open a dialog
+	echo "postfix postfix/main_mailer_type select Internet Site" | debconf-set-selections
+	echo "postfix postfix/mailname string $(hostname -f)" | debconf-set-selections
+fi
+pkg_install_logical postfix dovecot opendkim spamassassin
+pkg_install bogofilter
+
+step "Install FTP server (Pure-FTPd)"
+pkg_install_logical pure-ftpd
+
+step "Install statistics and security tools"
+pkg_install_logical webalizer awstats fail2ban certbot
+
+# ---------------------------------------------------------------------------
+# PHP
+# ---------------------------------------------------------------------------
+
+step "Install PHP for the panel (php${PHP_PANEL_BRANCH}s)"
+sh /script/phpm-installer "php${PHP_PANEL_BRANCH}s" -y || die "Cannot install PHP $(php_dotted "${PHP_PANEL_BRANCH}") for the panel"
+
+if [ -z "${OPT_PHP}" ] ; then
+	OPT_PHP="${PHP_PANEL_BRANCH} $(php_latest_available)"
+fi
+
+step "Install PHP for domains: $(for x in ${OPT_PHP} ; do echo -n "$(php_dotted "${x}") " ; done)"
+for xy in $(echo "${OPT_PHP}" | tr ' ' '\n' | sort -u) ; do
+	sh /script/phpm-installer "php${xy}m"
+done
+
+touch "${ppath}/etc/flag/enablemultiplephp.flg"
+php_set_branch "$(php_latest_installed)"
+
+sh /script/fixlxphpexe "php${PHP_PANEL_BRANCH}s"
+sh /script/set-kloxo-apps-php
+
+# ---------------------------------------------------------------------------
+# Kloxo core (database, default objects)
+# ---------------------------------------------------------------------------
+
+installtype="${APP_TYPE}"
+admin_password="${OPT_ADMIN_PASS:-$(os_random_password 16)}"
+
+. "${ppath}/install/step2.inc"
+
+# ---------------------------------------------------------------------------
+# Defaults
+# ---------------------------------------------------------------------------
+
+step "Select default drivers"
+if os_is_el ; then
+	sh /script/setdriver --server=localhost --class=web --driver=apache >/dev/null 2>&1
+	chkconfig httpd on >/dev/null 2>&1
 else
-	phpused="php56"
-#	yum -y install ${phpused}-cli ${phpused}-mysqlnd ${phpused}-fpm
-	#sh /script/php-branch-installer ${phpused}u
+	# the nginx driver writes to /etc/nginx on every distribution
+	sh /script/setdriver --server=localhost --class=web --driver=nginx >/dev/null 2>&1
+	chkconfig nginx on >/dev/null 2>&1
 fi
-
-chkconfig php-fpm on >/dev/null 2>&1
-	
-if [ "$(uname -m)" == "x86_64" ] ; then
-	ln -sf /usr/lib64/php /usr/lib/php
-fi
-
-#mkdir -p /opt/${phpused}/custom
-sh /script/phpm-installer ${phpused}s -y
-sh /script/fixlxphpexe ${phpused}s
-
-cd /
-
-export PATH=/usr/bin:/usr/sbin:/sbin:$PATH
-
-cd ${ppath}/install
-
-#if [ ! -f ${ppath}/install/step2.inc ] ; then
-#	/usr/bin/lxphp.exe installer.php --install-type=$APP_TYPE $*
-#else
-	installtype=$APP_TYPE
-	installstep='1'
-
-	source ${ppath}/install/step2.inc
-#fi
-
-## set skin to simplicity
-sh /script/skin-set-for-all >/dev/null 2>&1
-
-sh /script/set-hosts >/dev/null 2>&1
-
-echo
-echo "... Wait until finished (restart services) ..."
-
-## fix driver - always set default
-sh /script/setdriver --server=localhost --class=web --driver=apache >/dev/null 2>&1
-chkconfig httpd on >/dev/null 2>&1
 sh /script/setdriver --server=localhost --class=webcache --driver=none >/dev/null 2>&1
 sh /script/setdriver --server=localhost --class=dns --driver=bind >/dev/null 2>&1
 sh /script/setdriver --server=localhost --class=spam --driver=bogofilter >/dev/null 2>&1
 
-## use php-cgi by default
-sh /script/set-kloxo-php >/dev/null 2>&1
+sh /script/skin-set-for-all >/dev/null 2>&1
+sh /script/set-hosts >/dev/null 2>&1
+sh /script/fix-service-list >/dev/null 2>&1
 
+step "Install third-party applications (phpMyAdmin, Roundcube, ...)"
+sh /script/thirdparty-update --install
+
+step "Restart services"
 sh /script/restart-all --force >/dev/null 2>&1
 
-echo
-
+kloxo_install_bye

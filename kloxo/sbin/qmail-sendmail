@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 export DKSIGN=/var/qmail/control/domainkeys/%/private
 export RELAYCLIENT=
 exec /var/qmail/bin/sendmail "$@"

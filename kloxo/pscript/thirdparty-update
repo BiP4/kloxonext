@@ -1,0 +1,314 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - keep the third-party web applications on their latest
+#    upstream release and make them run on the newest PHP of the server.
+#
+#      sh /script/thirdparty-update             update what is installed
+#      sh /script/thirdparty-update --install   also install missing apps
+#      sh /script/thirdparty-update --check     only report versions
+#      sh /script/thirdparty-update --only=phpmyadmin,roundcube
+#
+#    Runs daily from kloxo-thirdparty-update.timer.
+#
+#    Applications
+#      phpmyadmin  -> /usr/local/lxlabs/kloxo/httpdocs/thirdparty/phpMyAdmin
+#      roundcube   -> /home/kloxo/httpd/webmail/roundcube
+#      snappymail  -> /home/kloxo/httpd/webmail/snappymail  (maintained successor of RainLoop)
+#
+#    Every download is verified (SHA-256 published by upstream, or GitHub
+#    release digest) before it replaces the running copy; the previous copy is
+#    kept as <dir>.previous for a quick rollback.
+
+. /script/os.inc
+. /script/php-native.inc
+
+KPATH="${KLOXO_PATH}"
+WEBMAIL="/home/kloxo/httpd/webmail"
+PMA="${KPATH}/httpdocs/thirdparty/phpMyAdmin"
+STATE="${KPATH}/etc/conf/thirdparty.versions"
+LOG="${KPATH}/log/thirdparty-update.log"
+
+MODE="update"
+ONLY=""
+
+for a in "$@" ; do
+	case "${a}" in
+		--install) MODE="install" ;;
+		--check)   MODE="check" ;;
+		--only=*)  ONLY=",${a#*=}," ;;
+	esac
+done
+
+mkdir -p "${KPATH}/etc/conf" "${KPATH}/log" "${KPATH}/httpdocs/thirdparty" "${WEBMAIL}"
+touch "${STATE}"
+
+TMP="$(mktemp -d)"
+trap 'rm -rf "${TMP}"' EXIT
+
+log() {
+	echo "$*"
+	echo "$(date '+%F %T') $*" >> "${LOG}"
+}
+
+want() {
+	[ -z "${ONLY}" ] || [[ "${ONLY}" == *",$1,"* ]]
+}
+
+state_get() { sed -n "s/^$1=//p" "${STATE}" | tail -1 ; }
+
+state_set() {
+	sed -i "/^$1=/d" "${STATE}"
+	echo "$1=$2" >> "${STATE}"
+}
+
+# newer <candidate> <installed>  -> 0 when candidate > installed
+newer() {
+	[ -z "$2" ] && return 0
+	[ "$1" == "$2" ] && return 1
+	[ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1)" == "$1" ]
+}
+
+fetch() {
+	curl -fsSL --retry 3 --connect-timeout 20 -A "KloxoNext-updater" -o "$2" "$1"
+}
+
+github_latest() {
+	# prints: <tag> <asset-url> <sha256-or-empty> for the first asset matching $2
+	local repo="$1" pattern="$2" json
+	json="$(curl -fsSL --retry 3 -H 'Accept: application/vnd.github+json' -A "KloxoNext-updater" \
+		"https://api.github.com/repos/${repo}/releases/latest")" || return 1
+
+	echo "${json}" | jq -r --arg p "${pattern}" '
+		.tag_name as $t
+		| [.assets[] | select(.name | test($p))][0]
+		| "\($t) \(.browser_download_url) \((.digest // "") | sub("^sha256:"; ""))"'
+}
+
+verify_sha256() {
+	local file="$1" expected="$2"
+	[ -z "${expected}" ] && { log "  ! no checksum published, refusing to install" ; return 1 ; }
+	echo "${expected}  ${file}" | sha256sum -c --status
+}
+
+# Swap <newdir> into <target>, keeping the old copy as <target>.previous
+swap_in() {
+	local new="$1" target="$2"
+	rm -rf "${target}.previous"
+	[ -d "${target}" ] && mv "${target}" "${target}.previous"
+	mv "${new}" "${target}"
+}
+
+mysql_root_pass() {
+	(cd "${KPATH}/httpdocs" && lxphp.exe ../bin/common/mp.php 2>/dev/null)
+}
+
+ensure_tools() {
+	command -v jq >/dev/null 2>&1 || pkg_install jq
+	command -v curl >/dev/null 2>&1 || pkg_install curl
+	command -v xz >/dev/null 2>&1 || pkg_install_logical archive
+}
+
+# ---------------------------------------------------------------------------
+# phpMyAdmin
+# ---------------------------------------------------------------------------
+
+# Kloxo single sign-on (examples/signon.php) + per-server blowfish secret
+pma_configure() {
+	local dir="$1" secret
+
+	if [ -s "${KPATH}/etc/conf/pma.secret" ] ; then
+		secret="$(cat "${KPATH}/etc/conf/pma.secret")"
+	else
+		secret="$(openssl rand -hex 32)"
+		echo "${secret}" > "${KPATH}/etc/conf/pma.secret"
+		chmod 600 "${KPATH}/etc/conf/pma.secret"
+	fi
+
+	sed "s#__BLOWFISH_SECRET__#${secret}#" "${KPATH}/file/phpmyadmin/config.inc.php" > "${dir}/config.inc.php"
+	mkdir -p "${dir}/examples"
+	cp -f "${KPATH}/file/phpmyadmin/signon.php" "${dir}/examples/signon.php"
+
+	chown -R lxlabs:lxlabs "${dir}"
+	chmod 640 "${dir}/config.inc.php"
+}
+
+update_phpmyadmin() {
+	local cur latest url sum dir
+
+	cur="$(state_get phpmyadmin)"
+	[ -z "${cur}" ] && [ -f "${PMA}/package.json" ] && cur="$(jq -r .version "${PMA}/package.json" 2>/dev/null)"
+
+	latest="$(curl -fsSL https://www.phpmyadmin.net/home_page/version.json | jq -r .version)"
+	[ -z "${latest}" ] || [ "${latest}" == "null" ] && { log "- phpMyAdmin: cannot read latest version" ; return 1 ; }
+
+	log "- phpMyAdmin: installed ${cur:-none}, latest ${latest}"
+
+	[ "${MODE}" == "check" ] && return 0
+	[ ! -d "${PMA}" ] && [ "${MODE}" != "install" ] && return 0
+	newer "${latest}" "${cur}" || [ ! -f "${PMA}/index.php" ] || return 0
+
+	url="https://files.phpmyadmin.net/phpMyAdmin/${latest}/phpMyAdmin-${latest}-all-languages.tar.xz"
+	fetch "${url}" "${TMP}/pma.tar.xz" || { log "  ! download failed" ; return 1 ; }
+	sum="$(curl -fsSL "${url}.sha256" | awk '{print $1}')"
+	verify_sha256 "${TMP}/pma.tar.xz" "${sum}" || { log "  ! checksum mismatch" ; return 1 ; }
+
+	tar -xJf "${TMP}/pma.tar.xz" -C "${TMP}"
+	dir="${TMP}/phpMyAdmin-${latest}-all-languages"
+
+	pma_configure "${dir}"
+	rm -rf "${dir}/setup"
+
+	swap_in "${dir}" "${PMA}"
+	state_set phpmyadmin "${latest}"
+	log "  + phpMyAdmin ${latest} installed"
+}
+
+# ---------------------------------------------------------------------------
+# Roundcube
+# ---------------------------------------------------------------------------
+
+roundcube_configure() {
+	local target="$1" rootpass dbpass deskey
+
+	rootpass="$(mysql_root_pass)"
+
+	if [ -f "${KPATH}/etc/conf/roundcube.pass" ] ; then
+		dbpass="$(cat "${KPATH}/etc/conf/roundcube.pass")"
+	else
+		dbpass="$(os_random_password 24)"
+		echo "${dbpass}" > "${KPATH}/etc/conf/roundcube.pass"
+		chmod 600 "${KPATH}/etc/conf/roundcube.pass"
+	fi
+
+	deskey="$(os_random_password 24)"
+
+	mysql -u root -p"${rootpass}" <<-EOSQL
+		CREATE DATABASE IF NOT EXISTS roundcubemail CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+		CREATE USER IF NOT EXISTS 'roundcube'@'localhost' IDENTIFIED BY '${dbpass}';
+		ALTER USER 'roundcube'@'localhost' IDENTIFIED BY '${dbpass}';
+		GRANT ALL PRIVILEGES ON roundcubemail.* TO 'roundcube'@'localhost';
+		FLUSH PRIVILEGES;
+	EOSQL
+
+	if [ "$(mysql -u root -p"${rootpass}" -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='roundcubemail'")" == "0" ] ; then
+		mysql -u root -p"${rootpass}" roundcubemail < "${target}/SQL/mysql.initial.sql"
+	fi
+
+	sed -e "s#__DB_PASS__#${dbpass}#" -e "s#__DES_KEY__#${deskey}#" \
+		"${KPATH}/file/webmail/roundcube/config.inc.php" > "${target}/config/config.inc.php"
+	chmod 640 "${target}/config/config.inc.php"
+}
+
+update_roundcube() {
+	local target="${WEBMAIL}/roundcube" cur latest url sum info
+
+	cur="$(state_get roundcube)"
+	[ -z "${cur}" ] && [ -f "${target}/program/include/iniset.php" ] && \
+		cur="$(sed -n "s/.*define('RCMAIL_VERSION', '\([^']*\)').*/\1/p" "${target}/program/include/iniset.php")"
+
+	info="$(github_latest roundcube/roundcubemail '^roundcubemail-.*-complete\\.tar\\.gz$')" || { log "- Roundcube: cannot query GitHub" ; return 1 ; }
+	read -r latest url sum <<< "${info}"
+	latest="${latest#v}"
+
+	log "- Roundcube: installed ${cur:-none}, latest ${latest}"
+
+	[ "${MODE}" == "check" ] && return 0
+	[ ! -d "${target}" ] && [ "${MODE}" != "install" ] && return 0
+	newer "${latest}" "${cur}" || return 0
+
+	fetch "${url}" "${TMP}/rc.tar.gz" || { log "  ! download failed" ; return 1 ; }
+	verify_sha256 "${TMP}/rc.tar.gz" "${sum}" || { log "  ! checksum mismatch" ; return 1 ; }
+
+	tar -xzf "${TMP}/rc.tar.gz" -C "${TMP}"
+
+	local src="${TMP}/roundcubemail-${latest}"
+	local php
+	php="/opt/php$(php_latest_installed)m/custom/php-cli.sh"
+
+	if [ -f "${target}/index.php" ] ; then
+		# upstream upgrade path: copies files and migrates the database
+		cp -a "${target}" "${target}.previous.tmp"
+		if "${php}" "${src}/bin/installto.sh" -y "${target}" >> "${LOG}" 2>&1 ; then
+			rm -rf "${target}.previous" && mv "${target}.previous.tmp" "${target}.previous"
+		else
+			rm -rf "${target}" && mv "${target}.previous.tmp" "${target}"
+			log "  ! installto.sh failed, previous version restored"
+			return 1
+		fi
+	else
+		swap_in "${src}" "${target}"
+		roundcube_configure "${target}"
+		rm -rf "${target}/installer"
+	fi
+
+	chown -R apache:apache "${target}"
+	state_set roundcube "${latest}"
+	log "  + Roundcube ${latest} installed"
+}
+
+# ---------------------------------------------------------------------------
+# SnappyMail (RainLoop is abandoned upstream; SnappyMail is its maintained fork)
+# ---------------------------------------------------------------------------
+
+update_snappymail() {
+	local target="${WEBMAIL}/snappymail" cur latest url sum info
+
+	cur="$(state_get snappymail)"
+
+	info="$(github_latest the-djmaze/snappymail '^snappymail-[0-9.]+\\.tar\\.gz$')" || { log "- SnappyMail: cannot query GitHub" ; return 1 ; }
+	read -r latest url sum <<< "${info}"
+	latest="${latest#v}"
+
+	log "- SnappyMail: installed ${cur:-none}, latest ${latest}"
+
+	[ "${MODE}" == "check" ] && return 0
+	[ ! -d "${target}" ] && [ "${MODE}" != "install" ] && return 0
+	newer "${latest}" "${cur}" || return 0
+
+	fetch "${url}" "${TMP}/sm.tar.gz" || { log "  ! download failed" ; return 1 ; }
+	verify_sha256 "${TMP}/sm.tar.gz" "${sum}" || { log "  ! checksum mismatch" ; return 1 ; }
+
+	mkdir -p "${TMP}/snappymail"
+	tar -xzf "${TMP}/sm.tar.gz" -C "${TMP}/snappymail"
+
+	# keep accounts, domains and settings
+	[ -d "${target}/data" ] && cp -a "${target}/data" "${TMP}/snappymail/"
+
+	swap_in "${TMP}/snappymail" "${target}"
+	chown -R apache:apache "${target}"
+	find "${target}/data" -type d -exec chmod 750 {} \; 2>/dev/null
+
+	state_set snappymail "${latest}"
+	log "  + SnappyMail ${latest} installed"
+}
+
+notice_abandoned() {
+	local d
+	for d in rainloop afterlogic squirrelmail telaen horde t-dah ; do
+		if [ -d "${WEBMAIL}/${d}" ] ; then
+			log "- NOTE: '${d}' is no longer maintained upstream and is not updated; move users to roundcube/snappymail"
+		fi
+	done
+}
+
+# ---------------------------------------------------------------------------
+
+ensure_tools
+
+log "=== thirdparty-update (${MODE}) ==="
+
+want phpmyadmin && update_phpmyadmin
+want roundcube && update_roundcube
+want snappymail && update_snappymail
+notice_abandoned
+
+if [ "${MODE}" != "check" ] ; then
+	# third-party apps follow the newest PHP installed on the server
+	sh /script/set-kloxo-apps-php
+
+	# refresh 'redirect-to-<app>.php' pages of the webmail chooser
+	(cd "${KPATH}/httpdocs" && lxphp.exe ../bin/misc/installChooser.php >/dev/null 2>&1)
+fi
+
+log "=== done ==="

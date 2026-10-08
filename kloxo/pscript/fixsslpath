@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 ssl_file=$(dir -l /home/kloxo/client/*/ssl/*.pem 2>/dev/null|awk '{print $9}'|tr '\n' ' ')
 

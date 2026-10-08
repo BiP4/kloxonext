@@ -346,10 +346,7 @@ function os_is_arch_sixfour()
 
 function os_is_php_six_four()
 {
-    $v = lxshell_output("rpm -q --queryformat '%{ARCH}' php");
-    $v = trim($v);
-	
-    return ($v === "x86_64");
+    return (PHP_INT_SIZE === 8);
 }
 
 function os_restart_program()

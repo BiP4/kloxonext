@@ -12,8 +12,10 @@ After=syslog.target network.target
 
 [Service]
 Type=notify
+RuntimeDirectory=php-fpm
+RuntimeDirectoryPreserve=yes
 PIDFile=/run/php-fpm/__custom_name__-fpm.pid
-ExecStartPre=/usr/bin/rm -f /opt/configs/php-fpm/sock/__custom_name__-*.sock >/dev/null 2>&1
+ExecStartPre=/bin/sh -c 'rm -f /opt/configs/php-fpm/sock/__custom_name__-*.sock'
 ExecStart=/usr/sbin/__custom_name__-fpm -y /opt/configs/php-fpm/conf/__custom_name__/php-fpm.conf --nodaemonize
 ExecReload=/bin/kill -USR2 $MAINPID
 ExecStop=/bin/kill -s QUIT $MAINPID

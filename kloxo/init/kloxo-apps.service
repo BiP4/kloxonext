@@ -1,0 +1,16 @@
+[Unit]
+Description=KloxoNext third-party apps PHP (php-fpm, newest PHP on the server)
+Documentation=https://github.com/KloxoNGCommunity/kloxo
+After=network.target remote-fs.target nss-lookup.target mariadb.service
+
+[Service]
+Type=forking
+PIDFile=/usr/local/lxlabs/kloxo/init/kloxo-apps.pid
+ExecStart=/usr/local/lxlabs/kloxo/init/kloxo-apps-fpm -y /usr/local/lxlabs/kloxo/init/kloxo-apps-fpm.conf
+ExecReload=/bin/kill -s USR2 $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

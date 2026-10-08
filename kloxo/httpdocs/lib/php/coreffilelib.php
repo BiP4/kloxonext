@@ -1,5 +1,6 @@
 <?php
 
+#[\AllowDynamicProperties]
 class coreFfile
 {
 	static function get_full_stat($__username_o, $root, $path, $duflag)

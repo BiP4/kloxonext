@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$1" == "--help" ] ; then
 	sh /script/phpm-config-setup --help
-else
-	for i in $(cat /usr/local/lxlabs/kloxo/etc/list/set.php.lst|tr ',', '\n'|sed 's/[wu]//g'|uniq) ; do
-		if [ "${i}" != "php" ] ; then
-			sh /script/phpm-config-setup ${i}m $*
-			sh /script/phpm-config-setup ${i}s $*
-		fi
-	done
+	exit
 fi
+
+for d in /opt/php[0-9][0-9][ms] ; do
+	[ -d "${d}" ] || continue
+	sh /script/phpm-config-setup "$(basename "${d}")" "$@"
+done

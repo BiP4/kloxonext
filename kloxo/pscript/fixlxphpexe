@@ -1,103 +1,77 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - select the PHP used by the panel itself (phpXYs) and install
+#    the panel services (nginx + php-fpm + wrapper).
+
+. /script/os.inc
+. /script/php-native.inc
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
 	echo
 	echo " ------------------------------------------------------------------------------"
-	echo "  format: sh $0 <php53s/php54s>"
+	echo "  format: sh $0 [phpXYs]   (default: php${PHP_PANEL_BRANCH}s or newer)"
 	echo " ------------------------------------------------------------------------------"
 	echo
 	exit
 fi
 
-INIT_DIR="/usr/local/lxlabs/kloxo/init"
+INIT_DIR="${KLOXO_PATH}/init"
 
-if [ "$1" != "" ] ; then
-	 if [[ "$1" != "php"* ]] ; then
-		echo "Use 'sh $0 --help'"
-		exit
-	fi
+[ -f "${INIT_DIR}/php_active" ] && mv -f "${INIT_DIR}/php_active" "${INIT_DIR}/kloxo_php_active"
 
+if [ -n "$1" ] ; then
 	base_name="$1"
+elif [ -f "${INIT_DIR}/kloxo_php_active" ] ; then
+	base_name="$(tr -d ' \n' < "${INIT_DIR}/kloxo_php_active")"
+fi
 
-	if [ ! -f /opt/${base_name}/custom/php-cli.sh ] ; then
-		echo "File: '/opt/${base_name}/custom/php-cli.sh' not exists. Installing..."
+# Panel never runs on anything older than PHP_PANEL_BRANCH
+if [ -z "${base_name}" ] || [ "${base_name:3:2}" -lt "${PHP_PANEL_BRANCH}" ] 2>/dev/null ; then
+	base_name="php${PHP_PANEL_BRANCH}s"
+fi
 
-		sh /script/phpm-installer ${base_name}
+if [ ! -f "/opt/${base_name}/custom/php-cli.sh" ] ; then
+	echo "File: '/opt/${base_name}/custom/php-cli.sh' not exists. Installing..."
+	sh /script/phpm-installer "${base_name}" -y
+fi
+
+echo "${base_name}" > "${INIT_DIR}/kloxo_php_active"
+
+[ -f "/opt/${base_name}/custom/custom.php.ini" ] && cp -f "/opt/${base_name}/custom/custom.php.ini" "/opt/${base_name}/custom/php.ini"
+
+chown -R root:root "/opt/${base_name}"
+
+rm -f /usr/bin/lphp.exe /usr/bin/lxphp.exe
+ln -sf "/opt/${base_name}/custom/php-cli.sh" /usr/bin/lphp.exe
+ln -sf "/opt/${base_name}/custom/php-cli.sh" /usr/bin/lxphp.exe
+
+rm -f "${OS_SYSTEMD_DIR}/kloxo.service" /etc/rc.d/init.d/kloxo
+
+for i in web php wrap ; do
+	if [ -f "${INIT_DIR}/custom.kloxo-${i}.service" ] ; then
+		cp -f "${INIT_DIR}/custom.kloxo-${i}.service" "/etc/systemd/system/kloxo-${i}.service"
 	else
-		echo "${base_name}" > ${INIT_DIR}/kloxo_php_active
-	fi
-else
-	if [ -f ${INIT_DIR}/php_active ] ; then
-		'mv' -f ${INIT_DIR}/php_active ${INIT_DIR}/kloxo_php_active
+		cp -f "${INIT_DIR}/kloxo-${i}.service" "/etc/systemd/system/kloxo-${i}.service"
 	fi
 
-	if [ -f ${INIT_DIR}/kloxo_php_active ] ; then
-		base_name="$(cat ${INIT_DIR}/kloxo_php_active)"
-	else
-		if [ ! -f /opt/php74s/custom/php-cli.sh ] ; then
-			base_name="php74s"
-		else
-			base_name="php56s"
-		fi
-		src_name="${base_name%[s,m]}"
-		if [ ! -f /opt/${base_name}/custom/php-cli.sh ] ; then
-			echo "File: '/opt/${base_name}/custom/php-cli.sh' not exists. Installing..."
-			sh /script/phpm-installer ${base_name} -y
-		fi
+	chmod 0644 "/etc/systemd/system/kloxo-${i}.service"
+	# remove units installed by older Kloxo versions
+	rm -f "${OS_SYSTEMD_DIR}/kloxo-${i}.service" "/etc/rc.d/init.d/kloxo-${i}"
+done
 
-		echo "${base_name}" > ${INIT_DIR}/kloxo_php_active
-	fi
-fi
+systemctl daemon-reload
 
-mkdir -p /opt/${base_name}/custom
-
-if [ -f /opt/${base_name}/custom/custom.php.ini ] ; then
-	'cp' -f /opt/${base_name}/custom/custom.php.ini /opt/${base_name}/custom/php.ini
-fi
-
-chown -R root:root /opt/${base_name}
-
-'rm' -f /usr/bin/lphp.exe
-'rm' -f /usr/bin/lxphp.exe
-
-ln -sf /opt/${base_name}/custom/php-cli.sh /usr/bin/lphp.exe
-ln -sf /opt/${base_name}/custom/php-cli.sh /usr/bin/lxphp.exe
-
-if [ -f /usr/lib/systemd/system/kloxo.service ] ; then
-	'rm' -f /usr/lib/systemd/system/kloxo.service
-fi
-
-if [ -f /etc/rc.d/init.d/kloxo ] ; then
-	'rm' -f /etc/rc.d/init.d/kloxo
-fi
-
-#if [ "$(command -v systemctl)" != "" ] ; then
-if [ "$(ps --no-headers -o comm 1)" == "systemd" ] ; then
-	for i in web php wrap ; do
-		if [ -f ${INIT_DIR}/custom.kloxo-${i}.service ] ; then
-			'cp' -f ${INIT_DIR}/custom.kloxo-${i}.service /usr/lib/systemd/system/kloxo-${i}.service
-		else
-			'cp' -f ${INIT_DIR}/kloxo-${i}.service /usr/lib/systemd/system/kloxo-${i}.service
-		fi
-
-		chown root:root /usr/lib/systemd/system/kloxo-${i}.service
-		chmod 0644 /usr/lib/systemd/system/kloxo-${i}.service
-		chkconfig kloxo-${i} on 2>/dev/null
-	done
-
-	systemctl daemon-reload
-else
-	for i in web php wrap ; do
-		if [ -f ${INIT_DIR}/custom.kloxo-${i}.init ] ; then
-			'cp' -f ${INIT_DIR}/custom.kloxo-${i}.init /etc/rc.d/init.d/kloxo-${i}
-		else
-			'cp' -f ${INIT_DIR}/kloxo-${i}.init /etc/rc.d/init.d/kloxo-${i}
-		fi
-
-		chown root:root /etc/rc.d/init.d/kloxo-${i}
-		chmod 0775 /etc/rc.d/init.d/kloxo-${i}
-		chkconfig kloxo-${i} on 2>/dev/null
-	done
-fi
+for i in web php wrap ; do
+	systemctl enable "kloxo-${i}" >/dev/null 2>&1
+done
 
 echo "Execute fixlxphpexe for ${base_name}..."
+
+# daily third-party apps / PHP update
+cp -f "${INIT_DIR}/kloxo-thirdparty-update.service" /etc/systemd/system/
+cp -f "${INIT_DIR}/kloxo-thirdparty-update.timer" /etc/systemd/system/
+cp -f "${INIT_DIR}/kloxo-apps.service" /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now kloxo-thirdparty-update.timer >/dev/null 2>&1
+systemctl enable kloxo-apps >/dev/null 2>&1

@@ -1,22 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-rdir="/home/kloxo/httpd/webmail"
+#    KloxoNext - RainLoop is abandoned upstream; SnappyMail is its maintained successor
 
-cd ${rdir}/rainloop
-
-if [ -d ${rdir}/rainloop ] ; then
-	wget -q http://repository.rainloop.net/v2/webmail/rainloop-community-latest.zip
-	unzip -o -q rainloop-community-latest.zip
-	'rm' -rf ./rainloop-community-latest.zip
-
-	chown -R apache:apache ${rdir}/rainloop
-
-	echo
-	echo "* Rainloop Webmail update - finish process"
-	echo "  Run 'sh /script/setup-rainloop' to update configuration"
-	echo
-else
-	echo
-	echo "* Need install with 'yum install kloxo-webmail-rainloop -y' first"
-	echo
-fi
+sh /script/thirdparty-update --install --only=snappymail
+sh /script/add-rainloop-domains

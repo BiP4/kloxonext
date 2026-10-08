@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 #kill -9 $(ps j | awk 'NR>1 && $7 ~ "Z" {print $2}')
 

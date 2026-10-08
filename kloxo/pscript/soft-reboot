@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(grep envID /proc/self/status)" == "" ] ; then
 	if [ "$(rpm -qa kexec-tools)" == "" ] ; then

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(grep -R 'hiawatha' '/usr/local/lxlabs/kloxo/etc/slavedb/driver')" == "" ] ; then
 	if [ -f /etc/rc.d/init.d/hiawatha ] || [ -f /usr/lib/systemd/system/hiawatha.service ] ; then

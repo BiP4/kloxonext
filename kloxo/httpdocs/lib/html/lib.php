@@ -2797,13 +2797,9 @@ function install_if_package_not_exist($name, $nolog = null)
 		return;
 	}
 
-//	$ret = lxshell_return("rpm", "-q", $name);
-	$ret = lxshell_return("yum", "list", "installed", $name);
-
-
-	if ($ret) {
+	if (!OsPlatform::isInstalled($name)) {
 		log_cleanup("- Install for {$name} package", $nolog);
-		lxshell_return("yum", "-y", "install", $name);
+		OsPlatform::install($name);
 	} else {
 		log_cleanup("- {$name} package already installed", $nolog);
 	}
@@ -2873,25 +2869,27 @@ function checkIfLatest()
 
 function getLatestVersion()
 {
-	exec("yum check-update kloxo|grep kloxo|awk '{print $2}'", $out, $ret);
+	// KloxoNext is not shipped as rpm/deb: the update source publishes bin/kloxoversion
+	$src = '/usr/local/lxlabs/kloxo/etc/conf/update-source.conf';
 
-	if ($ret === 0) {
-		$ver = getInstalledVersion();
-	} else {
-		$ver = str_replace(".mr", "", $out[0]);
+	if (file_exists($src)) {
+		$conf = parse_ini_file($src);
+
+		if (!empty($conf['VERSION_URL'])) {
+			$ver = trim((string)curl_general_get($conf['VERSION_URL']));
+
+			if (preg_match('/^\d+\.\d+\.\d+/', $ver)) {
+				return $ver;
+			}
+		}
 	}
 
-	return $ver;
-
+	return getInstalledVersion();
 }
 
 function getInstalledVersion()
 {
-	exec("cd /; yum list installed kloxo|grep kloxo|awk '{print $2}'", $out, $ret);
-
-	$ver = str_replace(".mr", "", $out[0]);
-
-	return $ver;
+	return trim((string)@file_get_contents('/usr/local/lxlabs/kloxo/bin/kloxoversion'));
 }
 
 function getDownloadServer()
@@ -5403,8 +5401,25 @@ function getPhpVersion()
 	}
 }
 
+// KloxoNext - the 'php' branch is an alias to the newest native phpXYm
+function getNativePhpBranch()
+{
+	$f = '/usr/local/lxlabs/kloxo/init/php_branch_active';
+
+	if (file_exists($f)) {
+		// 'php84m' => 'php84'
+		return rtrim(trim(file_get_contents($f)), 'm');
+	}
+
+	return null;
+}
+
 function getRpmBranchInstalled($rpm)
 {
+	if (($rpm === 'php') && ($b = getNativePhpBranch())) {
+		return $b;
+	}
+
 	$a = getRpmBranchList($rpm);
 
 	if (!$a) {
@@ -5431,6 +5446,16 @@ function getRpmBranchInstalled($rpm)
 function getRpmBranchInstalledOnList($rpm)
 {
 	$a = getListOnList($rpm);
+
+	if (($rpm === 'php') && ($b = getNativePhpBranch())) {
+		foreach ($a as $e) {
+			if (strpos($e, "{$b}_(") === 0 || $e === $b) {
+				return $e;
+			}
+		}
+
+		return $b;
+	}
 
 	foreach ($a as $k => $e) {
 		$s = preg_replace('/(.*)\_\(as\_(.*)\)/', '$1', $e);
@@ -5482,35 +5507,19 @@ function getRpmBranchList($pname)
 
 function getRpmVersion($rpmname)
 {
-
-	// MR -- use '-qa' because need no output if package not exits
-	exec("rpm -qa --qf '%{VERSION}\n' {$rpmname}", $out);
-
-	if (count($out) > 0) {
-		$ver = $out[0];
-	} else {
-		$ver = '0.0.0';
-	}
-
-	return $ver;
+	return OsPlatform::installedVersion($rpmname);
 }
 
 function getRpmVersionFromYum($rpmname)
 {
-	exec("yum list {$rpmname}|grep '{$rpmname}.'|awk '{print \$2}'|awk -F'-'  '{print \$1}'", $ver);
+	$ver = OsPlatform::availableVersion($rpmname);
 
-	if (strpos($ver[0], 'Error:') !== false) {
-		$ret = '0.0.0';
-	} else {
-		$ret = $ver[0];
-	}
-
-	return $ret;
+	return ($ver === '') ? '0.0.0' : $ver;
 }
 
 function setRpmInstalled($rpmname)
 {
-	lxshell_return("yum", "-y", "install", $rpmname);
+	OsPlatform::install($rpmname);
 }
 
 function setRpmRemoved($rpmname)
@@ -5521,7 +5530,7 @@ function setRpmRemoved($rpmname)
 		return;
 	}
 
-	$ret = lxshell_return("rpm", "-e", "--nodeps", $rpmname);
+	$ret = OsPlatform::remove($rpmname, true);
 
 	if ($ret) {
 		throw new lxException($login->getThrow("remove_failed"), '', $rpmname);
@@ -5536,7 +5545,7 @@ function setRpmRemovedViaYum($rpmname)
 		return;
 	}
 
-	$ret = lxshell_return("yum", "-y", "remove", $rpmname);
+	$ret = OsPlatform::remove($rpmname);
 
 	if ($ret) {
 		throw new lxException($login->getThrow("remove_failed"), '', $rpmname);
@@ -5547,7 +5556,7 @@ function setRpmReplaced($rpmname, $replacewith)
 {
 	global $login;
 
-	$ret = lxshell_return("yum", "-y", "replace", $rpmname, "--replace-with={$replacewith}");
+	$ret = OsPlatform::replace($rpmname, $replacewith);
 
 	if ($ret) {
 		throw new lxException($login->getThrow("replace_failed"), '', "{$rpmname} => {$replacewith}");
@@ -5556,13 +5565,7 @@ function setRpmReplaced($rpmname, $replacewith)
 
 function isRpmInstalled($rpmname)
 {
-	exec("rpm -qa {$rpmname}", $out);
-
-	if (count($out) > 0) {
-		return true;
-	} else {
-		return false;
-	}
+	return OsPlatform::isInstalled($rpmname);
 }
 
 function isPhpModuleInstalled($module)
@@ -6326,17 +6329,29 @@ function setInitialPhpMyAdmin($nolog = null)
 	}
 
 	log_cleanup("Initialize phpMyAdmin configfile", $nolog);
-	lxfile_cp("../file/phpmyadmin/config.inc.php", "thirdparty/phpMyAdmin/config.inc.php");
 
-	log_cleanup("- phpMyAdmin: Set db password in configfile", $nolog);
-	$DbPass = file_get_contents("../etc/conf/kloxo.pass");
-	$phpMyAdminCfg = "../httpdocs/thirdparty/phpMyAdmin/config.inc.php";
-	$content = file_get_contents($phpMyAdminCfg);
-	$content = str_replace("# Kloxo-Marker",
-		"# Kloxo-Marker\n\$cfg['Servers'][\$i]['controlpass'] = '" .
-		$DbPass . "';", $content);
+	if (!lxfile_exists("thirdparty/phpMyAdmin/index.php")) {
+		log_cleanup("- phpMyAdmin not installed; installing latest release", $nolog);
+		exec("sh /script/thirdparty-update --install --only=phpmyadmin");
 
-	lfile_put_contents($phpMyAdminCfg, $content);
+		return;
+	}
+
+	// KloxoNext - same template + per-server secret as /script/thirdparty-update
+	$secretFile = "../etc/conf/pma.secret";
+
+	if (!lxfile_exists($secretFile) || trim(file_get_contents($secretFile)) === '') {
+		file_put_contents($secretFile, bin2hex(random_bytes(32)) . "\n");
+		chmod($secretFile, 0600);
+	}
+
+	$content = file_get_contents("../file/phpmyadmin/config.inc.php");
+	$content = str_replace('__BLOWFISH_SECRET__', trim(file_get_contents($secretFile)), $content);
+
+	lfile_put_contents("thirdparty/phpMyAdmin/config.inc.php", $content);
+	lxfile_mkdir("thirdparty/phpMyAdmin/examples");
+	lxfile_cp("../file/phpmyadmin/signon.php", "thirdparty/phpMyAdmin/examples/signon.php");
+	exec("chown -R lxlabs:lxlabs thirdparty/phpMyAdmin; chmod 640 thirdparty/phpMyAdmin/config.inc.php");
 /*
 	 // TODO: Need another way to do this (use root pass)
 	 log_cleanup("- phpMyAdmin: Import PMA Database and create tables if they do not exist", $nolog);
@@ -6466,29 +6481,16 @@ function setInitialServer($nolog = null)
 		"kloxo-webmail-t-dah"
 	);
 
-	$list = implode(" ", $packages);
+	if (OsPlatform::isEl()) {
+		OsPlatform::remove($packages);
+	}
 
-	exec("yum -y remove $list >/dev/null 2>&1");
-
-	$packages = array(
-		"kloxo-webmail-*.noarch",
-		"kloxo-thirdparty-*.noarch", 
-		"kloxo-thirdparty-*.noarch", 
-		"kloxo-stats-*.noarch", 
-		"kloxo-editor-*.noarch", 
-		"hiawatha",
-		"--exclude=kloxo-thirdparty-phpmyadmin-*.noarch",
-		"--exclude=kloxo-webmail-squirrelmail.noarch",
-		"--exclude=kloxo-webmail-telaen.noarch",
-		"--exclude=kloxo-webmail-horde.noarch",
-		"--exclude=kloxo-webmail-t-dah.noarch"
-	);
-
-	$list = implode(" ", $packages);
-
-	exec("yum -y install $list >/dev/null 2>&1");
+	// KloxoNext - third-party apps (webmail, phpMyAdmin, ...) are fetched from
+	// upstream by /script/thirdparty-update instead of kloxo-* rpms
+	OsPlatform::install('nginx');
 
 	exec("sh /script/fixlxphpexe");
+	exec("sh /script/set-kloxo-apps-php");
 
 	fix_hiawatha();
 }
@@ -6793,8 +6795,8 @@ function change_spam_to_bogofilter_next_next()
 {
 	global $login;
 
-	exec("rpm -e --nodeps spamassassin-toaster");
-	exec("yum -y install bogofilter");
+	OsPlatform::remove("spamassassin-toaster", true);
+	OsPlatform::install("bogofilter");
 
 	$drv = $login->getFromList('pserver', 'localhost')->getObject('driver');
 	$drv->driver_b->pg_spam = 'bogofilter';
@@ -7024,10 +7026,8 @@ function setUpdateServices($list, $nolog = null)
 	log_cleanup('Update Core packages', $nolog);
 
 	foreach ($l as $k => $v) {
-		exec("yum list installed {$v}", $out, $ret);
-
-		if ($ret === 0) {
-			exec("yum update {$v} -y >/dev/null 2>&1");
+		if (OsPlatform::isInstalled($v)) {
+			OsPlatform::upgrade($v);
 			log_cleanup("- New {$v} version installed", $nolog);
 		} else {
 			log_cleanup("- No '{$v}' update found/not installed", $nolog);
@@ -7737,24 +7737,12 @@ function setRealServiceBranchList($nolog = null)
 
 function getRpmVersionViaYum($rpm)
 {
-	exec("yum info {$rpm} | grep 'Version' | awk '{print $3}'", $out, $ret);
-
-	if ($ret === 0) {
-		return $out[0];
-	} else {
-		return '';
-	}
+	return OsPlatform::availableVersion($rpm);
 }
 
 function getRpmReleaseViaYum($rpm)
 {
-	exec("yum info {$rpm} | grep 'Release' | awk '{print $3}'", $out, $ret);
-
-	if ($ret === 0) {
-		return $out[0];
-	} else {
-		return '';
-	}
+	return OsPlatform::availableVersion($rpm, 'release');
 }
 
 function setPhpBranch($select, $nolog = null)
@@ -7773,25 +7761,9 @@ function setPhpBranch($select, $nolog = null)
 		return null;
 	} else {
 		// MR -- reinstall php modules to make sure replace too; must execute before replace
-		exec("cd /; yum list installed php* |grep -P 'php[a-zA-z0-9\-]+'", $phpmodules);
-
-		log_cleanup("-- Replace using 'yum replace {$phpbranch} --replace-with={$select}'", $nolog);
-		setRpmReplaced("{$phpbranch}-cli", "{$select}-cli");
-
-		foreach ($phpmodules as $k => $v) {
-			if ($phpmodules[0] === $phpbranch) {
-				continue;
-			}
-
-			$t = str_replace("{$phpbranch}-", "{$select}-", $v);
-
-			if (!isRpmInstalled($t)) {
-				log_cleanup("-- Install missing '{$t}' module if exists", $nolog);
-				exec("yum install {$t} >/dev/null 2>&1");
-			} else {
-				log_cleanup("-- '{$t}' module already installed", $nolog);
-			}
-		}
+		// KloxoNext - the 'php' branch is an alias of one native phpXYm (see pscript/php-native.inc)
+		log_cleanup("-- Switch 'php' branch from '{$phpbranch}' to '{$select}'", $nolog);
+		exec("sh /script/php-branch-installer " . escapeshellarg($select));
 	}
 
 	exec("sh /script/fixphp");
@@ -8487,12 +8459,12 @@ function setAllWebServerInstall($nolog = null)
 				$conffile = getLinkCustomfile("{$confpath}", "httpd24.conf");
 				exec("'cp' -f {$conffile} /etc/httpd/conf/httpd.conf");
 
-					exec("yum -y install {$hm['httpd']} >/dev/null 2>&1");
+					OsPlatform::install($hm['httpd']);
 
 			if (file_exists("../etc/flag/use_pagespeed.flg")) {
 				// MR -- this is a trick to use isRpmInstalled
 				if (!isRpmInstalled('| grep pagespeed')) {
-					exec("yum -y install mod-pagespeed-stable");
+					OsPlatform::install("mod-pagespeed-stable");
 				}
 
 				lxfile_cp(getLinkCustomfile("/opt/configs/apache/etc/conf.d", "pagespeed.conf"),
@@ -8508,7 +8480,7 @@ function setAllWebServerInstall($nolog = null)
 					log_cleanup("- No process for '{$v}'", $nolog);
 				}
 			} else {
-				exec("yum -y install {$t} >/dev/null 2>&1");
+				OsPlatform::install($t);
 				log_cleanup("- Install '{$v}'", $nolog);
 			}
 		}
@@ -8588,7 +8560,7 @@ function setAllDnsServerInstall($nolog = null)
 				log_cleanup("- No process for '{$v}'", $nolog);
 			}
 		} else {
-			exec("yum -y install {$t} >/dev/null 2>&1");
+			OsPlatform::install($t);
 			log_cleanup("- Install '{$v}'", $nolog);
 
 			if ($v === 'djbdns') {
@@ -8597,7 +8569,7 @@ function setAllDnsServerInstall($nolog = null)
 				PreparePowerdnsDb($nolog);
 			} elseif ($v === 'yadifa') {
 				if (!isServiceExists($a)) {
-					exec("yum -y install yadifa-tools >/dev/null 2>&1");
+					OsPlatform::install("yadifa-tools");
 				}
 			}
 		}
@@ -8648,7 +8620,7 @@ function setPhpUpdate($nolog = null)
 {
 	log_cleanup("Update All Php (branch and multiple)", $nolog);
 	log_cleanup("- Update process", $nolog);
-	exec("yum -y update php*; sh /script/phpm-updater");
+	exec("sh /script/phpm-updater");
 }
 
 function setCopyIndexFileToAwstatsDir($nolog = null)
@@ -8678,12 +8650,7 @@ function getRemoteIp()
 
 function isServiceExists($target)
 {
-	if ((file_exists("/etc/rc.d/init.d/{$target}")) ||
-			(file_exists("/usr/lib/systemd/system/{$target}.service"))) {
-		return true;
-	} else {
-		return false;
-	}
+	return OsPlatform::serviceExists($target);
 }
 
 function isServiceEnabled($target)

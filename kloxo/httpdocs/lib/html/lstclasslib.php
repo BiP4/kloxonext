@@ -1,5 +1,6 @@
 <?php 
 
+#[\AllowDynamicProperties]
 class lstclass {
 
 static $__desc = array("", "", "class_list");

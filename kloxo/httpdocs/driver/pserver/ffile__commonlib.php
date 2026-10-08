@@ -1,5 +1,6 @@
 <?php
 
+#[\AllowDynamicProperties]
 class ffile__common
 {
 	static function clearFromTrash($root, $name)
@@ -106,9 +107,7 @@ class ffile__common
 	{
 		global $login;
 
-		$ret = lxshell_return("rpm", "-q", "ImageMagick");
-		
-		if ($ret) {
+		if (!OsPlatform::isInstalled("ImageMagick")) {
 			throw new lxException($login->getThrow('no_imagemagick'));
 		}
 	}

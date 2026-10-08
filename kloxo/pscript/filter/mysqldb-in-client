@@ -1,2 +1,3 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 echo "select nname from mysqldb where parent_clname = 'client-$1'" | kloxodb | tail -n+2

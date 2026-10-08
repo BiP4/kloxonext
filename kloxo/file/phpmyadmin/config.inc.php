@@ -14,7 +14,7 @@
  * This is needed for cookie based authentication to encrypt password in
  * cookie
  */
-$cfg['blowfish_secret'] = '574xLWUEqM#w{uRXNUU$KL4H_-K+d{CfXOS%eOWtEPq)'; /* YOU MUST FILL IN THIS FOR COOKIE AUTH! */
+$cfg['blowfish_secret'] = sodium_hex2bin('__BLOWFISH_SECRET__'); /* per-server secret, see etc/conf/pma.secret */
 
 /*
  * Servers configuration
@@ -29,7 +29,7 @@ $i++;
 //$cfg['Servers'][$i]['auth_type'] = 'cookie';
 $cfg['Servers'][$i]['auth_type'] = 'signon';
 $cfg['Servers'][$i]['SignonSession'] = 'SignonSession';
-$cfg['Servers'][$i]['SignonURL']     = 'signon.php';
+$cfg['Servers'][$i]['SignonURL']     = 'examples/signon.php';
 /* Server parameters */
 $cfg['Servers'][$i]['host'] = 'localhost';
 $cfg['Servers'][$i]['connect_type'] = 'tcp';
@@ -75,4 +75,5 @@ $cfg['ThemeManager'] = TRUE;
 $cfg['ThemeDefault'] = 'pmahomme';
 $cfg['ThemePerServer'] = TRUE;
 
-?>
+/* KloxoNext - writable temp dir of the kloxo-apps php-fpm pool */
+$cfg['TempDir'] = '/usr/local/lxlabs/kloxo/init/tmp/apps';

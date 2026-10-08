@@ -1,39 +1,85 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-listpath="/usr/local/lxlabs/kloxo/etc/list"
+#    KloxoNext - build etc/list/<service>.lst ('name_(as_version)' entries)
+#    from the repositories of the running distribution.
+
+. /script/os.inc
+. /script/php-native.inc
+
+listpath="${KLOXO_PATH}/etc/list"
 
 echo "Update Services Branch List"
 
-for x in $(dir -l ${listpath}/set.*.lst|awk '{print $9}') ; do
-	f=$(basename $x)
-	n=${f%.lst}
-	n=${n#set.}
-	if [ -f ${listpath}/custom.${f} ] ; then
-		p=${listpath}/custom.${f}
+# Candidate version of one package as offered by the repositories
+_candidate() {
+	local p="$1"
+	if os_is_el ; then
+		dnf -q repoquery --latest-limit 1 --qf '%{version}' "${p}" 2>/dev/null | head -1
 	else
-		p=${listpath}/${f}
+		apt-cache policy "${p}" 2>/dev/null | awk '/Candidate:/ {print $2}' | grep -v '(none)' | sed -E 's/^[0-9]+://; s/[-+~].*$//'
+	fi
+}
+
+_real_name() {
+	# first real package name of a logical/RPM name on this OS
+	local n="$1"
+	if os_is_debian ; then
+		case "${n}" in
+			httpd) n="apache2" ;;
+			bind)  n="bind9" ;;
+			pdns)  n="pdns-server" ;;
+			knot)  n="knot" ;;
+			mysql-server) n="mysql-server" ;;
+		esac
+	fi
+	echo "${n}"
+}
+
+for x in "${listpath}"/set.*.lst ; do
+	f="$(basename "${x}")"
+	n="${f%.lst}"
+	n="${n#set.}"
+
+	if [ -f "${listpath}/custom.${f}" ] ; then
+		p="${listpath}/custom.${f}"
+	else
+		p="${listpath}/${f}"
 	fi
 
 	echo "- List for '${n}' branch"
 
-	if [ "${n}" == "php" ] ; then
-		s=$(cat ${p}|tr ',' '\n'|sed -e 's/\(.*\)/\1-cli/g'|tr '\n' ' ')
-		a=$(yum info ${s}|grep -e ^'Name' -e ^'Version'|awk '{print $3}'|xargs -n2 -d'\n'|sed 's/\(.*\)-cli \(.*\)/\1_\(as_\2\)/g'|sort|tr '\n' ','|sed 's/\(.*\),/\1/g')
-	else
-		s=$(cat ${p}|tr ',' ' ')
-		a=$(yum info ${s}|grep -e ^'Name' -e ^'Version'|awk '{print $3}'|xargs -n2 -d'\n'|sed 's/\(.*\) \(.*\)/\1_\(as_\2\)/g'|sort|tr '\n' ','|sed 's/\(.*\),/\1/g')
-	fi
+	a=""
 
-	echo ${a} > ${listpath}/${n}.lst
+	for item in $(tr ',' ' ' < "${p}") ; do
+		item="$(echo "${item}" | tr -d ' ')"
+		[ -z "${item}" ] && continue
+
+		if [ "${n}" == "php" ] ; then
+			xy="${item#php}"
+			if os_is_el ; then
+				v="$(_candidate "php${xy}-php-cli")"
+			else
+				v="$(_candidate "php$(php_dotted "${xy}")-cli")"
+			fi
+		else
+			v="$(_candidate "$(_real_name "${item}")")"
+		fi
+
+		[ -n "${v}" ] && a="${a},${item}_(as_${v})"
+	done
+
+	a="${a#,}"
+
+	echo "${a}" > "${listpath}/${n}.lst"
 
 	if [ "${n}" == "web" ] ; then
-		echo ${a}|tr ',' '\n'|grep httpd|grep -v lighttpd|tr '\n' ','|sed 's/\(.*\),/\1/g' > ${listpath}/httpd.lst
-		echo ${a}|tr ',' '\n'|grep lighttpd|tr '\n' ','|sed 's/\(.*\),/\1/g' > ${listpath}/lighttpd.lst
-		echo ${a}|tr ',' '\n'|grep nginx|tr '\n' ','|sed 's/\(.*\),/\1/g' > ${listpath}/nginx.lst
-		echo ${a}|tr ',' '\n'|grep hiawatha|tr '\n' ','|sed 's/\(.*\),/\1/g' > ${listpath}/hiawatha.lst
+		for w in httpd lighttpd nginx hiawatha ; do
+			echo "${a}" | tr ',' '\n' | grep "^${w}" | tr '\n' ',' | sed 's/,$//' > "${listpath}/${w}.lst"
+		done
 	fi
 
 	if [ "${n}" == "database" ] ; then
-		echo ${a}|tr ',' '\n'|grep -e 'mysql' -e 'mariadb' -e 'MariaDB'|tr '\n' ','|sed 's/\(.*\),/\1/g' > ${listpath}/mysql.lst
+		echo "${a}" | tr ',' '\n' | grep -e 'mysql' -e 'mariadb' | tr '\n' ',' | sed 's/,$//' > "${listpath}/mysql.lst"
 	fi
 done

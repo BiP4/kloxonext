@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 # release on Kloxo-MR 6.5.0.f
 # by mustafa.ramadhan@lxcenter.org

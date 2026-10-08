@@ -232,6 +232,7 @@ class webtraffic extends lxclass
 	}
 }
 
+#[\AllowDynamicProperties]
 class ApacheLogRegex
 {
 	private $_format;

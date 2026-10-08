@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if cat /proc/user_beancounters >/dev/null 2>&1 ; then
 	r=$(cat /proc/user_beancounters|grep vmguarpages|awk '{print $4}')

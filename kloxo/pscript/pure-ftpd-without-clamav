@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$(grep -i '^calluploadscript' /etc/pure-ftpd/pure-ftpd.conf)" != "" ] ; then
 	echo "- Remove 'calluploadscript' line from '/etc/pure-ftpd/pure-ftpd.conf'"

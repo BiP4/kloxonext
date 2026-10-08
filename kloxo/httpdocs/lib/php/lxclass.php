@@ -11,6 +11,7 @@ class vpsipaddress extends lxclass
 	function write() { }
 }
 
+#[\AllowDynamicProperties]
 abstract class Lxclass
 {
 	public $nname;
@@ -6483,6 +6484,7 @@ class lxDriverClass extends Lxclass
 	}
 }
 
+#[\AllowDynamicProperties]
 class ddatabase
 {
 }

@@ -1,0 +1,10 @@
+[Unit]
+Description=KloxoNext - daily third-party apps and PHP update
+
+[Timer]
+OnCalendar=*-*-* 04:20:00
+RandomizedDelaySec=45min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

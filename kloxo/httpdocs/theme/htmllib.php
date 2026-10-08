@@ -1,5 +1,6 @@
 <?php
 
+#[\AllowDynamicProperties]
 class FormVar
 {
 	function __get($key)
@@ -8,6 +9,7 @@ class FormVar
 	}
 }
 
+#[\AllowDynamicProperties]
 class HtmlLib
 {
 	public $__message;
