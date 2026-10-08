@@ -545,7 +545,7 @@ class Ffile extends Lxclass
 
 		// Hack hack
 
-		if ($skin_name === 'simplicity') {
+		if (isFlatSkin($skin_name)) {
 		} else {
 		}
 ?>

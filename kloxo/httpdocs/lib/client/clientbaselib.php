@@ -222,7 +222,7 @@ class ClientBase extends ClientCore
 			}
 		}
 
-		if ($login->sp_specialplay_o->specialplay_b->skin_name === 'simplicity') {
+		if (isFlatSkin($login->sp_specialplay_o->specialplay_b->skin_name)) {
 		//	if ($this->isAdmin()) {
 			if ($login->nname === 'admin') {
 				$server = $this->syncserver;

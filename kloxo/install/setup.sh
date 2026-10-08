@@ -198,6 +198,7 @@ pkg_install_logical webalizer awstats fail2ban certbot
 # PHP
 # ---------------------------------------------------------------------------
 
+PHP_PANEL_BRANCH="$(php_panel_branch)"
 step "Install PHP for the panel (php${PHP_PANEL_BRANCH}s)"
 sh /script/phpm-installer "php${PHP_PANEL_BRANCH}s" -y || die "Cannot install PHP $(php_dotted "${PHP_PANEL_BRANCH}") for the panel"
 

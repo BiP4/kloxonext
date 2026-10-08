@@ -2,7 +2,7 @@
 [ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
 if [ "$1" == "" ] ; then
-	skin="simplicity"
+	skin="nexus"
 else
 	skin="$1"
 fi

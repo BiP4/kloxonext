@@ -14,7 +14,7 @@
 #    All public functions are prefixed with 'os_' or 'pkg_' or 'svc_'.
 #
 
-[ -n "${KLOXO_OS_INC_LOADED}" ] && return 0
+[ -n "${KLOXO_OS_INC_LOADED:-}" ] && return 0
 KLOXO_OS_INC_LOADED=1
 
 KLOXO_PATH="/usr/local/lxlabs/kloxo"
@@ -33,10 +33,10 @@ os_detect() {
 	if [ -f /etc/os-release ] ; then
 		# shellcheck disable=SC1091
 		. /etc/os-release
-		OS_ID="${ID}"
-		OS_VERSION="${VERSION_ID}"
+		OS_ID="${ID:-}"
+		OS_VERSION="${VERSION_ID:-}"
 		OS_MAJOR="${VERSION_ID%%.*}"
-		OS_LIKE="${ID_LIKE}"
+		OS_LIKE="${ID_LIKE:-}"
 	fi
 
 	case "${OS_ID} ${OS_LIKE}" in
@@ -168,7 +168,8 @@ pkg_install() {
 		_pkg_apt_env
 		local avail=() p
 		for p in "$@" ; do
-			if apt-cache show "${p}" >/dev/null 2>&1 ; then
+			# a real installation candidate, not only a name referred to by other packages
+			if [ -n "$(apt-cache policy "${p}" 2>/dev/null | awk '/Candidate:/ {print $2}' | grep -v '(none)')" ] ; then
 				avail+=("${p}")
 			else
 				echo "  - package '${p}' not available, skipped"

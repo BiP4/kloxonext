@@ -120,11 +120,11 @@ function main_main()
 	initProgram();
 
 	if ($login->getSpecialObject('sp_specialplay')->skin_name === 'default') {
-		set_login_skin_to_simplicity();
+		set_login_skin_to_nexus();
 	}
 
 	if (($login->getSpecialObject('sp_specialplay')->isOn('simple_skin')) || 
-			($login->getSpecialObject('sp_specialplay')->skin_name === 'simplicity')) {
+			(isFlatSkin($login->getSpecialObject('sp_specialplay')->skin_name))) {
 	//	include_once "./display.php";
 		header( 'Location: /display.php?frm_action=show' ) ;
 	} else {

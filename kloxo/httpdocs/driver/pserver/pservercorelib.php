@@ -281,7 +281,7 @@ class pservercore extends Lxclient
 			}
 		}
 
-		if ($login->sp_specialplay_o->specialplay_b->skin_name === 'simplicity') {
+		if (isFlatSkin($login->sp_specialplay_o->specialplay_b->skin_name)) {
 			$server = $this->syncserver;
 			$server_phpini = unserialize(base64_decode(db_get_value("phpini", "pserver-" . $server, "ser_phpini_flag_b")));
 

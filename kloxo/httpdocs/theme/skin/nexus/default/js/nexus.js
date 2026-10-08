@@ -1,0 +1,124 @@
+/*
+ * KloxoNext 'nexus' skin - shell behaviour (no dependencies)
+ */
+(function () {
+	'use strict';
+
+	var root = document.documentElement;
+	var mobile = window.matchMedia('(max-width: 860px)');
+
+	function store(key, value) {
+		try {
+			if (value === null) { localStorage.removeItem(key); } else { localStorage.setItem(key, value); }
+		} catch (e) { /* private mode: keep working without persistence */ }
+	}
+
+	/* ---- sidebar: drawer on phones, icon-collapse on desktop ------------ */
+
+	function toggleSidebar() {
+		if (mobile.matches) {
+			root.classList.toggle('kn-sidebar-open');
+		} else {
+			var c = root.classList.toggle('kn-collapsed');
+			store('kn-sidebar', c ? 'collapsed' : null);
+		}
+	}
+
+	document.addEventListener('click', function (e) {
+		var t = e.target.closest('[data-kn-toggle-sidebar]');
+		if (t) { toggleSidebar(); return; }
+
+		if (e.target.closest('[data-kn-close-sidebar]')) {
+			root.classList.remove('kn-sidebar-open');
+			return;
+		}
+
+		var conf = e.target.closest('[data-kn-confirm]');
+		if (conf && !window.confirm(conf.getAttribute('data-kn-confirm'))) {
+			e.preventDefault();
+			return;
+		}
+
+		if (e.target.closest('[data-kn-toast-close]')) {
+			var toast = e.target.closest('[data-kn-toast]');
+			if (toast) { toast.remove(); }
+			return;
+		}
+
+		// close the account menu / collapsed flyouts when clicking elsewhere
+		document.querySelectorAll('details.kn-user[open]').forEach(function (d) {
+			if (!d.contains(e.target)) { d.removeAttribute('open'); }
+		});
+
+		if (root.classList.contains('kn-collapsed') && !mobile.matches) {
+			document.querySelectorAll('.kn-nav-section[open]').forEach(function (d) {
+				if (!d.contains(e.target)) { d.removeAttribute('open'); }
+			});
+		}
+	});
+
+	document.addEventListener('keydown', function (e) {
+		if (e.key === 'Escape') {
+			root.classList.remove('kn-sidebar-open');
+			document.querySelectorAll('details.kn-user[open]').forEach(function (d) { d.removeAttribute('open'); });
+		}
+	});
+
+	// only one sidebar section open at a time keeps the menu short
+	document.querySelectorAll('.kn-nav-section').forEach(function (d) {
+		d.addEventListener('toggle', function () {
+			if (!d.open) { return; }
+			document.querySelectorAll('.kn-nav-section[open]').forEach(function (o) {
+				if (o !== d) { o.removeAttribute('open'); }
+			});
+			if (root.classList.contains('kn-collapsed') && !mobile.matches) {
+				var sub = d.querySelector('.kn-nav-sub');
+				var r = d.getBoundingClientRect();
+				if (sub) { sub.style.top = Math.min(r.top, window.innerHeight - 320) + 'px'; }
+			}
+		});
+	});
+
+	/* ---- light / dark theme --------------------------------------------- */
+
+	document.querySelectorAll('[data-kn-theme-toggle]').forEach(function (b) {
+		b.addEventListener('click', function () {
+			var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+			root.setAttribute('data-theme', next);
+			store('kn-theme', next);
+		});
+	});
+
+	/* ---- page title: last breadcrumb entry -------------------------------- */
+
+	var title = document.getElementById('kn-page-title');
+	var crumbs = document.querySelectorAll('.kn-main .verb4 a, .kn-main .verb4 span, .kn-main .verb4 b');
+	if (title && crumbs.length) {
+		var last = crumbs[crumbs.length - 1].textContent.replace(/\s+/g, ' ').trim();
+		title.textContent = last;
+		if (last) { document.title = last + ' · KloxoNext'; }
+	}
+
+	/* ---- wide legacy tables scroll horizontally instead of breaking layout */
+
+	document.querySelectorAll('.kn-main table').forEach(function (t) {
+		if (t.closest('.kn-table-wrap')) { return; }
+		var isData = t.querySelector(':scope > tbody > tr.tablerow0, :scope > tbody > tr.tablerow1, :scope > tbody > tr > td.tableheader');
+		if (!isData) { return; }
+		var w = document.createElement('div');
+		w.className = 'kn-table-wrap';
+		t.parentNode.insertBefore(w, t);
+		w.appendChild(t);
+	});
+
+	/* ---- success toast fades out; errors stay ----------------------------- */
+
+	var ok = document.querySelector('.kn-toast-ok');
+	if (ok) {
+		setTimeout(function () {
+			ok.style.transition = 'opacity .4s ease';
+			ok.style.opacity = '0';
+			setTimeout(function () { ok.remove(); }, 450);
+		}, 6000);
+	}
+})();

@@ -231,7 +231,7 @@ class Html extends Htmllib
 											<tr>
 <?php
 		if (!$sellist) {
-			if ($skin_name !== 'simplicity') {
+			if (!isFlatSkin($skin_name)) {
 ?>
 
 												<td><img src="<?= $imgheadleft; ?>"></td>
@@ -255,7 +255,7 @@ class Html extends Htmllib
 								<tr>
 									<td colspan='3'>
 <?php
-			if ($skin_name !== 'simplicity') {
+			if (!isFlatSkin($skin_name)) {
 ?>
 
 										<table cellpadding='0' cellspacing='0' border='0' width='100%' height='35' background="<?= $imgbtnbg; ?>">

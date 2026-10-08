@@ -1882,6 +1882,33 @@ function execRrdTraffic($filename, $tot, $inc, $out)
 	lxshell_return("rrdtool", "update", $file, "N:$tot:$inc:$out");
 }
 
+// KloxoNext - skins without frames (top/side navigation inside display.php)
+function isFlatSkin($skin_name)
+{
+	return in_array($skin_name, array('simplicity', 'nexus'), true);
+}
+
+function set_login_skin_to_nexus()
+{
+	global $sgbl, $login;
+
+	if (!$sgbl->isKloxo()) {
+		return;
+	}
+
+	foreach (array('sp_specialplay', 'sp_childspecialplay') as $sp) {
+		$obj = $login->getObject($sp);
+		$obj->specialplay_b->skin_name = 'nexus';
+		$obj->specialplay_b->skin_color = 'default';
+		$obj->specialplay_b->icon_name = 'collage';
+		$obj->specialplay_b->show_direction = 'vertical';
+		$obj->specialplay_b->button_type = 'font';
+		$obj->specialplay_b->skin_background = '';
+		$obj->setUpdateSubaction();
+		$obj->write();
+	}
+}
+
 function set_login_skin_to_feather()
 {
 	global $sgbl, $login;

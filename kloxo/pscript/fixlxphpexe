@@ -26,9 +26,9 @@ elif [ -f "${INIT_DIR}/kloxo_php_active" ] ; then
 	base_name="$(tr -d ' \n' < "${INIT_DIR}/kloxo_php_active")"
 fi
 
-# Panel never runs on anything older than PHP_PANEL_BRANCH
-if [ -z "${base_name}" ] || [ "${base_name:3:2}" -lt "${PHP_PANEL_BRANCH}" ] 2>/dev/null ; then
-	base_name="php${PHP_PANEL_BRANCH}s"
+# Panel never runs on anything older than PHP_PANEL_MIN_BRANCH
+if [ -z "${base_name}" ] || [ "${base_name:3:2}" -lt "${PHP_PANEL_MIN_BRANCH}" ] 2>/dev/null ; then
+	base_name="php$(php_panel_branch)s"
 fi
 
 if [ ! -f "/opt/${base_name}/custom/php-cli.sh" ] ; then

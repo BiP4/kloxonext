@@ -21,16 +21,17 @@
 #    Requires: . /script/os.inc
 #
 
-[ -n "${KLOXO_PHP_NATIVE_INC_LOADED}" ] && return 0
+[ -n "${KLOXO_PHP_NATIVE_INC_LOADED:-}" ] && return 0
 KLOXO_PHP_NATIVE_INC_LOADED=1
 
-[ -z "${KLOXO_OS_INC_LOADED}" ] && . "$(dirname "${BASH_SOURCE[0]}")/os.inc"
+[ -z "${KLOXO_OS_INC_LOADED:-}" ] && . "$(dirname "${BASH_SOURCE[0]}")/os.inc"
 
 # PHP branches KloxoNext knows about, oldest first.
 PHP_KNOWN_BRANCHES="74 80 81 82 83 84 85"
 
-# Minimum branch used by the panel itself and by the third-party apps.
-PHP_PANEL_BRANCH="84"
+# Minimum branch used by the panel itself (see php_panel_branch).
+PHP_PANEL_MIN_BRANCH="84"
+PHP_PANEL_BRANCH="${PHP_PANEL_MIN_BRANCH}"
 
 # Extensions installed for every branch (logical names).
 PHP_DEFAULT_EXTS="cli fpm cgi common mysqlnd pdo gd mbstring xml intl zip opcache soap bcmath curl ldap process sodium gmp imap apcu redis imagick sqlite3 tidy"
@@ -130,6 +131,21 @@ php_latest_available() {
 	local b
 	b="$(php_available_branches)"
 	echo "${b##* }"
+}
+
+# Branch for the panel: PHP 8.4 when the repositories have it, otherwise the
+# oldest available branch newer than 8.4 (Ubuntu 26.04 ships only 8.5).
+php_panel_branch() {
+	local xy
+	if php_native_installed "${PHP_PANEL_MIN_BRANCH}" ; then
+		echo "${PHP_PANEL_MIN_BRANCH}" ; return
+	fi
+	for xy in $(php_available_branches) ; do
+		if [ "${xy}" -ge "${PHP_PANEL_MIN_BRANCH}" ] ; then
+			echo "${xy}" ; return
+		fi
+	done
+	echo "${PHP_PANEL_MIN_BRANCH}"
 }
 
 php_native_install() {

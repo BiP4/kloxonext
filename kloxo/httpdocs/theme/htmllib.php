@@ -7401,7 +7401,7 @@ class HtmlLib
 		$skincolor = $login->getSkinColor();
 		$skin_name = $login->getSpecialObject('sp_specialplay')->skin_name;
 
-		if ($skin_name === 'simplicity') {
+		if (isFlatSkin($skin_name)) {
 			$wait_text = "document.getElementById('div_status').style.color='#fff';document.getElementById('div_status').innerHTML='&nbsp;{$login->getKeywordUc('wait')}&nbsp;';";
 		} else {
 			$wait_text = "";
@@ -8686,7 +8686,7 @@ function uploadAbort(e) { // upload abort
 			$fontstyle = 'color: #000';
 			$mess = $this->format_message($mess, $value, true);
 
-			if ($skin_name === 'simplicity') {
+			if (isFlatSkin($skin_name)) {
 				$mess = preg_replace("/<.*?>/", "", $mess);
 				$message = preg_replace("/<.*?>/", "", $message);
 				return $message . " " . $mess;
@@ -8723,7 +8723,7 @@ function uploadAbort(e) { // upload abort
 			$pmess = $this->format_message($mess, $value, true);
 			$pmess = substr($pmess, 0, 270);
 
-			if ($skin_name === 'simplicity') {
+			if (isFlatSkin($skin_name)) {
 				$message = preg_replace("/<.*?>/", "", $message);
 				$pmess = preg_replace("/<.*?>/", "", $pmess);
 				return $message . " " . $pmess . "...";
@@ -9523,7 +9523,14 @@ function uploadAbort(e) { // upload abort
 			$bodycolor = "000";
 		}
 
-		if ($skin_name === 'simplicity') {
+		// KloxoNext - modern responsive layout (sidebar + topbar), see theme/skin/nexus
+		if ($skin_name === 'nexus') {
+			include_once getLinkCustomfile(getcwd() . $skin_dir, "layout_begin.php");
+
+			return;
+		}
+
+		if (isFlatSkin($skin_name)) {
 			$skin_background = $login->getSpecialObject('sp_specialplay')->skin_background;
 		//	$bodybackground = "url(/theme/background/{$skin_background}) center; background-size: cover; background-attachment: fixed";
 			$bodybackground = "";
@@ -9540,7 +9547,7 @@ function uploadAbort(e) { // upload abort
 
 		<body <?= $func ?> style="background:#<?= $bodycolor ?> <?= $bodybackground ?>;">
 <?php
-		if ($skin_name === 'simplicity') {
+		if (isFlatSkin($skin_name)) {
 			if (file_exists("./login/images/user-logo.png")) {
 ?>
 			<div class="div_fixed_logo_left"><img src="./login/images/user-logo.png" height="40"/></div>
@@ -9561,8 +9568,8 @@ function uploadAbort(e) { // upload abort
 <?php
 		}
 
-		if (($as_simple_skin) || ($skin_name === 'simplicity')) {
-			if ($skin_name === 'simplicity') {
+		if (($as_simple_skin) || (isFlatSkin($skin_name))) {
+			if (isFlatSkin($skin_name)) {
 				$mmmclass = 'div_mmm_simplicity';
 			} else {
 				$mmmclass = 'div_mmm_feather shadow_all';
@@ -9971,7 +9978,7 @@ function uploadAbort(e) { // upload abort
 
 	<div id="content_wrapper" class="div_content">
 <?php
-		if ($login->getSpecialObject('sp_specialplay')->skin_name === 'simplicity') {
+		if (isFlatSkin($login->getSpecialObject('sp_specialplay')->skin_name)) {
 ?>
 		<div class="verb4"><?= print_navigation($gbl->__navig); ?></div>
 <?php
@@ -10134,7 +10141,7 @@ function uploadAbort(e) { // upload abort
 
 		$skindir = $login->getSkinDir();
 
-		if ($login->getSpecialObject('sp_specialplay')->skin_name !== 'simplicity') {
+		if (!isFlatSkin($login->getSpecialObject('sp_specialplay')->skin_name)) {
 			return "url({$skindir}/images/expand.gif)";
 		} else {
 			return "";

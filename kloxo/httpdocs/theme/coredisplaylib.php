@@ -1906,7 +1906,7 @@ function print_navigation($navig)
 			$hypervm = "HyperVM";
 		}
 
-		if (($login->getSpecialObject('sp_specialplay')->isOn('simple_skin')) && ($login->getSpecialObject('sp_specialplay')->skin_name !== 'simplicity')) {
+		if (($login->getSpecialObject('sp_specialplay')->isOn('simple_skin')) && (!isFlatSkin($login->getSpecialObject('sp_specialplay')->skin_name))) {
 			if ($login->getSpecialObject('sp_specialplay')->isOn('show_thin_header')) {
 				//	$v = create_simpleObject(array('url' => "javascript:top.mainframe.logOut()", 'purl' => '&a=updateform&sa=logout', 'target' => null));
 				//	$ghtml->print_div_button_on_header(null, true, $k, '');
@@ -1916,7 +1916,7 @@ function print_navigation($navig)
 <?php
 			}
 
-		} elseif ($login->getSpecialObject('sp_specialplay')->skin_name !== 'simplicity') {
+		} elseif (!isFlatSkin($login->getSpecialObject('sp_specialplay')->skin_name)) {
 			$imgstring = "<img width='18' height='18' src='/theme/general/button/star.gif'>";
 
 			if ($sgbl->isBlackBackground()) {
@@ -2133,12 +2133,35 @@ function do_display_init()
 	}
 
 	createPrincipleObject();
+
+	$is_nexus = ($login->getSpecialObject('sp_specialplay')->skin_name === 'nexus');
+
+	if ($is_nexus) {
+		// KloxoNext - standards mode + mobile viewport for the responsive skin
+		print("<!DOCTYPE html>\n");
+	}
 ?>
-	<html>
+	<html<?= $is_nexus ? ' lang="en" data-theme="light"' : '' ?>>
 	<head>
-		<title> Kloxo Display Page </title>
+		<title><?= $is_nexus ? 'KloxoNext' : ' Kloxo Display Page ' ?></title>
 <?php
 		print_meta_lan();
+
+		if ($is_nexus) {
+?>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="color-scheme" content="light dark">
+		<script>
+			/* apply the saved theme before first paint (no flash) */
+			try {
+				var t = localStorage.getItem('kn-theme');
+				if (!t) { t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+				document.documentElement.setAttribute('data-theme', t);
+				if (localStorage.getItem('kn-sidebar') === 'collapsed') { document.documentElement.classList.add('kn-collapsed'); }
+			} catch (e) {}
+		</script>
+<?php
+		}
 ?>
 
 		<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
@@ -2212,7 +2235,7 @@ function do_display_init()
 	try {
 		main_system_lock();
 
-		if ($login->getSpecialObject('sp_specialplay')->skin_name !== 'simplicity') {
+		if (!isFlatSkin($login->getSpecialObject('sp_specialplay')->skin_name)) {
 			print_navigation($gbl->__navig);
 		}
 
@@ -2237,7 +2260,15 @@ function do_display_init()
 
 function do_display_exec()
 {
+	global $login;
+
 	display_exec();
+
+	if ($login->getSpecialObject('sp_specialplay')->skin_name === 'nexus') {
+		include_once getLinkCustomfile(getcwd() . $login->getSkinDir(), "layout_end.php");
+
+		return;
+	}
 ?>
 
 	</div>

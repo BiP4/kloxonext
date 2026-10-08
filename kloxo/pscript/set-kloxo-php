@@ -21,7 +21,7 @@ rm -f "${KLOXO_PATH}/init/kloxo_use_php-cgi"
 echo 'lxlabs ALL=(ALL:ALL) NOPASSWD:/usr/local/lxlabs/kloxo' > /etc/sudoers.d/mount
 chmod 0440 /etc/sudoers.d/mount
 
-target="${2:-php${PHP_PANEL_BRANCH}s}"
+target="${2:-php$(php_panel_branch)s}"
 
 sh /script/fixlxphpexe "${target}"
 sh /script/restart -y
