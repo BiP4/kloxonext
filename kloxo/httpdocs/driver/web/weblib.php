@@ -1582,7 +1582,7 @@ class Web extends Lxdb
 
 				if (($driverapp === 'apache') || ((strpos($driverapp, 'proxy') !== false) && ($this->web_selected === 'back-end'))) {
 					if ((strpos($phptype, 'php-fpm') !== false) || (strpos($phptype, 'proxy_fcgi') !== false)) {
-						if (count($l) === 1) {
+						if (lx_count($l) === 1) {
 							$y['php_selected'] = $l[0];
 							$this->convertToUnmodifiable($y);
 							$vlist['php_selected'] = $y['php_selected'];
@@ -1596,7 +1596,7 @@ class Web extends Lxdb
 						$vlist['php_selected'] = $y['php_selected'];
 					}
 				} else {
-					if (count($l) === 1) {
+					if (lx_count($l) === 1) {
 						$y['php_selected'] = $l[0];
 						$this->convertToUnmodifiable($y);
 						$vlist['php_selected'] = $y['php_selected'];

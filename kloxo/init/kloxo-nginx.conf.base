@@ -110,6 +110,7 @@ http {
 				fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 				fastcgi_param PATH_INFO $fastcgi_path_info;
 				fastcgi_param HTTPS $https if_not_empty;
+				fastcgi_param HTTP_SCHEME $scheme;
 				fastcgi_read_timeout 3600;
 				fastcgi_pass kloxo_apps;
 			}
@@ -122,6 +123,7 @@ http {
 			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 			fastcgi_param PATH_INFO $fastcgi_path_info;
 			fastcgi_param HTTPS $https if_not_empty;
+			fastcgi_param HTTP_SCHEME $scheme;   # set by Hiawatha, used by redirect.php
 			fastcgi_read_timeout 3600;
 			fastcgi_buffers 16 32k;
 			fastcgi_buffer_size 64k;

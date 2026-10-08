@@ -1314,7 +1314,7 @@ abstract class Lxclass
 
 		$this->$typevar = 'fullist';
 
-		$this->$totalvar = count($this->$list);
+		$this->$totalvar = lx_count($this->$list);
 
 		if (!isset($this->$list)) {
 			$this->$list = NULL;
@@ -1621,13 +1621,13 @@ abstract class Lxclass
 
 		//	$db->rawquery("begin;");
 
-			$countres = $db->rawquery("select count(*) from {$table} {$countquery}");
+			$countres = $db->rawquery("select lx_count(*) from {$table} {$countquery}");
 			if ($sgbl->__var_database_type === 'mysql') {
-				$countres = $countres[0]['count(*)'];
+				$countres = $countres[0]['lx_count(*)'];
 			} else if ($sgbl->__var_database_type === 'mssql') {
 				$countres = $countres[0]['computed'];
 			} else {
-				$countres = $countres[0]['count(*)'];
+				$countres = $countres[0]['lx_count(*)'];
 			}
 
 		//	print_time('count', "CountResult");
@@ -1663,7 +1663,7 @@ abstract class Lxclass
 
 		} else {
 			$res = exec_class_method($rclass, 'initThisList', $this, $class);
-			$countres = count($res);
+			$countres = lx_count($res);
 		}
 
 	//	$this->ApplyFilter($res);
@@ -1951,8 +1951,8 @@ abstract class Lxclass
 			} else {
 				$list = explode("-", $property);
 			}
-			$dproperty = $list[count($list) - 1];
-			unset($list[count($list) - 1]);
+			$dproperty = $list[lx_count($list) - 1];
+			unset($list[lx_count($list) - 1]);
 			$dclass = implode('_s_', $list);
 		}
 	}
@@ -1969,8 +1969,8 @@ abstract class Lxclass
 				$list = explode("-", $property);
 			}
 
-			$dclass = $list[count($list) - 2];
-			$dproperty = $list[count($list) - 1];
+			$dclass = $list[lx_count($list) - 2];
+			$dproperty = $list[lx_count($list) - 1];
 		}
 	}
 
@@ -2440,7 +2440,7 @@ abstract class Lxclass
 				}
 			}
 
-			$count = count($res);
+			$count = lx_count($res);
 
 			$n = 0;
 
@@ -4109,7 +4109,7 @@ abstract class Lxclass
 		// For customer, it is best you get the full list. It is going to be small.
 		if ($parent->isCustomer()) {
 			$list = $parent->getList($class);
-			$count = count($list);
+			$count = lx_count($list);
 		} else {
 			$list = $parent->getVirtualList($class, $count);
 		}
@@ -4708,7 +4708,7 @@ abstract class Lxclass
 
 				if (array_search_bool($listvar, $totalchildlist)) {
 					$childlist = $this->$cvar;
-					$num = count($childlist);
+					$num = lx_count($childlist);
 					$fv[$var] = $num;
 				}
 			} else if (cse($var, "_num")) {
@@ -6351,7 +6351,7 @@ class lxDriverClass extends Lxclass
 	{
 		$bc = $this->do_backup();
 
-		if (!count($bc[1])) {
+		if (!lx_count($bc[1])) {
 			$bc[1][] = 'blank_file';
 			lxfile_touch("{$bc[0]}/blank_file");
 		}

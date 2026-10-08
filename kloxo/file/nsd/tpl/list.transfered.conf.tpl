@@ -11,7 +11,7 @@
 	$text = '';
 
 	// MR -- this is IPs from 'A record' of dns
-	if (array_keys($ips)) {
+	if (!empty($ips)) {
 		foreach ($ips as $k => $v) {
 			$text .= "    notify: {$v} NOKEY\n";
 			$text .= "    provide-xfr: {$v} NOKEY\n";

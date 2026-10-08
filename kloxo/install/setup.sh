@@ -99,12 +99,14 @@ fi
 
 [ "$(uname -m)" == "x86_64" ] || [ "$(uname -m)" == "aarch64" ] || die "Only x86_64 and aarch64 are supported"
 
+command -v hostname >/dev/null 2>&1 || { pkg_install hostname >/dev/null 2>&1 ; }
+
 if [ "$(hostname -f 2>/dev/null)" == "$(hostname -s)" ] ; then
 	die "Hostname '$(hostname)' is not a FQDN. Run: hostnamectl set-hostname server1.example.com"
 fi
 echo -e "FQDN hostname                 ${C_OK} ($(hostname -f))"
 
-if grep -q '^[^#].*[[:space:]]/tmp[[:space:]].*tmpfs' /etc/fstab ; then
+if grep -qs '^[^#].*[[:space:]]/tmp[[:space:]].*tmpfs' /etc/fstab ; then
 	die "'/tmp' is mounted as tmpfs in /etc/fstab; remove it and reboot (backups need a real /tmp)"
 fi
 
@@ -114,7 +116,7 @@ if os_is_el && command -v selinuxenabled >/dev/null 2>&1 && selinuxenabled ; the
 	sed -i 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
 fi
 
-mkdir -p "${ppath}/log" "${ppath}/etc/conf" "${ppath}/etc/flag" "${ppath}/pid"
+mkdir -p "${ppath}/log" "${ppath}/etc/conf" "${ppath}/etc/flag" "${ppath}/pid" "${ppath}/session"
 
 if [ -d /var/lib/mysql/kloxo ] ; then
 	kloxostate='installed'

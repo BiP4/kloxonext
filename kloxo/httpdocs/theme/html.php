@@ -162,7 +162,7 @@ class Html extends Htmllib
 
 		$imagedir = $login->getSkinDir() . "/images";
 
-		$nlcount = count($name_list) + 1;
+		$nlcount = lx_count($name_list) + 1;
 		$imgheadleft = $imagedir . "/top_lt.gif";
 		$imgheadleft2 = $imagedir . "/top_lt.gif";
 		$imgheadright = $imagedir . "/top_rt.gif";

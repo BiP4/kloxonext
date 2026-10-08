@@ -81,7 +81,7 @@ class TrafficHistory extends Lxclass
 		$list1 = get_namelist_from_objectlist($tobjectlist);
 		$list = lx_array_keys($list1);
 		list(, $start, ) = explode( ':', $list[0]);
-		$count = count($list);
+		$count = lx_count($list);
 		list( , , $end ) = explode(':', $list[$count-1]);
 		$smonth = @ strftime("%m", $start);
 		$emonth = @ strftime("%m", $end);

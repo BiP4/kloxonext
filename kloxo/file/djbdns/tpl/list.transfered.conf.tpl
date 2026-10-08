@@ -4,7 +4,7 @@
 	// MR -- importance if not active
 	if (!file_exists($dir)) { return; }
 
-	if (array_keys($ips)) {
+	if (!empty($ips)) {
 		$file = "{$dir}/tcp";
 
 		$i = implode(":allow,AXFR=\"\"\n", $ips);

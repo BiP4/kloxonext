@@ -346,7 +346,7 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 
 /* horizontal scroll for wide legacy tables on small screens */
 .kn-table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--kn-radius); }
-.kn-table-wrap > table { min-width: 640px; }
+.kn-table-wrap > table { min-width: 0; }
 
 /* ------------------------------------------------------- legacy form rows */
 
@@ -500,3 +500,99 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 	.kn-sidebar, .kn-topbar, .kn-overlay, .kn-toast { display: none !important; }
 	.kn-body { margin: 0 !important; }
 }
+
+/* ------------------------------------------------------------------- tabs */
+
+.kn-tabs {
+	display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+	margin: 0 0 18px; border-bottom: 1px solid var(--kn-border);
+}
+.kn-tabs::-webkit-scrollbar { display: none; }
+.kn-tab {
+	flex: 0 0 auto; padding: 9px 14px; margin-bottom: -1px;
+	color: var(--kn-text-2) !important; font-weight: 500; white-space: nowrap;
+	border-bottom: 2px solid transparent; text-decoration: none !important;
+}
+.kn-tab:hover { color: var(--kn-text) !important; border-bottom-color: var(--kn-border-strong); }
+.kn-tab[aria-current="page"] { color: var(--kn-primary) !important; border-bottom-color: var(--kn-primary); font-weight: 600; }
+
+/* --------------------------------------------- legacy home page / panels */
+
+/* section headers drawn with the skin colour inline (background:#xxxxxx) */
+.kn-main tr.handle, .kn-main tr.handle > td,
+.kn-main td.collist, .kn-main th.collist {
+	background: var(--kn-surface-2) !important;
+	color: var(--kn-text) !important;
+	border-bottom: 1px solid var(--kn-border) !important;
+	height: auto !important; padding: 10px 12px !important;
+}
+.kn-main tr.handle span { font-weight: 600 !important; letter-spacing: .01em; }
+.kn-main td.collist .tableheadtext, .kn-main td.collist b { color: var(--kn-text-2) !important; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* the container of every icon panel on the home page */
+.kn-main table:has(> tbody > tr.handle) {
+	background: var(--kn-surface) !important;
+	border: 1px solid var(--kn-border) !important; border-radius: var(--kn-radius);
+	border-collapse: separate !important; overflow: hidden; box-shadow: var(--kn-shadow);
+	margin-bottom: 16px;
+}
+.kn-main [id^="internal_"], .kn-main [id^="item_"] { background: transparent !important; }
+
+/* icon buttons of the home page */
+.kn-main a:has(> img[src*="/icon/"]), .kn-main td:has(> a > img[src*="/icon/"]) { border-radius: var(--kn-radius-sm); }
+.kn-main td:has(> a > img[src*="/icon/"]):hover { background: var(--kn-primary-soft) !important; }
+
+/* breadcrumb bar (print_navigation) */
+.kn-main .verb4 .tbl_navigation { width: 100%; border: 0 !important; background: none !important; }
+.kn-main .verb4 .tbl_navigation td { padding: 0 !important; font-size: 13px !important; color: var(--kn-text-3) !important; }
+.kn-main .verb4 .tbl_navigation span[style*="#3498db"] { color: var(--kn-text-3) !important; font-weight: 500 !important; }
+
+/* "Error Box" / "Information" popup of htmllib::show_error_message */
+.kn-main #showimage {
+	position: fixed !important; top: calc(var(--kn-topbar-h) + 16px) !important; left: auto !important; right: 20px !important;
+	width: min(420px, calc(100vw - 32px)) !important; margin: 0 !important; z-index: 32;
+}
+.kn-main #showimage > div {
+	border: 1px solid color-mix(in srgb, var(--kn-danger) 35%, transparent) !important;
+	background: var(--kn-surface) !important; border-radius: var(--kn-radius); overflow: hidden; box-shadow: var(--kn-shadow-lg);
+}
+.kn-main #showimage #dragbar {
+	background: var(--kn-danger-soft) !important; border: 0 !important; height: auto !important;
+	padding: 8px 12px !important; display: flex; justify-content: space-between; align-items: center;
+}
+.kn-main #showimage #dragbar div { float: none !important; color: var(--kn-danger) !important; font-weight: 600; }
+.kn-main #showimage #dragbar a { color: var(--kn-danger) !important; font-size: 18px; text-decoration: none !important; }
+.kn-main #showimage div[style*="color: #000"] { color: var(--kn-text) !important; padding: 4px 4px 8px !important; }
+
+/* every element htmllib paints with the legacy header colour */
+.kn-main [style*="#6698c9"], .kn-main .trigger, .kn-main .expanded {
+	background: var(--kn-surface-2) !important; color: var(--kn-text) !important;
+	border-color: var(--kn-border) !important;
+}
+.kn-main .trigger, .kn-main .expanded { border-radius: var(--kn-radius-sm); padding: 8px 12px !important; font-weight: 600; }
+
+/* left column of the home page: never needs a scrollbar */
+.kn-main td[width="230"] .kn-table-wrap, .kn-main td[width="200"] .kn-table-wrap { overflow: visible; }
+
+/* ------------------------------------------ fluid widths for legacy boxes */
+
+.kn-main .div_standard, .kn-main .div_showhide, .kn-main .div_mmm_warning {
+	width: auto !important; max-width: 100%; margin: 0 0 16px !important;
+	background: transparent !important;
+}
+.kn-main .div_note, .kn-main .div_resource { width: auto !important; max-width: 100%; background: var(--kn-surface) !important; border-color: var(--kn-border) !important; }
+.kn-main .div_note_title { background: var(--kn-surface-2) !important; color: var(--kn-text) !important; }
+.kn-main .tbl_content_content { background: transparent !important; height: auto !important; }
+.kn-main .div_display_die { width: min(400px, 100%) !important; }
+.kn-main .frm_cron_c_command { width: min(450px, 100%) !important; }
+.kn-main .textbox { width: min(320px, 100%); }
+.kn-main .lightandthin { font-family: inherit !important; font-size: 12px !important; color: inherit !important; }
+.kn-main .if16 { color: inherit !important; }
+
+/* any legacy element with a hard-coded pixel width never overflows the viewport */
+.kn-main table[width], .kn-main div[style*="width:"], .kn-main div[style*="width :"] { max-width: 100%; }
+
+/* content never pushes the page wider than the viewport */
+.kn-main .tbl_content_content { table-layout: fixed; }
+.kn-main fieldset { min-width: 0; }
+.kn-main .div_showhide, .kn-main .div_standard { overflow-x: auto; }

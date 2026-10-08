@@ -709,7 +709,7 @@ class lxbackup extends Lxdb
 		ksort($newlist);
 
 		$num = $object->rm_last_number ? $object->rm_last_number : 5;
-		$total = count($newlist);
+		$total = lx_count($newlist);
 		$i = 0;
 
 		$retlist = array();

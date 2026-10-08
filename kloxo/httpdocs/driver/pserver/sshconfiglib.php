@@ -30,7 +30,7 @@ class sshconfig extends lxdb
 				$vlist['ssh_port'] = null;
 
 				exec("cat /etc/ssh/sshd_config|grep ^'Port'|awk '{print $2}'", $out);
-				if (count($out) > 0) {
+				if (lx_count($out) > 0) {
 					$port = $out[0];
 				} else {
 					$port = "22";

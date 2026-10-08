@@ -453,7 +453,7 @@ class Domaind extends DomainBase
 		$res = $sql->getTable(array('nname'));
 		$rs = get_namelist_from_arraylist($res);
 		
-		if (count($rs) > 1) {
+		if (lx_count($rs) > 1) {
 			$nlist['webpserver'] = array('s', $rs);
 			$nlist['mmailpserver'] = array('s', $rs);
 			$nlist['dnspserver'] = array('s', $rs);
@@ -1333,7 +1333,7 @@ class Domaind extends DomainBase
 	//	$this->getListActions($alist, 'mssqldb');
 	/*
 		if (check_if_many_server()) {
-		//	if (count($this->getParentO()->listpriv->mysqldbpserver_list) > 1) {
+		//	if (lx_count($this->getParentO()->listpriv->mysqldbpserver_list) > 1) {
 				$alist[] = "a=updateform&sa=ddatabasepserver";
 		//	}
 		}
@@ -1569,7 +1569,7 @@ class Domaind extends DomainBase
 	//	$this->getListActions($alist, 'mssqldb');
 		
 		if (check_if_many_server()) {
-		//	if (count($this->getParentO()->listpriv->mysqldbpserver_list) > 1) {
+		//	if (lx_count($this->getParentO()->listpriv->mysqldbpserver_list) > 1) {
 				$alist[] = "a=updateform&sa=ddatabasepserver";
 		//	}
 		}

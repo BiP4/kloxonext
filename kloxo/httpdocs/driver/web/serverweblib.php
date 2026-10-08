@@ -83,7 +83,7 @@ class serverweb extends lxdb
 				$out = null;
 				exec("cat /etc/httpd/conf.d/~lxcenter.conf | grep -i '### selected:'", $out);
 
-				if (count($out) > 0) {
+				if (lx_count($out) > 0) {
 					if (strpos($out[0], 'customize') !== false) {
 						$a = array('default', 'low', 'medium', 'high', 'customize');
 					} else {
@@ -97,7 +97,7 @@ class serverweb extends lxdb
 
 				$b = '';
 
-				if (count($out) > 0) {
+				if (lx_count($out) > 0) {
 					foreach ($a as $k => $v) {
 						if (strpos($out[0], $v) !== false) {
 							$b = $v;
@@ -118,7 +118,7 @@ class serverweb extends lxdb
 				$out = null;
 				exec("cat /etc/httpd/conf.d/~lxcenter.conf | grep -i ^'keepalive on'", $out);
 
-				if (count($out) > 0) {
+				if (lx_count($out) > 0) {
 					$s = 'on';
 				} else {
 					$s = 'off';

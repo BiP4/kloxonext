@@ -519,7 +519,7 @@ function createSslStream()
 //	stream_set_timeout($sockr, 30000000);
 	stream_context_set_option($sockr, 'ssl', 'allow_self_signed', true);
 //	stream_context_set_option($sock, 'ssl', 'cafile', "/etc/httpd/conf/ssl.crt/server.crt");
-	stream_context_set_option($sockr, 'ssl', 'local_cert', "$sgbl->__path_program_root/file/ssl/default.pem");
+	stream_context_set_option($sockr, 'ssl', 'local_cert', "$sgbl->__path_program_root/etc/ssl-default/default.pem");
 
 	if (!$sockr) {
 		die("Could not bind Remote address\n");
@@ -851,7 +851,7 @@ function do_local_action($rmt)
 			// workaround for the following php bug:
 			//   http://bugs.php.net/bug.php?id=47948
 			//   http://bugs.php.net/bug.php?id=51329
-			if (is_array($rmt->func) && count($rmt->func) > 0) {
+			if (is_array($rmt->func) && lx_count($rmt->func) > 0) {
 				$class = $rmt->func[0];
 				class_exists($class);
 			}

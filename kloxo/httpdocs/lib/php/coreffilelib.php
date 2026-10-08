@@ -31,13 +31,13 @@ class coreFfile
 		$__realparts = array();
 		$__parts = explode("/", $__path);
 		
-		for ($i = 0; $i < count($__parts); $i++) {
+		for ($i = 0; $i < lx_count($__parts); $i++) {
 			if (strlen($__parts[$i]) === 0 || $__parts[$i] === ".") {
 				continue;
 			}
 			
 			if ($__parts[$i] === "..") {
-				if (count($__realparts) > 0) {
+				if (lx_count($__realparts) > 0) {
 					array_pop($__realparts);
 				}
 			} else {

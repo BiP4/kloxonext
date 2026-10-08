@@ -13,7 +13,7 @@
 
 	$file = "/opt/configs/bind/conf/defaults/named.acl.conf";
 
-	if (array_keys($ips)) {
+	if (!empty($ips)) {
 		$i = implode(";\n    ", $ips);
 
 		$text = "acl allow-transfer {\n    localhost;\n    {$i};\n};\n\n";

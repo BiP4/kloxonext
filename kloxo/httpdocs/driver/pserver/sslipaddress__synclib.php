@@ -30,7 +30,7 @@ class sslipaddress__sync extends lxDriverClass
 			lfile_put_contents("{$path}/{$name}.ca", $contentsca);
 		} else {
 			$contentspem = "{$contentskey}\n{$contentscer}";
-			lxfile_cp("../file/ssl/default.ca", "{$path}/{$name}.ca");
+			lxfile_cp("../etc/ssl-default/default.ca", "{$path}/{$name}.ca");
 		}
 
 		lfile_put_contents("{$path}/{$name}.pem", $contentspem);

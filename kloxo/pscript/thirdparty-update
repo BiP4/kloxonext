@@ -207,7 +207,7 @@ update_roundcube() {
 	[ -z "${cur}" ] && [ -f "${target}/program/include/iniset.php" ] && \
 		cur="$(sed -n "s/.*define('RCMAIL_VERSION', '\([^']*\)').*/\1/p" "${target}/program/include/iniset.php")"
 
-	info="$(github_latest roundcube/roundcubemail '^roundcubemail-.*-complete\\.tar\\.gz$')" || { log "- Roundcube: cannot query GitHub" ; return 1 ; }
+	info="$(github_latest roundcube/roundcubemail '^roundcubemail-.*-complete\.tar\.gz$')" || { log "- Roundcube: cannot query GitHub" ; return 1 ; }
 	read -r latest url sum <<< "${info}"
 	latest="${latest#v}"
 
@@ -256,7 +256,7 @@ update_snappymail() {
 
 	cur="$(state_get snappymail)"
 
-	info="$(github_latest the-djmaze/snappymail '^snappymail-[0-9.]+\\.tar\\.gz$')" || { log "- SnappyMail: cannot query GitHub" ; return 1 ; }
+	info="$(github_latest the-djmaze/snappymail '^snappymail-[0-9.]+\.tar\.gz$')" || { log "- SnappyMail: cannot query GitHub" ; return 1 ; }
 	read -r latest url sum <<< "${info}"
 	latest="${latest#v}"
 
@@ -267,7 +267,14 @@ update_snappymail() {
 	newer "${latest}" "${cur}" || return 0
 
 	fetch "${url}" "${TMP}/sm.tar.gz" || { log "  ! download failed" ; return 1 ; }
-	verify_sha256 "${TMP}/sm.tar.gz" "${sum}" || { log "  ! checksum mismatch" ; return 1 ; }
+
+	if [ -n "${sum}" ] ; then
+		verify_sha256 "${TMP}/sm.tar.gz" "${sum}" || { log "  ! checksum mismatch" ; return 1 ; }
+	else
+		# SnappyMail publishes GPG signatures only; rely on the HTTPS GitHub release
+		log "  ~ no SHA-256 published by upstream, trusting the HTTPS GitHub release"
+		tar -tzf "${TMP}/sm.tar.gz" >/dev/null 2>&1 || { log "  ! corrupt archive" ; return 1 ; }
+	fi
 
 	mkdir -p "${TMP}/snappymail"
 	tar -xzf "${TMP}/sm.tar.gz" -C "${TMP}/snappymail"

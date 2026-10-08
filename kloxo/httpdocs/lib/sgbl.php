@@ -97,7 +97,7 @@ class Sgbl
 
 		// MR -- don't use isRpmInstalled for identified!!!
 	//	exec("rpm -qa qmail-toaster", $out);
-	//	$this->__path_mail_root = (count($out) > 0) ? "/home/vpopmail" : "/home/lxadmin/mail";
+	//	$this->__path_mail_root = (lx_count($out) > 0) ? "/home/vpopmail" : "/home/lxadmin/mail";
 		$this->__path_mail_root = "/home/vpopmail";
 		// MR -- still using old kloxo mail path
 		$this->__path_mail_data = "/home/lxadmin/mail";

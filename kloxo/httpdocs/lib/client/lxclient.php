@@ -520,7 +520,7 @@ abstract class Lxclient extends Lxdb
 		$sql = new Sqlite($this->__masterserver, 'ticket');
 		$res = $sql->getRowsWhere("sent_to = '{$this->getClName()}' AND unread_flag = 'on'");
 		
-		return count($res);
+		return lx_count($res);
 	}
 
 	function checkMessageUnread()
@@ -528,7 +528,7 @@ abstract class Lxclient extends Lxdb
 		$sql = new Sqlite($this->__masterserver, 'smessage');
 		$res = $sql->getRowsWhere("text_sent_to_cmlist LIKE '%,{$this->getClName()},%' AND text_readby_cmlist NOT LIKE '%,{$this->getClName()},%'");
 
-		return count($res);
+		return lx_count($res);
 	}
 
 	function updateSwitchHelp($param)

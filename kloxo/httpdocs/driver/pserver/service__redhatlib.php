@@ -91,14 +91,14 @@ class Service__Redhat extends lxDriverClass
 		if ($servicetype[0] === 'systemd') {
 			exec("systemctl list-unit-files --type=service|grep ^'{$service}'|grep 'enabled'", $systemd);
 
-			if (count($systemd) > 0) {
+			if (lx_count($systemd) > 0) {
 				return true;
 			}
 		}
 
 		exec("chkconfig --list 2>/dev/null|grep ^'{$service}'|grep ':on'", $sysv);
 
-		if (count($sysv) > 0) {
+		if (lx_count($sysv) > 0) {
 			return true;
 		}
 
@@ -143,7 +143,7 @@ class Service__Redhat extends lxDriverClass
 				exec("pgrep ^{$__l['servicename']}", $out);
 
 			//	if ($ret) {
-				if (count($out) > 0) {
+				if (lx_count($out) > 0) {
 					$__l['state'] = 'on';
 				} else {
 					$__l['state'] = 'off';

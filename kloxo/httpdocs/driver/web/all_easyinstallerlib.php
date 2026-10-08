@@ -173,7 +173,7 @@ class all_easyinstaller extends Lxclass
 		$string = null;
 		$count = 0;
 		$numapp = 0;
-		$total = count($list);
+		$total = lx_count($list);
 
 		foreach($list as $l) {
 			$small = strtolower($l);

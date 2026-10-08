@@ -1598,7 +1598,7 @@ class HtmlLib
 
 		$ret = $this->create_action_block($class, $alist);
 
-		$retcount = count($ret);
+		$retcount = lx_count($ret);
 
 		//	$col = $login->getSkinColor();
 		$col = 'ddd';
@@ -3479,7 +3479,7 @@ class HtmlLib
 		$url = "display.php?" . $url;
 		$this->get_post_from_get($url, $path, $post);
 
-		$k = count($p);
+		$k = lx_count($p);
 
 		if (isset($post['goback'])) {
 			for ($i = 0; $i < $post['goback']; $i++) {
@@ -4130,7 +4130,7 @@ class HtmlLib
 		$filter = $this->frm_filter;
 
 		if (!$filter && !$this->frm_searchstring) {
-			return count($obj_list);
+			return lx_count($obj_list);
 		}
 
 		foreach ($obj_list as $o) {
@@ -4474,7 +4474,7 @@ class HtmlLib
 
 		$skindir = $login->getSkinDir();
 
-		$nlcount = count($name_list) + 1;
+		$nlcount = lx_count($name_list) + 1;
 		$imgheadleft = $skindir . "/images/top_lt.gif";
 		$imgheadleft = $skindir . "/images/top_lt.gif";
 		$imgheadleft2 = $skindir . "/images/top_lt.gif";
@@ -5463,6 +5463,12 @@ class HtmlLib
 
 	function print_css_source($csource)
 	{
+		// KloxoNext - cache busting (the panel serves static files with a 7 day expiry)
+		$real = getcwd() . '/' . ltrim($csource, '/');
+
+		if (strpos($csource, '?') === false && file_exists($real)) {
+			$csource .= '?v=' . filemtime($real);
+		}
 ?>
 		<link href="<?= $csource ?>" rel="stylesheet" type="text/css">
 <?php
@@ -6042,7 +6048,7 @@ class HtmlLib
 			$filteropacitystring = "style='background:black;color:#999;FILTER:progid;-moz-opacity:0.5'";
 		}
 
-		$num = count($cgi_o_o) - 1;
+		$num = lx_count($cgi_o_o) - 1;
 
 		while ($num >= 0) {
 			$class = $cgi_o_o[$num]['class'];
@@ -6183,11 +6189,11 @@ class HtmlLib
 
 		if (isset($post['frm_o_o']) && $post['frm_o_o']) {
 			$p = $post['frm_o_o'];
-			$suclass = $p[count($p) - 1]['class'];
+			$suclass = $p[lx_count($p) - 1]['class'];
 
 			$p = $post['frm_o_o'];
 
-			for ($i = count($p) - 1; $i >= 0; $i--) {
+			for ($i = lx_count($p) - 1; $i >= 0; $i--) {
 				if (isset($p[$i]['nname'])) {
 					$nname = exec_class_method($suclass, 'getClassId', $p[$i]['nname']);
 
@@ -6343,7 +6349,7 @@ class HtmlLib
 				$desc = get_classvar_description($suclass);
 
 				if (csa($desc[0], "N")) {
-					$count = count($post['frm_o_o']) - 1;
+					$count = lx_count($post['frm_o_o']) - 1;
 					$var .= "_nn_" . fix_nname_to_be_variable($post['frm_o_o'][$count]['nname']);
 				}
 
@@ -6359,7 +6365,7 @@ class HtmlLib
 			$desc = get_classvar_description($suclass);
 
 			if (csa($desc[0], "N")) {
-				$count = count($post['frm_o_o']) - 1;
+				$count = lx_count($post['frm_o_o']) - 1;
 			}
 
 			return array("", '', $descr, 'desc' => $descr, 'help' => $help);
@@ -6623,7 +6629,7 @@ class HtmlLib
 			'#f1c40f', '#e67e22', '#e74c3c', '#95a5a6',
 			'#f39c12', '#d35400', '#c0392b', '#bdc3c7', '#7f8c8d');
 
-		$i = count($c) - 1;
+		$i = lx_count($c) - 1;
 		$r = rand(0, $i);
 		$b = $c[$r];
 
@@ -7493,7 +7499,7 @@ class HtmlLib
 		}
 
 
-		$total = count($full);
+		$total = lx_count($full);
 
 		$count = 0;
 
@@ -9014,12 +9020,12 @@ function uploadAbort(e) { // upload abort
 		if ($level != -1) {
 			if ($childobjectflag) {
 				$url = $this->getFullUrl("a=show&o=$class", $cgi_o_o);
-				$num = count($cgi_o_o);
+				$num = lx_count($cgi_o_o);
 				$cgi_o_o[$num]['class'] = $class;
 			} else {
 				$urlname = $object->nname;
 				$url = $this->getFullUrl("a=show&l[class]=$class&l[nname]=$urlname", $cgi_o_o);
-				$num = count($cgi_o_o);
+				$num = lx_count($cgi_o_o);
 				$cgi_o_o[$num]['class'] = $class;
 				$cgi_o_o[$num]['nname'] = $object->nname;
 			}
@@ -9172,7 +9178,7 @@ function uploadAbort(e) { // upload abort
 
 			if (isset($sgbl->__var_main_resource) && $sgbl->__var_main_resource) {
 				$cl = $object->getList($name);
-				$count = count($cl);
+				$count = lx_count($cl);
 
 				$halfflag = false;
 			} else {

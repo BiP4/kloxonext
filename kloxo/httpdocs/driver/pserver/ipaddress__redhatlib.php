@@ -37,7 +37,7 @@ class Ipaddress__Redhat extends LxDriverclass
 		$networkaddress = implode(".", $converted);
 		$dev = explode("-", $this->main->devname);
 
-		if (count($dev) >= 2) {
+		if (lx_count($dev) >= 2) {
 			$actualname = implode(":", $dev);
 		} else {
 			$actualname = $this->main->devname;
@@ -125,7 +125,7 @@ class Ipaddress__Redhat extends LxDriverclass
 		$this->checkForEthBase();
 		$dev = explode("-", $this->main->devname);
 
-		if (count($dev) >= 2) {
+		if (lx_count($dev) >= 2) {
 			$actualname = implode(":", $dev);
 		} else {
 			$actualname = $this->main->devname;
@@ -169,7 +169,7 @@ class Ipaddress__Redhat extends LxDriverclass
 		foreach ($result1 as $res) {
 			$temp = explode(":", $res['devname']);
 
-			if (count($temp) === 2) {
+			if (lx_count($temp) === 2) {
 				$res['devname'] = implode("-", $temp);
 			}
 

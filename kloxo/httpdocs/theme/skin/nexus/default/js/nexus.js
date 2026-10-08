@@ -92,9 +92,13 @@
 	/* ---- page title: last breadcrumb entry -------------------------------- */
 
 	var title = document.getElementById('kn-page-title');
-	var crumbs = document.querySelectorAll('.kn-main .verb4 a, .kn-main .verb4 span, .kn-main .verb4 b');
-	if (title && crumbs.length) {
-		var last = crumbs[crumbs.length - 1].textContent.replace(/\s+/g, ' ').trim();
+	// first cell of the navigation bar holds the path; the second one "Login as ..."
+	var nav = document.querySelector('.kn-main .verb4 .tbl_navigation td') || document.querySelector('.kn-main .verb4');
+	if (title && nav) {
+		// "admin — {All Clients}" -> "All Clients"
+		var parts = nav.textContent.replace(/\s+/g, ' ').split(/[—»›]/);
+		// drop braces and icon-font glyphs (private use area)
+		var last = parts[parts.length - 1].replace(/[{}-☐]/g, '').trim();
 		title.textContent = last;
 		if (last) { document.title = last + ' · KloxoNext'; }
 	}

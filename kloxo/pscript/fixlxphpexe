@@ -75,3 +75,14 @@ cp -f "${INIT_DIR}/kloxo-apps.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now kloxo-thirdparty-update.timer >/dev/null 2>&1
 systemctl enable kloxo-apps >/dev/null 2>&1
+
+# binaries used by the panel units
+ln -sfn "/opt/${base_name}/custom/php-fpm.sh" "${INIT_DIR}/kloxo-phpcgi"
+mkdir -p "${KLOXO_PATH}/log" "${KLOXO_PATH}/session" "${INIT_DIR}/tmp"
+
+# the panel nginx needs a certificate before the first cleanup runs
+sh /script/ssl-default-generate
+for e in key crt ca pem ; do
+	[ -s "${KLOXO_PATH}/etc/program.${e}" ] || cp -f "${KLOXO_PATH}/etc/ssl-default/default.${e}" "${KLOXO_PATH}/etc/program.${e}"
+done
+chmod 600 "${KLOXO_PATH}/etc/program.key" "${KLOXO_PATH}/etc/program.pem"

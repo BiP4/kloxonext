@@ -142,11 +142,11 @@ function file_put_between_comments($username, $stlist, $endlist, $startstring, $
 		}
 	}
 
-	if (count($outlist) > 0) {
+	if (lx_count($outlist) > 0) {
 		$outstring = implode("\n", $outlist);
 	}
 
-	if (count($afterlist) > 0) {
+	if (lx_count($afterlist) > 0) {
 		$afterstring = implode("\n", $afterlist);
 	}
 
@@ -303,7 +303,7 @@ function get_com_ob($obj)
 
 function make_hidden_if_one($dlist)
 {
-	if (count($dlist) === 1) {
+	if (lx_count($dlist) === 1) {
 		return array('h', getFirstFromList($dlist));
 	}
 
@@ -391,7 +391,7 @@ function get_total_files_in_directory($dir)
 	$dir = expand_real_root($dir);
 	$list = lscandir_without_dot($dir);
 
-	return count($list);
+	return lx_count($list);
 }
 
 function convert_favorite()
@@ -685,13 +685,13 @@ function check_if_port_on($port)
 
 		//	if (strpos($out[0], '(pid ') !== false) {
 		//	if (strpos($out[0], 'running') !== false) {
-			if (count($out) > 0) {
+			if (lx_count($out) > 0) {
 				$ret = true;
 			}
 		} elseif (strpos($v, 'pgrep') !== false) {
 			exec($v, $out, $ret);
 
-			if (count($out) > 0) {
+			if (lx_count($out) > 0) {
 				return true;
 			}
 		} else {
@@ -1120,7 +1120,7 @@ function check_if_many_server()
 	$res = $sql->getTable(array('nname'));
 	$rs = get_namelist_from_arraylist($res);
 
-	if (count($rs) > 1) {
+	if (lx_count($rs) > 1) {
 		return true;
 	}
 
@@ -1369,7 +1369,7 @@ function convertCOMarray($array)
 
 function mycount($olist)
 {
-	return count($olist);
+	return lx_count($olist);
 }
 
 function do_actionlog($login, $object, $action, $subaction)
@@ -2873,7 +2873,7 @@ function getVersionList($till = null)
 	$list = getFullVersionList($till);
 
 	foreach ($list as $k => $l) {
-		if (preg_match("/2$/", $l) && ($k !== count($list) - 1)) {
+		if (preg_match("/2$/", $l) && ($k !== lx_count($list) - 1)) {
 			continue;
 		}
 
@@ -4783,13 +4783,13 @@ function lxguard_main($clearflag = false, $since = false)
 		}
 	}
 
-	$rmt =  array_map('trim', lfile_get_unserialize("{$lxgpath}/hitlist.info"));
+	$rmt =  lx_array_map_safe('trim', lfile_get_unserialize("{$lxgpath}/hitlist.info"));
 
 	if ($rmt) {
 		$oldtime = max((int)$oldtime, (int)$rmt->ddate);
 	}
 
-	$list = array_map('trim', lfile_get_unserialize("{$lxgpath}/access.info"));
+	$list = lx_array_map_safe('trim', lfile_get_unserialize("{$lxgpath}/access.info"));
 
 	$type = array('sshd' => '/var/log/secure', 'pure-ftpd' => '/var/log/messages', 'vpopmail' => '/var/log/maillog');
 
@@ -4818,10 +4818,10 @@ function lxguard_main($clearflag = false, $since = false)
 
 //	dprintr($list['192.168.1.11']);
 
-	dprint_r("Debug: Total: " . count($total) . "\n");
+	dprint_r("Debug: Total: " . lx_count($total) . "\n");
 
 	$deny = get_deny_list($total);
-	$hdn = array_map('trim', lfile_get_unserialize("{$lxgpath}/hostdeny.info"));
+	$hdn = lx_array_map_safe('trim', lfile_get_unserialize("{$lxgpath}/hostdeny.info"));
 	$deny = lx_array_merge(array($deny, $hdn));
 
 	$str_host = null;
@@ -5862,7 +5862,7 @@ function getInitialPhpFpmConfig($nolog = null)
 
 	$a = glob("../etc/flag/use_php*.flg");
 
-	if (count($a) > 0) {
+	if (lx_count($a) > 0) {
 		$b1 = basename($a[0]);
 		$b2 = str_replace('.flg', '', $b1);
 		$b3 = str_replace('use_', '', $b2);
@@ -6311,7 +6311,7 @@ function setInitialPureftpConfig($nolog = null)
 	if (!lxfile_real("/etc/pki/pure-ftpd/pure-ftpd.pem")) {
 		log_cleanup("- Install pure-ftpd ssl/tls key", $nolog);
 		lxfile_mkdir("/etc/pki/pure-ftpd/");
-		lxfile_cp("../file/ssl/program.pem", "/etc/pki/pure-ftpd/pure-ftpd.pem");
+		lxfile_cp("../etc/program.pem", "/etc/pki/pure-ftpd/pure-ftpd.pem");
 	}
 
 	if (!lxfile_exists("/etc/pure-ftpd/pureftpd.pdb")) {
@@ -7358,11 +7358,11 @@ function getParseInlinePhp($template, $input)
 
 	// MR -- important because process on panel include html code!
 	$splitter = explode('### begin', $ret);
-	$ret = (count($splitter) === 2) ? '### begin' . $splitter[1] : $ret;
+	$ret = (lx_count($splitter) === 2) ? '### begin' . $splitter[1] : $ret;
 	$splitter = explode(';;; begin', $ret);
-	$ret = (count($splitter) === 2) ? ';;; begin' . $splitter[1] : $ret;
+	$ret = (lx_count($splitter) === 2) ? ';;; begin' . $splitter[1] : $ret;
 	$splitter = explode('/// begin', $ret);
-	$ret = (count($splitter) === 2) ? '/// begin' . $splitter[1] : $ret;
+	$ret = (lx_count($splitter) === 2) ? '/// begin' . $splitter[1] : $ret;
 
 	return $ret;
 }
@@ -8001,7 +8001,7 @@ function is_cli()
 		return true;
 	}
 
-	if (empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and count($_SERVER['argv']) > 0) {
+	if (empty($_SERVER['REMOTE_ADDR']) and !isset($_SERVER['HTTP_USER_AGENT']) and lx_count($_SERVER['argv']) > 0) {
 		return true;
 	}
 
@@ -8012,7 +8012,7 @@ function is_cli()
 function isRemotePost()
 {
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-		// or possibly, count($_POST) > 0
+		// or possibly, lx_count($_POST) > 0
 		$host = preg_replace('#^www\.#', '', $_SERVER['HTTP_HOST']);
 
 		if ($host AND $_SERVER['HTTP_REFERER']) {
@@ -8052,7 +8052,7 @@ function isCSRFTokenMatch()
 	$ret = true;
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-		// or possibly, count($_POST) > 0
+		// or possibly, lx_count($_POST) > 0
 
 		$token_post = $_POST['frm_token'];
 		$token_session = $gbl->c_session->ssession_vars['__tmp_csrf_token'];
@@ -8686,17 +8686,17 @@ function isServiceEnabled($target)
 
 	exec("command -v systemctl", $test);
 
-	if (count($test) > 0) {
+	if (lx_count($test) > 0) {
 		exec("systemctl list-unit-files --type=service|grep ^{$target}|grep 'enabled'", $val2);
 
-		if (count($val2) > 0) {
+		if (lx_count($val2) > 0) {
 			$ret = true;
 		}
 	}
 
 	exec("chkconfig --list 2>/dev/null|grep ^{$target}|grep ':on'", $val1);
 
-	if (count($val1) > 0) {
+	if (lx_count($val1) > 0) {
 		$ret = true;
 	}
 	
@@ -8710,17 +8710,17 @@ function getServiceType($target = null)
 	if ($target) {
 		exec("command -v systemctl", $test);
 
-		if (count($test) > 0) {
+		if (lx_count($test) > 0) {
 			exec("systemctl list-unit-files --type=service|grep ^{$target}", $val2);
 
-			if (count($val2) > 0) {
+			if (lx_count($val2) > 0) {
 				$ret = 'systemd';
 			}
 		}
 
 		exec("chkconfig --list 2>/dev/null|grep ^{$target}", $val1);
 
-		if (count($val1) > 0) {
+		if (lx_count($val1) > 0) {
 			$ret = 'init';
 		}
 	} else {

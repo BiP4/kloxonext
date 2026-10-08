@@ -233,7 +233,7 @@ class ippool extends Lxdb
 			}
 		}
 		
-		$tot = count($list);
+		$tot = lx_count($list);
 		
 		return "$assigned/$tot";
 	}
@@ -308,7 +308,7 @@ class ippool extends Lxdb
 
 			$res[] = $l;
 			
-			if (count($res) >= $num) {
+			if (lx_count($res) >= $num) {
 				return $res;
 			}
 		}

@@ -4,7 +4,9 @@ include_once "lib/html/include.php";
 
 initProgram('admin');
 
-$kloxo_file_path = "{$sgbl->__path_program_root}/file/ssl";
+// KloxoNext - unique per-server certificate (see /script/ssl-default-generate)
+exec("sh /script/ssl-default-generate");
+$kloxo_file_path = "{$sgbl->__path_program_root}/etc/ssl-default";
 $kloxo_ssl_path = "/home/kloxo/ssl";
 $kloxo_etc_path = "{$sgbl->__path_program_root}/etc";
 

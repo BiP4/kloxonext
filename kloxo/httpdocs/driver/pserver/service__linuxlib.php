@@ -20,7 +20,7 @@ class Service__Linux extends Lxlclass
 
 	//	exec("command -v systemctl", $test);
 
-	//	if (count($test) > 0) {
+	//	if (lx_count($test) > 0) {
 		if (getServiceType() === 'systemd') {
 			exec("systemctl list-unit-files --type=service|awk '{print $1}'|sed 's/\.service//g'", $val2);
 		}
@@ -85,7 +85,7 @@ class Service__Linux extends Lxlclass
 		exec("pgrep ^{$name}", $out);
 
 	//	$state = ($ret) ? "off" : "on";
-		$state = (count($out) > 0) ? "off" : "on";
+		$state = (lx_count($out) > 0) ? "off" : "on";
 
 		return $state;
 	}

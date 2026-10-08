@@ -1,5 +1,5 @@
 <?php
-	if (array_keys($ips)) {
+	if (!empty($ips)) {
 		$i = implode(",", $ips);
 		$str = "zone_transfer_acl = \"{$i}\"\n";
 	}

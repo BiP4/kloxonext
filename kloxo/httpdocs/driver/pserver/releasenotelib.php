@@ -74,7 +74,7 @@ class ReleaseNote extends Lxlclass
 
 			$c++;
 
-			$e = abs($c - count($y));
+			$e = abs($c - lx_count($y));
 			$b = strlen($e);
 			$d = substr_replace($m, $e, -$b);
 

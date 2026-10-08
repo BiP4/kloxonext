@@ -266,7 +266,7 @@ class ApacheLogRegex
 
 		$this->_parse_format();
 
-		$this->_num_fields = count($this->_regex_fields);
+		$this->_num_fields = lx_count($this->_regex_fields);
 
 		if ($this->_num_fields == 0) {
 			trigger_error(__CLASS__ . '::' . __FUNCTION__ . '(): ' . 
@@ -419,7 +419,7 @@ class ApacheLogRegex
 
 		$m = array(); //matches
 
-		if (!preg_match($time_format, $time, $m) || count($m) != 10) {
+		if (!preg_match($time_format, $time, $m) || lx_count($m) != 10) {
 			return null;
 		}
 

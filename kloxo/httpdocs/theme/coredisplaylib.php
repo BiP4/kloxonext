@@ -591,7 +591,7 @@ function do_select_list($object, $sclist)
 
 	foreach ($sclist as $k => $s) {
 		$cg = $ghtml->frm_o_o;
-		$n = count($cg);
+		$n = lx_count($cg);
 		$cg[$n]['frm_o_o']['class'] = $k;
 		$string[] = $ghtml->object_variable_startblock($object, $class, "{$desc[2]}");
 		$string[] = $ghtml->object_inherit_classpath();
@@ -989,7 +989,7 @@ function __ac_desc_UpdateForm($object)
 /*
 	$object->createShowPropertyList($alist);
 
-	if (isset($alist['property']) && count($alist['property']) > 1) {
+	if (isset($alist['property']) && lx_count($alist['property']) > 1) {
 		$nalist = null;
 		$nalist = lx_merge_good($nalist, $alist['property']);
 	} elseif ($object->getParentO()) {
@@ -1398,7 +1398,7 @@ function create_xml($object, $stuff, $ret)
 			} else {
 				$descr = $ghtml->get_classvar_description_after_overload($class, $k);
 
-				if (count($descr) < 3) {
+				if (lx_count($descr) < 3) {
 					dprint("Variable $k in $class Not Defined... <br/> \n");
 					$descr = array($class, $k, "Not Defined");
 				}
@@ -1996,7 +1996,7 @@ function print_warning()
 
 	$sesss = $login->getList('ssession');
 
-	if (count($sesss) > 1) {
+	if (lx_count($sesss) > 1) {
 		$ghtml->__http_vars['frm_emessage'] = "more_than_one_user";
 	}
 
@@ -2445,7 +2445,7 @@ function lx_frm_inc()
 		//   http://bugs.php.net/bug.php?id=47948
 		//   http://bugs.php.net/bug.php?id=51329
 
-		if (is_array($gbl->__this_function) && count($gbl->__this_function) > 0) {
+		if (is_array($gbl->__this_function) && lx_count($gbl->__this_function) > 0) {
 			$class = $gbl->__this_function[0];
 			class_exists($class);
 		}

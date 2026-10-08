@@ -387,7 +387,7 @@ function createPrincipleObject()
 
 			if (!$sing && ($object->createShowAlist($alist) || $object->createShowPropertyList($alist) || $object->createShowClist("") || $object->createShowSclist())) {
 				// Skip the last one, but only if it is a 'show'. If 'show', the last object is the object that is being displayed, and shouldn't appear in history.
-				if (($k === count($p) - 1) && ($ghtml->frm_action === 'show')) {
+				if (($k === lx_count($p) - 1) && ($ghtml->frm_action === 'show')) {
 					break;
 				}
 

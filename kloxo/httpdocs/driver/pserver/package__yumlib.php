@@ -48,7 +48,7 @@ static function getPackages($nocache = false)
 			// name.arch version repo
 			$v = explode(" ", $l);
 
-			if (count($v) < 3 || strpos($v[0], '.') === false) {
+			if (lx_count($v) < 3 || strpos($v[0], '.') === false) {
 				continue;
 			}
 

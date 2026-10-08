@@ -36,7 +36,7 @@ function sudo_action_main()
 		// workaround for the following php bug:
 		//   http://bugs.php.net/bug.php?id=47948
 		//   http://bugs.php.net/bug.php?id=51329
-		if (is_array($rmt->func) && count($rmt->func) > 0) {
+		if (is_array($rmt->func) && lx_count($rmt->func) > 0) {
 			$class = $rmt->func[0];
 			class_exists($class);
 		}

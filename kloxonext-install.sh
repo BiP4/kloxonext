@@ -85,6 +85,8 @@ fi
 echo "- Installing KloxoNext files to ${KPATH}"
 mkdir -p "${KPATH}"
 cp -a "${SRC}/kloxo/." "${KPATH}/"
+# sources copied from a non-POSIX filesystem may be world-writable
+chmod -R go-w "${KPATH}"
 
 rm -rf /script
 ln -sf "${KPATH}/pscript" /script

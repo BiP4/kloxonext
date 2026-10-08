@@ -311,7 +311,7 @@ final class OsPlatform
 
 		self::run('rpm -qa ' . escapeshellarg($name), $out);
 
-		return count(array_filter($out)) > 0;
+		return lx_count(array_filter($out)) > 0;
 	}
 
 	/** Installed version, '0.0.0' when absent (same contract as getRpmVersion()). */
@@ -338,7 +338,7 @@ final class OsPlatform
 		self::run("rpm -qa --qf '%{VERSION}\\n' " . escapeshellarg($name), $out);
 		$out = array_values(array_filter($out));
 
-		return (count($out) > 0) ? $out[0] : '0.0.0';
+		return (lx_count($out) > 0) ? $out[0] : '0.0.0';
 	}
 
 	/** Candidate version from the repositories ('' when not available). */
@@ -365,7 +365,7 @@ final class OsPlatform
 		$ret = self::run("dnf -q repoquery --latest-limit 1 --qf '{$qf}\\n' " . escapeshellarg($name), $out);
 		$out = array_values(array_filter($out));
 
-		return (($ret === 0) && count($out) > 0) ? $out[0] : '';
+		return (($ret === 0) && lx_count($out) > 0) ? $out[0] : '';
 	}
 
 	public static function serviceExists($name)

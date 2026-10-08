@@ -201,13 +201,13 @@ class lxguardhitdisplay extends lxclass
 	static function createHitList($server)
 	{
 		$sq = new Sqlite(null, "lxguardhit");
-		$res = $sq->rawQuery("SELECT ipaddress, access, count(*) FROM lxguardhit ".
+		$res = $sq->rawQuery("SELECT ipaddress, access, lx_count(*) FROM lxguardhit ".
 			"WHERE syncserver = '$server' GROUP BY ipaddress, access");
 
 		if (!$res) { return; }
 
 		foreach($res as $r) {
-			$total[$r['ipaddress']][$r['access']] = $r['count(*)'];
+			$total[$r['ipaddress']][$r['access']] = $r['lx_count(*)'];
 		}
 
 		foreach($total as $k => $t) {

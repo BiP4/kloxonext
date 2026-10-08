@@ -229,7 +229,7 @@ if (getServiceType('php-fpm') === 'systemd') {
 	$seddata = 's:^prog=\"\(.*\)\":\1:';
 	exec("cat /etc/rc.d/init.d/php-fpm|grep 'prog='|sed -e '" . $seddata . "'", $out);
 }
-if (count($out) > 0) {
+if (lx_count($out) > 0) {
 	$phpused = $out[0];
 
 	if ($phpused === "php-fpm") {
@@ -247,7 +247,7 @@ if ($pop3app === 'courier') { $pop3app = 'courier-imap'; }
 
 exec("rpm -qa {$pop3app}-toaster", $out);
 
-if (count($out) > 0) {
+if (lx_count($out) > 0) {
 	$pop3app = $out[0];
 } else {
 	$pop3app = 'none';
@@ -259,7 +259,7 @@ $smtpapp = slave_get_driver('smtp');
 
 exec("rpm -qa {$smtpapp}-toaster", $out);
 
-if (count($out) > 0) {
+if (lx_count($out) > 0) {
 	$smtpapp = $out[0];
 } else {
 	$smtpapp = 'none';
@@ -273,7 +273,7 @@ if ($spamapp === 'spamassassin') { $spamapp === 'spamassassin-toaster'; }
 
 exec("rpm -qa {$spamapp}", $out);
 
-if (count($out) > 0) {
+if (lx_count($out) > 0) {
 	$spamapp = $out[0];
 } else {
 	$spamapp = '--uninstalled--';
@@ -309,7 +309,7 @@ $out = null;
 // MR -- use grep because possible as kloxo-stats-<statsprog> or just <statsprog>
 exec("rpm -qa|grep {$webstatsprog}", $out);
 
-if (count($out) > 0) {
+if (lx_count($out) > 0) {
 	$appstats = $out[0];
 } else {
 	$appstats = '--uninstalled--';

@@ -7,6 +7,6 @@ $kn_js = rtrim($login->getSkinDir(), '/') . "/js/nexus.js";
 		</main>
 	</div>
 </div>
-<script src="<?= htmlspecialchars($kn_js, ENT_QUOTES, 'UTF-8') ?>?v=<?= rawurlencode($GLOBALS['sgbl']->__ver_full) ?>"></script>
+<script src="<?= htmlspecialchars($kn_js, ENT_QUOTES, 'UTF-8') ?>?v=<?= @filemtime(getcwd() . $kn_js) ?>"></script>
 </body>
 </html>

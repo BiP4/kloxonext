@@ -318,10 +318,10 @@ class pservercore extends Lxclient
 			$iplist = $l->getFreeIp($newnum);
 			$totallist = lx_array_merge(array($iplist, $totallist));
 
-			if (count($totallist) >= $totalneeded) {
+			if (lx_count($totallist) >= $totalneeded) {
 				break;
 			} else {
-				$newnum = $totalneeded - count($totallist);
+				$newnum = $totalneeded - lx_count($totallist);
 			}
 		}
 
@@ -1300,7 +1300,7 @@ STRIN;
 				// MR -- get httpd24u info
 				exec("cat ../etc/list/httpd.lst|grep httpd24", $out);
 
-				if (count($out) > 0) {
+				if (lx_count($out) > 0) {
 					if (version_compare(getRpmVersionFromYum('httpd'), '2.4.0', '>')) {
 						exec("echo '' > ../etc/flag/use_apache24.flg");
 						$this->use_apache24 = 'on';

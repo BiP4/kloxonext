@@ -1,0 +1,37 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - per-server default TLS certificate.
+#
+#    Older Kloxo releases shipped file/ssl/default.key (the same private key
+#    on every server, published in the repository). KloxoNext generates a
+#    unique self-signed certificate per server instead; it is used by the
+#    panel, Pure-FTPd and as fallback for the IP-based vhosts until a real
+#    (Let's Encrypt) certificate is issued.
+#
+#      sh /script/ssl-default-generate [--force]
+
+dst="/usr/local/lxlabs/kloxo/etc/ssl-default"
+
+if [ -s "${dst}/default.pem" ] && [ "${1}" != "--force" ] ; then
+	exit 0
+fi
+
+mkdir -p "${dst}"
+chmod 700 "${dst}"
+
+cn="$(hostname -f 2>/dev/null || hostname)"
+ip="$(ip route get 1 2>/dev/null | sed -n 's/^.*src \([0-9.]*\) .*$/\1/p')"
+san="DNS:${cn},DNS:localhost,IP:127.0.0.1"
+[ -n "${ip}" ] && san="${san},IP:${ip}"
+
+openssl req -x509 -nodes -newkey rsa:3072 -sha256 -days 3650 \
+	-subj "/CN=${cn}/O=KloxoNext" \
+	-addext "subjectAltName=${san}" \
+	-keyout "${dst}/default.key" -out "${dst}/default.crt" >/dev/null 2>&1 || exit 1
+
+cp -f "${dst}/default.crt" "${dst}/default.ca"
+cat "${dst}/default.key" "${dst}/default.crt" > "${dst}/default.pem"
+chmod 600 "${dst}"/default.key "${dst}"/default.pem
+
+echo "- Generated unique default certificate for ${cn}"

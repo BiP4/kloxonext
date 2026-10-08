@@ -16,7 +16,7 @@ function security_blanket_main()
 	// workaround for the following php bug:
 	//   http://bugs.php.net/bug.php?id=47948
 	//   http://bugs.php.net/bug.php?id=51329
-	if (is_array($rem->func) && count($rem->func) > 0) {
+	if (is_array($rem->func) && lx_count($rem->func) > 0) {
 		$class = $rem->func[0];
 		class_exists($class);
 	}

@@ -1378,7 +1378,7 @@ function get_composite($class)
 
 	$list = explode("__", $class);
 
-	if (count($list) === 2) {
+	if (lx_count($list) === 2) {
 		return array($list[0], null, $list[1]);
 	}
 
@@ -1836,7 +1836,7 @@ function randomString($length)
 		'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z');
 
 	for ($rand = 0; $rand <= $length; $rand++) {
-		$random = rand(0, count($chars) - 1);
+		$random = rand(0, lx_count($chars) - 1);
 		$randstr .= $chars[$random];
 	}
 
@@ -2178,7 +2178,18 @@ function lx_exception_handler($e)
 {
 	global $gbl, $sgbl, $login, $ghtml;
 
-	print("Error message: {$e->getMessage()} {$e->variable} {$e->value}\n");
+	$var = isset($e->variable) ? (is_array($e->variable) ? implode(',', $e->variable) : $e->variable) : '';
+	$val = isset($e->value) ? $e->value : '';
+
+	print("Error message: {$e->getMessage()} {$var} {$val}\n");
+
+	// KloxoNext - PHP errors (TypeError, ValueError...) always leave a trace for debugging
+	if (!($e instanceof lxException)) {
+		print("  at {$e->getFile()}:{$e->getLine()}\n");
+		@file_put_contents("/usr/local/lxlabs/kloxo/log/php-exceptions.log",
+			date('c') . " " . get_class($e) . ": " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine() . "\n"
+			. $e->getTraceAsString() . "\n\n", FILE_APPEND);
+	}
 
 	if ($sgbl->dbg <= 0) {
 		return;

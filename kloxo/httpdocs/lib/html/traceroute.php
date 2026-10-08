@@ -58,7 +58,7 @@ class traceroute extends lxclass
 			throw new lxException($login->getThrow("traceroute_failed"), '', $host);
 		}
 
-		if (count($_result) == 0) {
+		if (lx_count($_result) == 0) {
 			throw new lxException($login->getThrow("traceroute_failed"), '', $host);
 		}
 
@@ -101,7 +101,7 @@ class traceroute extends lxclass
 
 	function _parseResultlinux()
 	{
-		$raw_data_len = count($this->_raw_data);
+		$raw_data_len = lx_count($this->_raw_data);
 		$dataRow = 0;
 
 		while (empty($this->_raw_data[$dataRow]) && ($dataRow<$raw_data_len)) {
@@ -124,10 +124,10 @@ class traceroute extends lxclass
 			$parts = explode('  ', substr($this->_raw_data[$dataRow], 4));
 
 			/* if we can find a next hop it's name/ip will be here */
-			if (count($parts) > 0) {
+			if (lx_count($parts) > 0) {
 				/* get machine/ip */
 				$machineparts = explode(' ', $parts[0]);
-				if (count($machineparts) > 1) {
+				if (lx_count($machineparts) > 1) {
 					$hop['machine'] = $machineparts[0];
 					$hop['ip']      = trim($machineparts[1], ' ()');
 				} else {
@@ -139,7 +139,7 @@ class traceroute extends lxclass
 
 			$responsetimes = array();
 
-			for($timeidx = 0; $timeidx < count($parts); $timeidx++) {
+			for($timeidx = 0; $timeidx < lx_count($parts); $timeidx++) {
 				$temppart=explode(' ', $parts[$timeidx]);
 
 				if ($temppart[0] == "*") {
@@ -166,7 +166,7 @@ class traceroute extends lxclass
 	*/
 	function _parseResultwindows()
 	{
-		$raw_data_len = count($this->_raw_data);
+		$raw_data_len = lx_count($this->_raw_data);
 		$dataRow = 0;
 
 		while (empty($this->_raw_data[$dataRow]) && ($dataRow<$raw_data_len)) {
@@ -176,13 +176,13 @@ class traceroute extends lxclass
 		$tempparts = explode(' ', $this->_raw_data[$dataRow]);
 		$searchIdx = 0;
 
-		while (($searchIdx < count($tempparts)) && (substr($tempparts[$searchIdx], 0, 1) != '[')) {
+		while (($searchIdx < lx_count($tempparts)) && (substr($tempparts[$searchIdx], 0, 1) != '[')) {
 			$searchIdx++;
 		}
 
 		$this->_target_ip = trim($tempparts[$searchIdx], ' [],');
 
-		while (($searchIdx < count($tempparts)) && ((int) $tempparts[$searchIdx] <= 0)) {
+		while (($searchIdx < lx_count($tempparts)) && ((int) $tempparts[$searchIdx] <= 0)) {
 			$searchIdx++;
 		}
 
@@ -193,7 +193,7 @@ class traceroute extends lxclass
 			$tempparts  = explode(' ', $this->_raw_data[$dataRow]);
 			$searchIdx = 0;
 
-			while (($searchIdx < count($tempparts)) && ((int) $tempparts[$searchIdx] <= 0)) {
+			while (($searchIdx < lx_count($tempparts)) && ((int) $tempparts[$searchIdx] <= 0)) {
 				$searchIdx++;
 			}
 
@@ -233,9 +233,9 @@ class traceroute extends lxclass
 			$machineparts = explode(' ', rtrim(substr($this->_raw_data[$dataRow], 32)));
 
 			// if we can find a next hop it's name/ip will be here
-			if (count($machineparts) == 1) {
+			if (lx_count($machineparts) == 1) {
 				$hop['ip'] = trim($machineparts[0], ' ()[]');
-			} elseif (count($machineparts) == 2) {
+			} elseif (lx_count($machineparts) == 2) {
 				$hop['machine'] = $machineparts[0];
 				$hop['ip']      = trim($machineparts[1], ' ()[]');
 			}

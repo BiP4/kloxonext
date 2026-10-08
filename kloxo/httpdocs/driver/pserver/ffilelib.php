@@ -579,7 +579,7 @@ class Ffile extends Lxclass
 		$list = explode('/', $this->nname);
 	//	implode('/', $list);
 		
-		for ($j = 0; $j < count($list); $j++) {
+		for ($j = 0; $j < lx_count($list); $j++) {
 			$nlist[] = $list[$j];
 			$newname = implode('/', $nlist);
 			
@@ -600,7 +600,7 @@ class Ffile extends Lxclass
 			if ($base) {
 				$url .= "&frm_selectshowbase=$base";
 			}
-			if ($j === count($list) - 1) {
+			if ($j === lx_count($list) - 1) {
 
 ?>
 <span>/ <?= $list[$j] ?></span>

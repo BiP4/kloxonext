@@ -7,241 +7,173 @@ $kloxo_version = $sgbl->__ver_full;
 
 init_language();
 
-$cgi_clientname = $ghtml->frm_clientname;
-$cgi_class = $ghtml->frm_class;
-$cgi_password = $ghtml->frm_password;
 $cgi_forgotpwd = $ghtml->frm_forgotpwd;
-$cgi_email = $ghtml->frm_email;
-
-$cgi_token = $ghtml->frm_token;
-
-$cgi_classname = 'client';
-
-if ($cgi_class) {
-	$cgi_classname = $cgi_classname;
-}
-
-$accountlist = array('client' => "Kloxo Account", 'domain' => 'Domain Owner', 'mailaccount' => "Mail Account");
-$progname = $sgbl->__var_program_name;
 
 if ($sgbl->is_this_slave()) {
-	print("Slave Server\n");
+	print("<section class=\"card\"><h1>Slave server</h1><p class=\"sub\">Manage this server from its master.</p></section>");
 
 	exit;
 }
 
+$h = function ($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); };
+
+// message of the previous request (frm_emessage / frm_smessage), as plain text
+$kn_msg = '';
+$kn_msg_err = false;
+
+if ($ghtml->frm_emessage) {
+	$kn_msg_err = true;
+	$k = $ghtml->frm_emessage;
+	$kn_msg = isset($g_language_mes->__emessage[$k]) ? $g_language_mes->__emessage[$k] : $k;
+} elseif ($ghtml->frm_smessage) {
+	$k = $ghtml->frm_smessage;
+	$kn_msg = isset($g_language_mes->__smessage[$k]) ? $g_language_mes->__smessage[$k] : $k;
+}
+
+$kn_msg = trim(strip_tags((string)$kn_msg));
+
 $logfo = db_get_value("general", "admin", "login_pre");
-$logfo = str_replace("<%programname%>", $sgbl->__var_program_name, $logfo);
+$logfo = str_replace("<%programname%>", $sgbl->__var_program_name, (string)$logfo);
 
 if (!$cgi_forgotpwd) {
-//	if (session_status() == PHP_SESSION_NONE) {
-	if(!isset($_SESSION)) {
+	if (!isset($_SESSION)) {
 		session_start();
 	}
 
-	$ghtml->print_message();
+	// KloxoNext - unpredictable CSRF token (was mt_rand())
+	$_SESSION['frm_token'] = bin2hex(random_bytes(16));
 
-	$_SESSION['frm_token'] = mt_rand();
-?>
-<!--- include start --->
+	$blocked_for = 0;
 
-<?php
+	if (isset($_SESSION['last_login_time'], $_SESSION['num_login_fail'])) {
+		$elapsed = time() - (int)$_SESSION['last_login_time'];
 
-	if ((isset($_SESSION['last_login_time'])) && (isset($_SESSION['num_login_fail']))) {
-		$t = time();
-		$s = $_SESSION['last_login_time'];
-		$d = $t - $s;
-		$n = $_SESSION['num_login_fail'];
-
-		$m = $g_language_mes->__emessage['blocked'];
-		$r = $g_language_mes->__emessage['blocked_remaining'];
-
-		if ($n == 5) {
-			if (intval($t - $s) < intval(10*60)) {
-				$msg = '
-<div style="margin: 4px auto; width: 450px; padding: 4px; color: #000; background-color: #fdb; border: 1px solid #ccc">
-<div id="countdown" align="center"></div>
-<script>
-	var countdown = document.getElementById("countdown");
-	//var totalTime = 600;
-	var totalTime = ' . intval(600 - $d) . ';
-	function pad(n) {
-		return n > 9 ? "" + n : "0" + n;
-	}
-	var original = totalTime;
-	function padMinute(n) {
-		return original >= 600 && n <= 9 ? "0" + n : "" + n;
-	}
-	var interval = setInterval(function() {
-		updateTime();
-		if(totalTime == -1) {
-			clearInterval(interval);
-		//	return;
-		//	self.location = self.location.href;
-			self.location = "/login/";
-		}
-	}, 1000);
-
-	function displayTime() {
-		var minutes = Math.floor(totalTime / 60);
-		var seconds = totalTime % 60;
-		minutes = "<span>" + padMinute(minutes).split("").join("</span><span>") + "</span>";
-		seconds = "<span>" + pad(seconds).split("").join("</span><span>") + "</span>";
-	//	countdown.innerHTML = "Blocked remaining: " + minutes + ":" + seconds;
-		countdown.innerHTML = "' . $m . ' ' . $r . ': " + minutes + ":" + seconds;
-	}
-	function updateTime() {
-		displayTime();
-		totalTime--;
-	}
-	updateTime();
-</script>
-</div>';
+		if ((int)$_SESSION['num_login_fail'] >= 5) {
+			if ($elapsed < 600) {
+				$blocked_for = 600 - $elapsed;
 			} else {
-				$_SESSION['num_login_fail'] = 0 ;
+				$_SESSION['num_login_fail'] = 0;
 			}
 		} else {
 			$_SESSION['last_login_time'] = time();
 		}
-	} else {
-		$msg="";
 	}
 ?>
+	<section class="card" aria-labelledby="login-title">
+		<h1 id="login-title">Sign in</h1>
+		<p class="sub">Use your panel account to continue.</p>
 
-<div align="center">
-	<div class="login">
-		<div class="login-form">
-		 	 <div align="center"><font size="5" color="red"><b> Login </b></font></div>
-		 	 <br/>
+<?php if ($kn_msg !== '') { ?>
+		<div class="alert <?= $kn_msg_err ? 'alert-error' : 'alert-ok' ?>" role="alert"><?= $h($kn_msg) ?></div>
+<?php } ?>
 
-		 	 <form name="loginform" action="/lib/php/" onsubmit="ctrim(this.frm_clientname.value) ; ctrim(this.frm_password.value) ; encode_url(loginform) ; return fieldcheck(this)" method="post">
-		 		 <div class="form-block">
- 		 		<div class="inputlabel">Username</div>
- 		 		<input name="frm_clientname" type="text" class="inputbox" size="30"/>
-
- 		 		<div class="inputlabel">Password</div>
-	 		 		<input name="frm_password" type="password" class="passbox" size="30"/>
- 			 		<br/>
-	 		 		<input type="hidden" name="frm_token" value="<?php echo $_SESSION['frm_token']; ?>"/>
-	 		 		<div align="left"><input type="submit" class="button" name="login" value="Login"/></div>
-				</div>
-		 	 </form>
+<?php if ($blocked_for > 0) { ?>
+		<div class="alert alert-error" role="alert">
+			<?= $h($g_language_mes->__emessage['blocked']) ?>
+			<?= $h($g_language_mes->__emessage['blocked_remaining']) ?>: <b id="kn-countdown" data-left="<?= (int)$blocked_for ?>"></b>
 		</div>
-		<div class="login-text">
-			<div class="ctr"><img src="/theme/login/icon.gif" width="64" height="64" alt="security"/></div>
-			<?=$logfo?>
-			<a class="forgotpwd" href="javascript:document.forgotpassword.submit()"><font color="black"><u>Forgot Password?</u></a>
-			<form name="forgotpassword" method="post" action="/login/">
-			<input type="hidden" name="frm_forgotpwd" value="1"/>
-			</form>
+		<script>
+			(function () {
+				var el = document.getElementById('kn-countdown'), left = +el.getAttribute('data-left');
+				function tick() {
+					if (left < 0) { location.href = '/login/'; return; }
+					el.textContent = Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2);
+					left--; setTimeout(tick, 1000);
+				}
+				tick();
+			})();
+		</script>
+<?php } ?>
 
-			<script>
-				document.loginform.frm_clientname.focus();
-			</script>
+		<form name="loginform" action="/lib/php/" method="post"
+			onsubmit="return fieldcheck(this)" autocomplete="on">
+			<div class="field">
+				<label for="frm_clientname">Username</label>
+				<input id="frm_clientname" name="frm_clientname" type="text" autocomplete="username"
+					autocapitalize="none" spellcheck="false" required autofocus>
+			</div>
+			<div class="field">
+				<label for="frm_password">Password</label>
+				<input id="frm_password" name="frm_password" type="password" autocomplete="current-password" required>
+			</div>
+			<input type="hidden" name="frm_token" value="<?= $h($_SESSION['frm_token']) ?>">
+			<button type="submit" class="btn" name="login" value="Login"<?= ($blocked_for > 0) ? ' disabled' : '' ?>>Sign in</button>
+		</form>
+
+		<div class="row">
+			<a href="/login/?frm_forgotpwd=1">Forgot password?</a>
+			<span>v<?= $h($kloxo_version) ?></span>
 		</div>
-		<div class="clr"></div>
-	</div>
-	<div style="margin: 4px auto; width: 200px; padding: 4px; color: #fff; background-color: #000">Kloxo <?php echo $kloxo_version ?></div>
-<?php echo $msg;?>
 
-</div>
-
-<div id="break"></div>
-
+		<div class="note"><?= $logfo ?></div>
+	</section>
 <?php
 	if (if_demo()) {
-		print("<div align='center'>");
+		print("<div>");
 		include_once "lib/demologins.php";
 		print("</div>");
 	}
 } elseif ($cgi_forgotpwd == 1) {
+	$page = 'Forgot password';
 ?>
+	<section class="card" aria-labelledby="forgot-title">
+		<h1 id="forgot-title">Reset password</h1>
+		<p class="sub">Enter your username and the contact e-mail of the account. A new password will be sent to that address.</p>
 
-<div align="center">
-	<div class="login">
-		<div class="login-form">
-			<div align="center"><font name=Verdana size=5 color=red><b> Forgot Password </b></font></div>
-			<br/>
+		<form name="sendmail" action="/login/" method="post">
+			<div class="field">
+				<label for="frm_clientname">Username</label>
+				<input id="frm_clientname" name="frm_clientname" type="text" autocomplete="username" required autofocus>
+			</div>
+			<div class="field">
+				<label for="frm_email">Contact e-mail</label>
+				<input id="frm_email" name="frm_email" type="email" autocomplete="email" required>
+			</div>
+			<input type="hidden" name="frm_forgotpwd" value="2">
+			<button type="submit" class="btn" name="forgot" value="Send">Send new password</button>
+		</form>
 
-			<form name="sendmail" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-				<div class="form-block">
-				<div class="inputlabel">Username</div>
- 		 		<input name="frm_clientname" type="text" class="inputbox" size="30"/>
-
- 		 		<div class="inputlabel">Email Id</div>
-	 		 		<input name="frm_email" type="text" class="passbox" size="30"/>
- 			 		<br/>
- 			 		<input type="hidden" name="frm_forgotpwd" value="2"/>
-	 		 		<div align="left"><input type="submit" class="button" name="forgot" value="Send"/></div>
-				</div>
-			</form>
-		</div>
-		<div class="login-text">
-		<div class="ctr"><img src="/theme/login/icon1.gif" width="64" height="64" alt="security"/></div>
-			<p>Welcome to <?php echo $sgbl->__var_program_name; ?></p>
-			<p>Use a valid username and email-id to get password.</p>
-			<br/>
-			<a class=forgotpwd href="javascript:history.go(-1);"><font color="black"><u>Back to login</u></a>
-		</div>
-
-		<script>
-			document.sendmail.frm_clientname.focus();
-		</script>
-
-		<div class="clr"></div>
-	</div>
-	<div style="margin: 4px auto; width: 200px; padding: 4px; color: #fff; background-color: #000">Kloxo<?php echo $kloxo_version ?></div>
-</div>
-
-<div id="break"></div>
-
+		<div class="row"><a href="/login/">&larr; Back to sign in</a><span></span></div>
+	</section>
 <?php
 } elseif ($cgi_forgotpwd == 2) {
 	$progname = $sgbl->__var_program_name;
 	$cprogname = ucfirst($progname);
 
-	$cgi_clientname = $ghtml->frm_clientname;
-	$cgi_email = $ghtml->frm_email;
+	$cgi_clientname = trim((string)$ghtml->frm_clientname);
+	$cgi_email = trim((string)$ghtml->frm_email);
 
+	// KloxoNext - both values reach SQL below: accept only well-formed input
+	// (the original code interpolated raw request data -> SQL injection).
+	$name_ok = (bool)preg_match('/^[A-Za-z0-9._@-]{1,128}$/', $cgi_clientname);
+	$mail_ok = (filter_var($cgi_email, FILTER_VALIDATE_EMAIL) !== false);
 
-	htmllib::checkForScript($cgi_clientname);
-	$classname = $ghtml->frm_class;
+	$classname = getClassFromName($cgi_clientname);
 
-	if (!$classname) {
-		$classname = getClassFromName($cgi_clientname);
+	if (!in_array($classname, array('client', 'domain', 'mailaccount'), true)) {
+		$classname = 'client';
 	}
 
-	if ($cgi_clientname != "" && $cgi_email != "") {
-		$tablename = $classname;
-		$rawdb = new Sqlite(null, $tablename);
-		$email = $rawdb->rawQuery("select contactemail from $tablename where nname = '$cgi_clientname';");
+	if ($name_ok && $mail_ok) {
+		$rawdb = new Sqlite(null, $classname);
+		$email = $rawdb->rawQuery("select contactemail from {$classname} where nname = '{$cgi_clientname}';");
 
+		if ($email && hash_equals((string)$email[0]['contactemail'], $cgi_email)) {
+			$rndstring = randomString(12);
+			$pass = password_hash($rndstring, PASSWORD_BCRYPT);
 
-		if ($email && $cgi_email == $email[0]['contactemail']) {
-			$rndstring = randomString(8);
-			$pass = crypt($rndstring, '$1$'.randomString(8).'$');
+			$rawdb->rawQuery("update {$classname} set password = '{$pass}' where nname = '{$cgi_clientname}'");
 
-			$rawdb->rawQuery("update $tablename set password = '$pass' where nname = '$cgi_clientname'");
-			$mailto = $email[0]['contactemail'];
-			$name = "$cprogname";
-			$email = "Admin";
+			$subject = "{$cprogname} password reset";
+			$message = "\n\nYour {$cprogname} password has been reset.\n";
+			$message .= "Requested from IP address: {$_SERVER['REMOTE_ADDR']}\n";
+			$message .= "Username: {$cgi_clientname}\n";
+			$message .= "New password: {$rndstring}\n";
 
-			$cc = "";
-			$subject = "$cprogname Password Reset Request";
-			$message = "\n\n\nYour password has been reset to the one below for your $cprogname login.\n";
-			$message .= "The Client IP address which requested the Reset: {$_SERVER['REMOTE_ADDR']}\n";
-			$message .= 'Username: ' . $cgi_clientname . "\n";
-			$message .= 'New Password: ' . $rndstring . '';
-
-			//$message = nl2br($message);
-
-			lx_mail(null, $mailto, $subject, $message);
-
-			$ghtml->print_redirect("/login/?frm_smessage=password_sent");
-
-		} else {
-			$ghtml->print_redirect("/login/?frm_emessage=nouser_email");
+			lx_mail(null, $email[0]['contactemail'], $subject, $message);
 		}
 	}
+
+	// same answer whether or not the account exists (no user enumeration)
+	$ghtml->print_redirect("/login/?frm_smessage=password_sent");
 }
-?><!--- include end --->

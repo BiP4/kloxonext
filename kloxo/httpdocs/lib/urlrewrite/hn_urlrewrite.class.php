@@ -348,7 +348,7 @@ class hn_urlRewrite
 		{
 			$this->_ErrorHandler('no_array');
 		}
-		if($this->compare && count($this->registered_scripts)<1)
+		if($this->compare && lx_count($this->registered_scripts)<1)
 		{
 			$this->_ErrorHandler('no_array_values');
 		}
@@ -530,13 +530,13 @@ class hn_urlRewrite
 			foreach($params as $v) $_GET[strip_tags($v[0])] = strip_tags($v[1]);
 
 			// build querystring
-			if(count($params)>0)
+			if(lx_count($params)>0)
 			{
 				$this->querystring = "{$params[0][0]}={$params[0][1]}";
 			}
-			if(count($params)>1)
+			if(lx_count($params)>1)
 			{
-				for($i=1;$i<count($params);$i++)
+				for($i=1;$i<lx_count($params);$i++)
 				{
 					$this->querystring .= "&{$params[$i][0]}={$params[$i][1]}";
 				}
@@ -616,7 +616,7 @@ class hn_urlRewrite
 			//             1    2		 3    4                   <5>        6       7
 			$pattern = '=^(.*?)(<area|<a|<img)(.*?)(href\=|src\=)["|\'](.*?)["|\']([^>]*?)(>.*$|>.*?</a>.*$)=msi';
 			while(preg_match($pattern, $page, $a)) {
-				if(count($a)>1) {
+				if(lx_count($a)>1) {
 					$page = $a[7];
 					$newpage .= $a[1].$a[2].$a[3].$a[4].'"';
 					switch($a[2])
@@ -893,7 +893,7 @@ class hn_urlRewrite
 					$uplinks++;
 				}
 			}
-			$k				= count($pathsegments);
+			$k				= lx_count($pathsegments);
 			$newurl			= '';
 
 			// No Uplinks in string!
@@ -1014,7 +1014,7 @@ class hn_urlRewrite
 		$alpha_array = $this->CodingKey;
 		$decoded = base64_decode($str);
 		list($decoded,$letter) = explode("\+",$decoded);
-		for($i=0;$i<count($alpha_array);$i++)
+		for($i=0;$i<lx_count($alpha_array);$i++)
 		{
 			if($alpha_array[$i] == $letter)
 			break;

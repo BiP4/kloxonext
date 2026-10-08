@@ -16,11 +16,11 @@ function createipconf()
 
 	$list  = array_reverse($ipl);
  
-	$count = count($list);
+	$count = lx_count($list);
 
 	foreach($list as $ip) {
 		$dev  = explode("-" , $ip->devname);
-		if(count($dev) >= 2) {
+		if(lx_count($dev) >= 2) {
 			$actualname  = implode( ":", $dev);
 		} else 
 			$actualname = $ip->devname;
@@ -112,7 +112,7 @@ function dosyncToSystem()
 	$networkaddress = $this->findnetworkaddress($ipaddr , $netmask);
 
 		$dev  = explode("-" , $this->main->devname);
-		if(count($dev) >= 2) {
+		if(lx_count($dev) >= 2) {
 			$actualname  = implode( ":", $dev);
 		} else 
 			$actualname = $this->main->devname;
@@ -153,7 +153,7 @@ function dosyncToSystem()
 				foreach($ipl as $i) {
 					$st = $i['devname'];
 				    $dev  = explode("-" , $st );
-                    if(count($dev) >= 1) 
+                    if(lx_count($dev) >= 1) 
 					   $actualname = implode(":", $dev); 
                     else 
                        $actualname = $st;
@@ -193,7 +193,7 @@ function dosyncToSystem()
 				foreach($ipl as $i) {
 					$st = $i['devname'];
 				    $dev  = explode("-" , $st );
-                    if(count($dev) >= 1) 
+                    if(lx_count($dev) >= 1) 
 					   $actualname = implode(":", $dev); 
                     else 
                        $actualname = $st;
@@ -227,7 +227,7 @@ static function getCurrentIps()
 	}	
 	foreach($a as $single ) {
 
-		if(count($single) >= 3) {
+		if(lx_count($single) >= 3) {
 			$ret[] = $single;
 		}
 	}

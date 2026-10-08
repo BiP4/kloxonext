@@ -149,7 +149,7 @@ class Gbllib  extends Lxclass
 		unset($histlist[$url]);
 		$histlist[$url] = time();
 
-		while(count($histlist) > 20) {
+		while(lx_count($histlist) > 20) {
 			array_shift($histlist);
 		}
 

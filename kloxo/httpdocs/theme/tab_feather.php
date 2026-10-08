@@ -38,7 +38,7 @@ function print_tab_block_start($alist)
 
 						$list = $ghtml->whichTabSelect($alist);
 						$list[-1] = false;
-						$list[count($list) - 1] = false;
+						$list[lx_count($list) - 1] = false;
 
 						foreach ($alist as $k => $a) {
 							print_tab_button($k, $a, $list);
@@ -157,7 +157,7 @@ function print_tab_button($key, $url, $list)
 		return;
 	}
 
-	$lastkey = count($list);
+	$lastkey = lx_count($list);
 
 	if ($check) {
 		if ($key === 0) {

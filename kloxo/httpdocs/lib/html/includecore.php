@@ -1,4 +1,28 @@
 <?php 
+
+// KloxoNext - PHP 7 semantics of count(): null => 0, scalar => 1 (PHP 8 throws TypeError).
+// Kloxo objects keep lists as null until they are loaded, so the core relies on it.
+function lx_count($value, $mode = COUNT_NORMAL)
+{
+	if (is_array($value) || $value instanceof Countable) {
+		return count($value, $mode);
+	}
+
+	return ($value === null) ? 0 : 1;
+}
+
+// KloxoNext - PHP 8.1+ makes mysqli throw on every SQL error; Kloxo checks return
+// values (and relies on failing queries while it migrates its schema).
+// PHP 7 array_map() returned null (with a warning) for a non-array argument
+function lx_array_map_safe($callback, $value)
+{
+	return is_array($value) ? array_map($callback, $value) : null;
+}
+
+if (function_exists('mysqli_report')) {
+	mysqli_report(MYSQLI_REPORT_OFF);
+}
+
 function print_time($var, $mess = null, $dbg = 2) 
 {
 	static $last;

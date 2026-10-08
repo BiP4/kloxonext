@@ -567,7 +567,7 @@ function lxfile_rm_rec_content($file)
 
 	$list = explode("/", $file);
 
-	if (count($list) <= 2) {
+	if (lx_count($list) <= 2) {
 		return;
 
 	//	throw new lxException($login->getThrow("recursive_removal_low_level_directories_not_allowed"), '', $file);
@@ -601,7 +601,7 @@ function lxfile_rm_rec($file)
 	$file = remove_extra_slash($file);
 	$list = explode("/", $file);
 
-	if (count($list) <= 2) {
+	if (lx_count($list) <= 2) {
 		return;
 
 	//	throw new lxException($login->getThrow("recursive_removal_low_level_directories_not_allowed"), '', $file);
