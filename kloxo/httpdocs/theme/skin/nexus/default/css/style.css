@@ -612,10 +612,12 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 /* ------------------------------------------------ add/update forms (htmllib) */
 
 .kn-main form div[style*="width:600px"], .kn-main form div[style*="width: 600px"] {
-	width: min(680px, 100%) !important; margin: 0 auto 20px !important;
+	/* grows with a textarea widened by the user, never beyond the content area */
+	width: fit-content !important; min-width: min(680px, 100%); max-width: 100%;
+	margin: 0 auto 20px !important;
 	background: var(--kn-surface) !important;
 	border: 1px solid var(--kn-border) !important; border-radius: var(--kn-radius);
-	box-shadow: var(--kn-shadow); overflow: hidden;
+	box-shadow: var(--kn-shadow); overflow-x: auto;
 }
 .kn-main form div[style*="width:600px"] > div[style*="padding:10px"],
 .kn-main form div[style*="#f8fff8"], .kn-main form div[style*="#f8f8ff"] {
@@ -624,8 +626,14 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 	font-weight: 500; font-size: 13px;
 }
 .kn-main form div[style*="width:600px"] > div[style*="padding:10px"]:first-of-type { border-top: 0 !important; }
-.kn-main form div[style*="width:600px"] > div[style*="padding:10px"] :is(input[type="text"], input[type="password"], select, textarea) {
+.kn-main form div[style*="width:600px"] > div[style*="padding:10px"] :is(input[type="text"], input[type="password"], select) {
 	display: block; margin-top: 6px !important; width: min(420px, 100%) !important; font-weight: 400;
+}
+/* textareas (logs, messages, configs): full card width by default and resizable in both
+   directions - no !important on the width so the drag handle's inline size wins */
+.kn-main form div[style*="width:600px"] > div[style*="padding:10px"] textarea {
+	display: block; margin-top: 6px !important; font-weight: 400;
+	width: 100%; min-width: 240px; max-width: none; resize: both;
 }
 .kn-main form div[style*="#eee"], .kn-main form div[style*="#EEE"], .kn-main form div[style*="#eeeeee"] {
 	background: var(--kn-surface-2) !important; border-top: 1px solid var(--kn-border) !important;
