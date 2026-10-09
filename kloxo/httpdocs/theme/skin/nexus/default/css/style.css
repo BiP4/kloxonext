@@ -596,3 +596,33 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 .kn-main .tbl_content_content { table-layout: fixed; }
 .kn-main fieldset { min-width: 0; }
 .kn-main .div_showhide, .kn-main .div_standard { overflow-x: auto; }
+
+/* ------------------------------------------------ add/update forms (htmllib) */
+
+.kn-main form div[style*="width:600px"], .kn-main form div[style*="width: 600px"] {
+	width: min(680px, 100%) !important; margin: 0 auto 20px !important;
+	background: var(--kn-surface) !important;
+	border: 1px solid var(--kn-border) !important; border-radius: var(--kn-radius);
+	box-shadow: var(--kn-shadow); overflow: hidden;
+}
+.kn-main form div[style*="width:600px"] > div[style*="padding:10px"],
+.kn-main form div[style*="#f8fff8"], .kn-main form div[style*="#f8f8ff"] {
+	background: transparent !important; color: var(--kn-text);
+	padding: 14px 20px !important; border-top: 1px solid var(--kn-border) !important;
+	font-weight: 500; font-size: 13px;
+}
+.kn-main form div[style*="width:600px"] > div[style*="padding:10px"]:first-of-type { border-top: 0 !important; }
+.kn-main form div[style*="width:600px"] > div[style*="padding:10px"] :is(input[type="text"], input[type="password"], select, textarea) {
+	display: block; margin-top: 6px !important; width: min(420px, 100%) !important; font-weight: 400;
+}
+.kn-main form div[style*="#eee"], .kn-main form div[style*="#EEE"], .kn-main form div[style*="#eeeeee"] {
+	background: var(--kn-surface-2) !important; border-top: 1px solid var(--kn-border) !important;
+	padding: 12px 20px !important;
+}
+.kn-main form sup { color: var(--kn-danger); }
+.kn-main form div[style*="width:600px"] > div[style*="text-align:right"] {
+	background: var(--kn-surface-2) !important; padding: 12px 20px !important;
+}
+
+/* no transitions until the first frame is painted (avoids a sliding sidebar on load) */
+.kn-preload *, .kn-preload *::before, .kn-preload *::after { transition: none !important; }

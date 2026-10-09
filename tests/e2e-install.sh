@@ -25,6 +25,7 @@ for s in kloxo-web kloxo-php kloxo-apps mariadb named php-fpm pure-ftpd httpd ap
 echo "  panel login: $(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:7778/login/)"
 echo "  phpMyAdmin:  $(curl -sk -o /dev/null -w %{http_code} https://127.0.0.1:7777/thirdparty/phpMyAdmin/)"
 for b in $BR; do echo "  $b.test -> $(curl -s -H "Host: $b.test" http://127.0.0.1/v.php | head -c 60)"; done
+bash /src/tests/mailtest.sh
 echo "  php exceptions: $(grep -c "^20" $K/log/php-exceptions.log 2>/dev/null || echo 0)"
 grep -v "^#" $K/log/php-exceptions.log 2>/dev/null | head -5
 '

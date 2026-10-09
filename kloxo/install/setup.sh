@@ -184,6 +184,9 @@ chown "${OS_NAMED_USER}":root /var/log/named
 chmod 755 /var/log/named
 rm -f /etc/rndc.conf
 os_debian_bind_compat
+# zone files of every DNS driver live here; named needs write access (journals)
+mkdir -p /opt/configs/nsd/conf
+chown -R named /opt/configs/nsd/conf
 
 step "Install mail services (Postfix + Dovecot)"
 if os_is_debian ; then

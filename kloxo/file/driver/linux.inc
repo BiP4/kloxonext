@@ -28,3 +28,11 @@ $driver['davuser'] = 'lighttpd';
 $driver['sshconfig'] = 'linux';
 
 $driver['phpmodule'] = "linux";
+
+// KloxoNext - on Debian/Ubuntu only the drivers adapted to its paths are offered
+// (apache/lighttpd/hiawatha templates write to RHEL locations such as /etc/httpd)
+if (class_exists('OsPlatform') && OsPlatform::isDebian()) {
+	$driver['web'] = array("none", "nginx");
+	$driver['webcache'] = array("none", "varnish");
+	$driver['dns'] = array("none", "bind");
+}

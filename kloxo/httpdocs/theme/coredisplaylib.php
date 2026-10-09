@@ -2157,6 +2157,7 @@ function do_display_init()
 				var t = localStorage.getItem('kn-theme');
 				if (!t) { t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
 				document.documentElement.setAttribute('data-theme', t);
+				document.documentElement.classList.add('kn-preload');
 				if (localStorage.getItem('kn-sidebar') === 'collapsed') { document.documentElement.classList.add('kn-collapsed'); }
 			} catch (e) {}
 		</script>

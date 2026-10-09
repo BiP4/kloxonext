@@ -115,6 +115,10 @@
 		w.appendChild(t);
 	});
 
+	window.requestAnimationFrame(function () {
+		window.requestAnimationFrame(function () { root.classList.remove('kn-preload'); });
+	});
+
 	/* ---- success toast fades out; errors stay ----------------------------- */
 
 	var ok = document.querySelector('.kn-toast-ok');

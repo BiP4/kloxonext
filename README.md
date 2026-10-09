@@ -83,6 +83,20 @@ The default skin **nexus** is responsive (sidebar navigation that becomes a draw
 has light and dark modes, and keeps every menu entry and permission rule of the original panel.
 The older *simplicity* and *feather* skins remain selectable in *Appearance*.
 
+## Mail
+
+Postfix + Dovecot from the distribution (qmail-toaster is not packaged for these systems):
+
+* SMTP 25, submission 587 (STARTTLS) and 465 (TLS) with authentication through Dovecot
+* IMAP/POP3 with TLS, delivery through Dovecot LMTP, Sieve, per-mailbox quota
+* mailboxes in `/home/vmail/<domain>/<user>/Maildir` (user `vmail`)
+* forwards, catch-all, alias domains and autoresponders from the panel; DKIM through OpenDKIM
+  when *domain key* is enabled in the server mail settings
+
+Every change made in the panel regenerates `/etc/postfix/kloxo/*` and `/etc/dovecot/kloxo/users`
+from the Kloxo database (see `httpdocs/lib/php/mailmapslib.php`). `sh /script/setup-mail`
+re-applies the whole configuration; it adapts to Dovecot 2.3 (EL) and 2.4 (Ubuntu 26.04).
+
 ## Project status
 
 | Phase | Scope                                                                  | Status        |
@@ -90,14 +104,17 @@ The older *simplicity* and *feather* skins remain selectable in *Appearance*.
 | 1     | OS abstraction (dnf/apt), installer, PHP 8.4 panel, nginx panel server | done          |
 | 2     | Modern responsive skin, login page                                     | done (iterating) |
 | 3     | Automatic third-party updates on the newest PHP                        | done          |
-| 4     | Postfix + Dovecot mail driver; Apache/BIND path layer for Ubuntu        | planned       |
+| 4     | Postfix + Dovecot mail driver                                          | done          |
+| 4b    | Apache/lighttpd web drivers on Ubuntu (RHEL paths)                     | planned       |
 
-Until phase 4 lands, mail accounts cannot be managed from the panel (the qmail-toaster driver is
-not available on these distributions), and on Ubuntu the website driver is nginx.
+On Ubuntu the website driver is nginx; Apache, lighttpd and Hiawatha are offered on AlmaLinux/Rocky.
+Spam filtering: Sieve files messages flagged by SpamAssassin/Bogofilter into *Junk*; wiring a
+content filter into Postfix is not done yet.
 
 ## Tests
 
-`tests/container-phase1.sh` – smoke test run inside fresh AlmaLinux 9, AlmaLinux 10 and Ubuntu 26.04
+`tests/container-phase1.sh` – smoke test run inside fresh AlmaLinux 9, AlmaLinux 10 and Ubuntu 26.04 containers.
+`tests/e2e-install.sh <container>` – full install in a systemd container, then domains with per-domain PHP and mail (`tests/mailtest.sh`).
 containers:
 
 ```bash
