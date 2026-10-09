@@ -5801,6 +5801,13 @@ class HtmlLib
 
 		$current_url = $this->get_get_from_current_post(null);
 
+		// KloxoNext - pages like phpinfo open in the same tab (no popup, which
+		// browsers block and which the redirect below used to cancel anyway)
+		if ($windowurl) {
+			$redirect_url = $windowurl;
+			$windowurl = null;
+		}
+
 		if (ifSplashScreen() || $windowurl) {
 			dprint("<br /> <br /> Redirect called with splash <br /> ");
 			dprint(" <b><br /> <br />  Click <a href=\"$redirect_url\"><b> here to go to Continue. </a> </b> \n");

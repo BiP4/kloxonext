@@ -109,6 +109,11 @@ VERSION_URL = "${raw}"
 EOF
 fi
 
+# installed commit: the panel Update page / auto-update compare it with GitHub
+if [ -d "${SRC}/.git" ] ; then
+	git -C "${SRC}" rev-parse HEAD > "${KPATH}/etc/conf/update-commit" 2>/dev/null
+fi
+
 [ -n "${TMP}" ] && rm -rf "${TMP}"
 
 getent group lxlabs >/dev/null || groupadd -r lxlabs

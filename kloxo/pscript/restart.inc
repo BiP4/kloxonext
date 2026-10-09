@@ -53,7 +53,7 @@ else
 						elif [ "${item}" == "nsd" ] ; then
 							service ${item} restart
 						elif [ "${item}" == "spawn-fcgi" ] ; then
-							'rm' -f /tmp/fcgiwrap.sock
+							'rm' -f /run/kloxo-fcgiwrap/fcgiwrap.sock
 							service ${item} restart
 						else
 							service ${item} restart

@@ -1,0 +1,71 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+#
+#    KloxoNext - AWStats web tree + CGI gateway
+#
+#    Builds /home/kloxo/httpd/awstats/wwwroot (served by the stats.<domain>
+#    vhosts) from the distribution's awstats package, and runs fcgiwrap on
+#    /run/kloxo-fcgiwrap/fcgiwrap.sock so nginx/hiawatha can execute awstats.pl.
+#
+
+. /script/os.inc
+
+KLOXO_PATH=/usr/local/lxlabs/kloxo
+AW=/home/kloxo/httpd/awstats
+WR=${AW}/wwwroot
+
+command -v awstats.pl >/dev/null 2>&1 || [ -f /usr/share/awstats/wwwroot/cgi-bin/awstats.pl ] || \
+	[ -f /usr/lib/cgi-bin/awstats.pl ] || pkg_install awstats
+[ -x /usr/sbin/fcgiwrap ] || pkg_install fcgiwrap
+
+# awstats.pl: EL ships it in wwwroot/cgi-bin, Debian/Ubuntu in /usr/lib/cgi-bin
+for f in /usr/share/awstats/wwwroot/cgi-bin/awstats.pl /usr/lib/cgi-bin/awstats.pl ; do
+	[ -f "${f}" ] && { AWPL="${f}" ; break ; }
+done
+
+if [ -z "${AWPL}" ] ; then
+	echo "- awstats.pl not found; AWStats pages disabled"
+	exit 0
+fi
+
+mkdir -p "${WR}/cgi-bin" "${AW}/dirdata"
+
+# script + helpers (awstats.pl falls back to /usr/share/awstats/{lib,lang,plugins})
+for f in $(dirname "${AWPL}")/aw*.pl ; do
+	[ -f "${f}" ] && ln -sfn "${f}" "${WR}/cgi-bin/$(basename "${f}")"
+done
+
+cp -f "$(ls ${KLOXO_PATH}/file/stats/custom.awstats_index.php 2>/dev/null || echo ${KLOXO_PATH}/file/stats/awstats_index.php)" \
+	"${WR}/cgi-bin/index.php"
+
+# static assets: icon / css / js / classes
+for d in icon css js classes ; do
+	for s in /usr/share/awstats/wwwroot/${d} /usr/share/awstats/${d} /usr/share/doc/awstats/examples/${d} ; do
+		if [ -d "${s}" ] && [ -n "$(ls -A "${s}" 2>/dev/null)" ] ; then
+			rm -rf "${WR:?}/${d}"
+			ln -sfn "${s}" "${WR}/${d}"
+			break
+		fi
+	done
+done
+
+chown -R apache:apache "${AW}"
+chown -h root:root "${WR}/cgi-bin/"aw*.pl "${WR}"/{icon,css,js,classes} 2>/dev/null
+
+# CGI gateway
+INIT_DIR=${KLOXO_PATH}/init
+if [ -f "${INIT_DIR}/custom.kloxo-fcgiwrap.service" ] ; then
+	cp -f "${INIT_DIR}/custom.kloxo-fcgiwrap.service" /etc/systemd/system/kloxo-fcgiwrap.service
+else
+	cp -f "${INIT_DIR}/kloxo-fcgiwrap.service" /etc/systemd/system/kloxo-fcgiwrap.service
+fi
+chmod 0644 /etc/systemd/system/kloxo-fcgiwrap.service
+
+# superseded by kloxo-fcgiwrap
+for s in spawn-fcgi fcgiwrap.socket fcgiwrap ; do
+	systemctl disable --now "${s}" >/dev/null 2>&1
+done
+
+systemctl daemon-reload
+systemctl enable kloxo-fcgiwrap >/dev/null 2>&1
+systemctl restart kloxo-fcgiwrap

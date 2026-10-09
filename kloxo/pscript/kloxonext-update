@@ -4,13 +4,40 @@
 #    KloxoNext - update the panel code from the configured git repository
 #    (etc/conf/update-source.conf, written by kloxonext-install.sh).
 #
+#      sh /script/kloxonext-update            copy the newest code (no cleanup; used by upcp)
+#      sh /script/kloxonext-update --apply    update when GitHub has a newer commit, then cleanup
+#      sh /script/kloxonext-update --auto     same as --apply, only when the administrator enabled
+#                                             automatic updates in the panel (Update page), i.e.
+#                                             etc/flag/auto-update-panel.flg exists (daily timer)
+#      sh /script/kloxonext-update --check    print installed/available commit; exit 0 = update available
+#
 #    Local customisations survive: Kloxo only reads 'custom.*' files, which are
 #    never part of the repository, and etc/conf, etc/slavedb, etc/flag,
 #    init/*active, log, session are excluded from the copy.
 
 . /script/os.inc
 
+KLOXO_PATH="${KLOXO_PATH:-/usr/local/lxlabs/kloxo}"
 conf="${KLOXO_PATH}/etc/conf/update-source.conf"
+commitfile="${KLOXO_PATH}/etc/conf/update-commit"
+flag="${KLOXO_PATH}/etc/flag/auto-update-panel.flg"
+pidfile="${KLOXO_PATH}/log/kloxonext-update.pid"
+log="${KLOXO_PATH}/log/kloxonext-update.log"
+
+mode="copy"
+
+case "${1}" in
+	--apply) mode="apply" ;;
+	--auto)  mode="auto" ;;
+	--check) mode="check" ;;
+	"")      ;;
+	*)       echo "usage: $0 [--apply|--auto|--check]" ; exit 2 ;;
+esac
+
+if [ "${mode}" == "auto" ] && [ ! -f "${flag}" ] ; then
+	echo "- Automatic panel updates are disabled (enable them on the panel Update page)"
+	exit 0
+fi
 
 if [ ! -f "${conf}" ] ; then
 	echo "- ${conf} not found; nothing to update from"
@@ -26,16 +53,57 @@ BRANCH="${BRANCH:-main}"
 command -v git >/dev/null 2>&1 || pkg_install git
 command -v rsync >/dev/null 2>&1 || pkg_install rsync
 
+installed="$(cat "${commitfile}" 2>/dev/null)"
+remote="$(timeout 30 git ls-remote "${REPO_URL}" "refs/heads/${BRANCH}" 2>/dev/null | awk '{print $1}')"
+
+if [ "${mode}" == "check" ] ; then
+	echo "INSTALLED_COMMIT=${installed}"
+	echo "REMOTE_COMMIT=${remote}"
+	[ -n "${remote}" ] && [ "${remote}" != "${installed}" ] && exit 0
+	exit 1
+fi
+
+if [ "${mode}" != "copy" ] ; then
+	if [ -z "${remote}" ] ; then
+		echo "- Cannot reach ${REPO_URL} (${BRANCH})"
+		exit 1
+	fi
+
+	if [ "${remote}" == "${installed}" ] ; then
+		echo "- KloxoNext is up to date (${installed:0:12})"
+		exit 0
+	fi
+
+	# one update at a time (panel button + daily timer)
+	if [ -f "${pidfile}" ] && kill -0 "$(cat "${pidfile}")" 2>/dev/null ; then
+		echo "- An update is already running"
+		exit 1
+	fi
+
+	echo $$ > "${pidfile}"
+	trap 'rm -f "${pidfile}"' EXIT
+
+	exec > >(tee -a "${log}") 2>&1
+	echo "=== $(date '+%F %T') update ${installed:0:12} -> ${remote:0:12} (${mode})"
+fi
+
 tmp="$(mktemp -d)"
-trap 'rm -rf "${tmp}"' EXIT
+trap 'rm -rf "${tmp}" ; [ "${mode}" != "copy" ] && rm -f "${pidfile}"' EXIT
 
 echo "- Fetching ${REPO_URL} (${BRANCH})"
 git clone -q --depth 1 --branch "${BRANCH}" "${REPO_URL}" "${tmp}/src" || exit 1
 
+# refuse a tree that is not KloxoNext (wrong repository / branch)
+if [ ! -f "${tmp}/src/kloxo/httpdocs/lib/html/include.php" ] || [ ! -f "${tmp}/src/kloxo/pscript/os.inc" ] ; then
+	echo "- ${REPO_URL} (${BRANCH}) does not contain KloxoNext; not updating"
+	exit 1
+fi
+
 old="$(cat "${KLOXO_PATH}/bin/kloxoversion" 2>/dev/null)"
 new="$(cat "${tmp}/src/kloxo/bin/kloxoversion" 2>/dev/null)"
+head="$(git -C "${tmp}/src" rev-parse HEAD 2>/dev/null)"
 
-echo "- Installed: ${old:-unknown}  Available: ${new:-unknown}"
+echo "- Installed: ${old:-unknown}  Available: ${new:-unknown} (${head:0:12})"
 
 rsync -a \
 	--exclude '/etc/conf/' --exclude '/etc/slavedb/' --exclude '/etc/flag/' \
@@ -45,6 +113,17 @@ rsync -a \
 	--exclude '/httpdocs/thirdparty/' --exclude 'custom.*' \
 	"${tmp}/src/kloxo/" "${KLOXO_PATH}/"
 
+chmod -R go-w "${KLOXO_PATH}"
 chown -R lxlabs:lxlabs "${KLOXO_PATH}/httpdocs"
 
-echo "- KloxoNext updated to ${new:-latest}. Run 'sh /script/cleanup' to apply."
+[ -n "${head}" ] && echo "${head}" > "${commitfile}"
+
+if [ "${mode}" == "copy" ] ; then
+	echo "- KloxoNext updated to ${new:-latest}. Run 'sh /script/cleanup' to apply."
+	exit 0
+fi
+
+echo "- Applying (cleanup)"
+cd "${KLOXO_PATH}/httpdocs" && sh /script/cleanup
+
+echo "- KloxoNext updated to ${new:-latest} (${head:0:12})"

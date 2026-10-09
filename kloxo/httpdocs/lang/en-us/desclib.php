@@ -1469,3 +1469,10 @@ $__description["kloxo_wrapper"] = array("Select wrapper");
 $__description["enable_php52m_fpm"] = array("Enable PHP52m as FPM (only 'static' PM)");
 
 $__description["send_limit"] = array("Send Limit (per-account per-day; blank to reset)");
+
+// KloxoNext - updates from GitHub
+$__description["update_source"] = array("Update Source (git)");
+$__description["installed_commit"] = array("Installed Commit");
+$__description["latest_commit"] = array("Latest Commit on GitHub");
+$__description["auto_update_panel"] = array("Update KloxoNext automatically from GitHub (daily, then cleanup)");
+$__description["automatic_updates"] = array("Automatic Updates");

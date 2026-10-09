@@ -313,6 +313,10 @@ if [ "$(grep 'm' <<<${base_name})" != "" ] ; then
 	sed -i 's:__for_phps__:;:' ${main_path}/custom/php-fpm.ini
 	sed -i 's:__session_save_path__:/var/lib/php/session:' ${main_path}/custom/php-fpm.ini
 
+	# shared by every per-user pool: sticky + not listable (like Debian's /var/lib/php/sessions)
+	mkdir -p /var/lib/php/session
+	chmod 1733 /var/lib/php/session
+
 	sed -i 's:/var/log/php-error.log:/var/log/'${base_name}'-error.log:' ${main_path}/custom/php-fpm.ini
 	sed -i 's:/var/log/php-error.log:/var/log/'${base_name}'-error.log:' ${main_path}/custom/php.ini
 else

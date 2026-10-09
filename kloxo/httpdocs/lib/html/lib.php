@@ -8551,9 +8551,7 @@ function setActivateWebServer($nolog = null)
 		log_cleanup("- Activate '{$v}' as Web server", $nolog);
 		exec("chkconfig {$a} on >/dev/null 2>&1");
 
-		if ($v === 'nginx') {
-			exec("chkconfig spawn-fcgi on >/dev/null 2>&1");
-		}
+		// KloxoNext - CGI for nginx/hiawatha comes from kloxo-fcgiwrap (setup-awstats)
 	}
 }
 
@@ -8653,14 +8651,10 @@ function setPhpUpdate($nolog = null)
 
 function setCopyIndexFileToAwstatsDir($nolog = null)
 {
-	$tdir = "/home/kloxo/httpd/awstats/wwwroot/cgi-bin";
-	$sdir = "../file/stats";
-
-	if (file_exists($tdir)) {
-		log_cleanup("Copy awstats_index.php to {$tdir}", $nolog);
-		$file = getLinkCustomfile($sdir, "awstats_index.php");
-		copy($file, "{$tdir}/index.php");
-	}
+	// KloxoNext - build /home/kloxo/httpd/awstats/wwwroot from the distro awstats
+	// package and start the CGI gateway used by nginx/hiawatha (kloxo-fcgiwrap)
+	log_cleanup("Setup AWStats web tree and CGI gateway", $nolog);
+	exec("sh /script/setup-awstats >/dev/null 2>&1");
 }
 
 function getRemoteIp()

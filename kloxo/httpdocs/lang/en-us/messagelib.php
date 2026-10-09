@@ -657,7 +657,7 @@ $__information['sp_specialplay_updateform_skin_pre'] = "<p>Base 'Appearance' is 
 	"<p><b>Example:</b> 'Feather' skin doesn't have 'background image' feature.</p>".
 	"<p><b>Note:</b> Simplicity skin may not work in old browser version. Found 'menu' problem in IE 8 or less version.</p>";
 
-$__information['lxupdate_updateform_lxupdateinfo_pre'] = "<p>Click 'Update Now' for update. Update process will be run in background. The same way with <b>'sh /script/cleanup'</b>.</p>".
+$__information['lxupdate_updateform_lxupdateinfo_pre'] = "<p>Click 'Update Now' to install the newest KloxoNext from GitHub. The update runs in background (<b>'sh /script/kloxonext-update --apply'</b>) and applies it with <b>'sh /script/cleanup'</b>; the panel restarts at the end.</p>".
 	"<p>If Kloxo panel not able to access after update, need running 'sh /script/restart' from ssh.</p>";
 
 $__information['releasenote_list__pre'] = "<p>Information about Kloxo release since first release.</p>";
@@ -960,3 +960,7 @@ $__information['sendmailban_addform__pre'] = "<p>Add 'Target' directory to ban P
 	"<p>Under 'admin', enable 'As Absolute Path' if want absolute path. Example: '/home' will be convert to '/home' instead '/home/admin/home'";
 
 
+
+$__information['lxupdate_updateform_autoupdate_pre'] = "<p>When enabled, the server checks the git repository (GitHub) once a day " .
+	"and, if a newer commit exists, installs it and runs <b>'sh /script/cleanup'</b>. Your 'custom.*' files and settings are kept.</p>" .
+	"<p>Without this permission the panel is only updated when you press 'Update Now' or run <b>'sh /script/kloxonext-update --apply'</b>.</p>";

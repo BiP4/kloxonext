@@ -1038,6 +1038,18 @@ class Web extends Lxdb
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
+		// KloxoNext: render phpinfo() of the domain's own PHP pool inside the panel
+		// (same window, no popup, works before the domain's DNS points here)
+		if ($this->syncserver === 'localhost') {
+			$html = $this->getPhpInfoFromPool();
+
+			if ($html !== null) {
+				$this->printPhpInfoPage($html);
+
+				exit;
+			}
+		}
+
 		$ar['ip_address'] = $gbl->c_session->ip_address;
 		$ar['session'] = $gbl->c_session->tsessionid;
 		rl_exec_get(null, $this->syncserver, array("web", "createSession"), array($ar));
@@ -1045,6 +1057,181 @@ class Web extends Lxdb
 		$gbl->__this_window_url = "http://$this->nname/__kloxo/phpinfo.php?session=$servar";
 
 		return null;
+	}
+
+	/** FastCGI socket of the PHP-FPM pool serving this domain, or null. */
+	function getPhpFpmSocket()
+	{
+		$sel = (isset($this->php_selected)) ? $this->php_selected : '';
+
+		if (!$sel || (strtolower($sel) === '--default--') || (stripos($sel, 'php used') !== false)) {
+			$sel = 'php';
+		}
+
+		$user = (isset($this->customer_name)) ? $this->customer_name : '';
+
+		if (!preg_match('/^[a-z0-9]+$/', $sel) || !preg_match('/^[A-Za-z0-9._-]+$/', $user)) {
+			return null;
+		}
+
+		foreach (array("{$sel}-{$user}", "php-{$user}") as $n) {
+			$sock = "/opt/configs/php-fpm/sock/{$n}.sock";
+
+			if (file_exists($sock)) {
+				return $sock;
+			}
+		}
+
+		return null;
+	}
+
+	/** Run /home/kloxo/httpd/script/phpinfo.php in the domain's pool via FastCGI; returns HTML or null. */
+	function getPhpInfoFromPool()
+	{
+		$sock = $this->getPhpFpmSocket();
+
+		if (!$sock) {
+			return null;
+		}
+
+		$fp = @stream_socket_client("unix://{$sock}", $errno, $errstr, 5);
+
+		if (!$fp) {
+			return null;
+		}
+
+		stream_set_timeout($fp, 30);
+
+		$script = "/home/kloxo/httpd/script/phpinfo.php";
+
+		$params = array(
+			'GATEWAY_INTERFACE' => 'FastCGI/1.0',
+			'REQUEST_METHOD'    => 'GET',
+			'SCRIPT_FILENAME'   => $script,
+			'SCRIPT_NAME'       => '/__kloxo/phpinfo.php',
+			'REQUEST_URI'       => '/__kloxo/phpinfo.php',
+			'DOCUMENT_URI'      => '/__kloxo/phpinfo.php',
+			'QUERY_STRING'      => '',
+			'DOCUMENT_ROOT'     => "/home/{$this->customer_name}/{$this->docroot}",
+			'SERVER_SOFTWARE'   => 'KloxoNext',
+			'SERVER_PROTOCOL'   => 'HTTP/1.1',
+			'SERVER_NAME'       => $this->nname,
+			'HTTP_HOST'         => $this->nname,
+			'SERVER_ADDR'       => '127.0.0.1',
+			'SERVER_PORT'       => '80',
+			'REMOTE_ADDR'       => '127.0.0.1',
+			'REMOTE_PORT'       => '0',
+			// not settable from HTTP (headers arrive as HTTP_*): marks a panel request
+			'KLOXO_PHPINFO'     => '1',
+		);
+
+		$rec = function ($type, $content) {
+			return pack('CCnnCx', 1, $type, 1, strlen($content), 0) . $content;
+		};
+
+		$len = function ($n) {
+			return ($n < 128) ? chr($n) : pack('N', $n | 0x80000000);
+		};
+
+		$body = '';
+
+		foreach ($params as $k => $v) {
+			$body .= $len(strlen($k)) . $len(strlen($v)) . $k . $v;
+		}
+
+		// BEGIN_REQUEST (responder, no keep-alive), PARAMS, empty PARAMS, empty STDIN
+		$req = $rec(1, pack('nCx5', 1, 0)) . $rec(4, $body) . $rec(4, '') . $rec(5, '');
+
+		fwrite($fp, $req);
+
+		$out = '';
+
+		while (!feof($fp)) {
+			$h = fread($fp, 8);
+
+			if (strlen($h) < 8) {
+				break;
+			}
+
+			$r = unpack('Cversion/Ctype/nid/nlen/Cpad/Cres', $h);
+			$c = ($r['len'] > 0) ? stream_get_contents($fp, $r['len']) : '';
+
+			if ($r['pad'] > 0) {
+				fread($fp, $r['pad']);
+			}
+
+			if ($r['type'] === 6) {
+				$out .= $c;
+			} elseif ($r['type'] === 3) {
+				break;
+			}
+		}
+
+		fclose($fp);
+
+		$p = strpos($out, "\r\n\r\n");
+
+		if ($p === false) {
+			return null;
+		}
+
+		$html = substr($out, $p + 4);
+
+		return (stripos($html, 'phpinfo') !== false) ? $html : null;
+	}
+
+	function printPhpInfoPage($html)
+	{
+		global $ghtml, $login;
+
+		// keep phpinfo's own body (its <head>/<style> would restyle the panel)
+		if (preg_match('~<body[^>]*>(.*)</body>~is', $html, $m)) {
+			$html = $m[1];
+		}
+
+		$back = htmlspecialchars($ghtml->getFullUrl("a=show"), ENT_QUOTES, 'UTF-8');
+		$name = htmlspecialchars($this->nname, ENT_QUOTES, 'UTF-8');
+
+		$standalone = !headers_sent();
+
+		if ($standalone) {
+			header('Content-Type: text/html; charset=utf-8');
+			print("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
+				. "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+				. "<title>phpinfo - {$name}</title></head><body>\n");
+		}
+
+		// scoped styles: rendered inside the panel layout, follows its light/dark theme
+		print(<<<HTML
+<style>
+.kn-phpinfo{--pi-line:var(--kn-border,#dfe3ec);--pi-head:var(--kn-surface-2,rgba(127,127,127,.08));max-width:1100px}
+.kn-phpinfo .kn-pi-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 16px}
+.kn-phpinfo .kn-pi-bar a{text-decoration:none;font-weight:600}
+.kn-phpinfo .center{text-align:left}
+.kn-phpinfo table{width:100%;border-collapse:collapse;margin:0 0 20px;border:1px solid var(--pi-line);table-layout:fixed;background:var(--kn-surface,transparent)}
+.kn-phpinfo td,.kn-phpinfo th{padding:6px 10px;border-bottom:1px solid var(--pi-line);vertical-align:top;overflow-wrap:anywhere;text-align:left;font-size:13px}
+.kn-phpinfo .e{width:32%;font-weight:600;background:var(--pi-head)}
+.kn-phpinfo .h td,.kn-phpinfo .h th,.kn-phpinfo th{background:var(--pi-head)}
+.kn-phpinfo h1{font-size:20px;margin:0 0 12px}.kn-phpinfo h2{font-size:17px;margin:26px 0 10px}
+.kn-phpinfo h1 a,.kn-phpinfo h2 a{color:inherit;text-decoration:none}.kn-phpinfo img{display:none}.kn-phpinfo hr{border:0}
+</style>
+<div class="kn-phpinfo">
+<div class="kn-pi-bar"><a href="{$back}">&larr; {$name}</a><strong>phpinfo()</strong></div>
+{$html}
+</div>
+HTML);
+
+		if ($standalone) {
+			print("</body></html>\n");
+
+			return;
+		}
+
+		if ($login->getSpecialObject('sp_specialplay')->skin_name === 'nexus') {
+			include_once getLinkCustomfile(getcwd() . $login->getSkinDir(), "layout_end.php");
+		} else {
+			print("</div></body></html>\n");
+		}
 	}
 
 	static function createSession($ar)
@@ -1153,8 +1340,7 @@ class Web extends Lxdb
 	//	$alist[] = "a=updateForm&sa=ipaddress";
 
 	//	$alist['__title_script'] = 'script';
-		$alist[] = create_simpleObject(array('url' => "http://nname/__kloxo/phpinfo.php", 
-				'purl' => 'a=updateform&sa=phpinfo', 'target' => "target='_blank'"));
+		$alist[] = "a=update&sa=phpinfo";
 
 	//	$alist[] = "a=show&o=phpini";
 	//	$alist[] = "a=updateform&sa=lighty_rewrite";

@@ -10,13 +10,18 @@
 #
 
 unit_state() {
-	systemctl is-enabled "$1" 2>/dev/null
+	local s
+	s="$(systemctl is-enabled "$1" 2>/dev/null)"
+	# aliases (Ubuntu: httpd -> apache2) report the state of their target unit
+	if [ "${s}" == "alias" ] ; then
+		s="$(systemctl is-enabled "$(systemctl show -p Id --value "$1.service" 2>/dev/null)" 2>/dev/null)"
+	fi
+	echo "${s}"
 }
 
 print_line() {
 	local svc="$1" s
 	s="$(unit_state "${svc}")"
-	# aliases (Ubuntu: httpd -> apache2) follow their target, which is listed itself
 	if [ "${s}" == "enabled" ] ; then
 		echo "${svc}	0:off	1:off	2:on	3:on	4:on	5:on	6:off"
 	else

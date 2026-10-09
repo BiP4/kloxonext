@@ -1,0 +1,11 @@
+[Unit]
+Description=KloxoNext - update the panel from its git repository and apply it (cleanup)
+Documentation=https://github.com/BiP4/kloxonext
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# own unit: the cleanup restarts the panel services, which must not take this job down
+ExecStart=/bin/bash /usr/local/lxlabs/kloxo/pscript/kloxonext-update --apply
+TimeoutStartSec=2h

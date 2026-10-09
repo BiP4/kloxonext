@@ -1,15 +1,14 @@
 [Unit]
-Description=Startup script for Kloxo.
-Documentation=https://www.facebook.com/groups/KloxoNextGeneration
-After=network.target remote-fs.target nss-lookup.target
- 
+Description=KloxoNext backend (applies queued restarts, background jobs)
+Documentation=https://github.com/BiP4/kloxonext
+After=network.target remote-fs.target nss-lookup.target mariadb.service
+
 [Service]
-Type=forking
-PIDFile=/usr/local/lxlabs/kloxo/pid/wrapper.pid
-ExecStart=/usr/bin/sh /script/run-kloxo-wrapper &
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s QUIT $MAINPID
-PrivateTmp=true
- 
+Type=simple
+WorkingDirectory=/usr/local/lxlabs/kloxo/httpdocs
+ExecStart=/bin/bash /usr/local/lxlabs/kloxo/sbin/kloxo-wrapper.sh
+Restart=always
+RestartSec=5
+
 [Install]
 WantedBy=multi-user.target

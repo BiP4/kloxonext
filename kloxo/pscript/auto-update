@@ -9,6 +9,9 @@
 #       - enable with:  touch /usr/local/lxlabs/kloxo/etc/flag/auto-install-new-php.flg
 #    3. latest upstream phpMyAdmin / Roundcube / SnappyMail
 #    4. third-party apps switched to the newest PHP installed
+#    5. KloxoNext itself from GitHub, only when the administrator enabled
+#       "Automatic panel updates" on the panel Update page
+#       (etc/flag/auto-update-panel.flg)
 
 . /script/os.inc
 . /script/php-native.inc
@@ -31,3 +34,8 @@ if [ -f "${flag}/auto-install-new-php.flg" ] ; then
 fi
 
 sh /script/thirdparty-update
+
+if [ -f "${flag}/auto-update-panel.flg" ] ; then
+	# separate unit: the cleanup restarts panel services
+	systemctl start --no-block kloxo-panel-update.service
+fi

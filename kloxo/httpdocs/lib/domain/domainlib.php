@@ -1231,13 +1231,7 @@ class Domaind extends DomainBase
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
-		$ar['ip_address'] = $gbl->c_session->ip_address;
-		$ar['session'] = $gbl->c_session->tsessionid;
-		rl_exec_get(null, $this->getObject('web')->syncserver, array("web", "createSession"), array($ar));
-		$servar = base64_encode(serialize($ar));
-		$gbl->__this_window_url = "http://$this->nname/__kloxo/phpinfo.php?session=$servar";
-		
-		return null;
+		return $this->getObject('web')->updatePhpInfo($param);
 	}
 
 	function updateShow($subaction, $param)

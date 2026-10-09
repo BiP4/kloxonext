@@ -4,7 +4,7 @@
 	$gid = $argv[2];
 	$cmd = '';
 
-	for ($i = 3; $i < lx_count($argv); $i++) {
+	for ($i = 3; $i < count($argv); $i++) {
 		$cmd .= "'" . $argv[$i] . "' ";
 	}
 

@@ -621,6 +621,13 @@ foreach ($certnamelist as $ip => $certname) {
 					SuPhp_UserGroup apache apache
 					SetHandler x-suphp-cgi
 				</IfModule>
+				# KloxoNext - no suPHP on EL9+/Ubuntu: run awstats.pl through kloxo-fcgiwrap
+				<IfModule !mod_suphp.c>
+					<IfModule mod_proxy_fcgi.c>
+						ProxyFCGIBackendType GENERIC
+						SetHandler "proxy:unix:/run/kloxo-fcgiwrap/fcgiwrap.sock|fcgi://kloxo-fcgiwrap"
+					</IfModule>
+				</IfModule>
 			#</IfModule>
 		</FilesMatch>
 <?php

@@ -13,7 +13,8 @@ function timed_execution()
 
 	$global_dontlogshell = true;
 
-	timed_exec(2,  "checkRestart");
+	// KloxoNext: apply queued restarts within seconds (new domains go live quickly)
+	timed_exec(1 / 6, "checkRestart");
 	timed_exec(2 * 5, "execSisinfoc");
 	$global_dontlogshell = false;
 }

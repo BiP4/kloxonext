@@ -1,6 +1,5 @@
 #!/bin/bash
 [ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-cd /usr/local/lxlabs/kloxo/httpdocs
-
-sh ../sbin/kloxo-wrapper.sh &
+#    KloxoNext - the backend runs as the kloxo-wrap systemd service
+systemctl restart kloxo-wrap

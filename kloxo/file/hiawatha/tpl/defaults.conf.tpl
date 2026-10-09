@@ -127,7 +127,7 @@ FastCGIserver {
 FastCGIserver {
 	FastCGIid = cgi_apache
 
-	ConnectTo = /tmp/fcgiwrap.sock
+	ConnectTo = /run/kloxo-fcgiwrap/fcgiwrap.sock
 	Extension = pl,cgi,py,rb,shtml
 	SessionTimeout = <?=$timeout;?>
 

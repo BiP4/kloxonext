@@ -603,7 +603,7 @@ function do_socket($socklist, $processfunc)
 		$excpta = null;
 
 		// Set up a blocking call to stream_select()
-		$ready = stream_select($read, $writea, $excpta, 30);
+		$ready = stream_select($read, $writea, $excpta, 5);
 
 		// Server stuff must be executed not merely when it is timed out. But always.
 		if (os_isSelfSystemUser()) {
