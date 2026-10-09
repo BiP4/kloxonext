@@ -1,0 +1,31 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - rebuild OpenDKIM tables from /etc/opendkim/keys/<domain>/private.private
+#    (keys are created by the mail driver when a mail domain is added).
+
+dir=/etc/opendkim
+[ -d "${dir}" ] || exit 0
+
+kt="${dir}/KeyTable"
+st="${dir}/SigningTable"
+th="${dir}/TrustedHosts"
+
+: > "${kt}.tmp"
+: > "${st}.tmp"
+
+for k in "${dir}"/keys/*/private.private ; do
+	[ -f "${k}" ] || continue
+	d="$(basename "$(dirname "${k}")")"
+	echo "private._domainkey.${d} ${d}:private:${k}" >> "${kt}.tmp"
+	echo "*@${d} private._domainkey.${d}" >> "${st}.tmp"
+done
+
+mv -f "${kt}.tmp" "${kt}"
+mv -f "${st}.tmp" "${st}"
+printf '127.0.0.1\n::1\nlocalhost\n%s\n' "$(hostname -f 2>/dev/null)" > "${th}"
+
+chown -R opendkim:opendkim "${dir}/keys" "${kt}" "${st}" "${th}" 2>/dev/null
+chmod 0640 "${kt}" "${st}"
+
+systemctl is-active --quiet opendkim && systemctl reload-or-restart opendkim

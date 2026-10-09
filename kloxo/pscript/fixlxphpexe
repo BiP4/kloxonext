@@ -72,6 +72,7 @@ echo "Execute fixlxphpexe for ${base_name}..."
 cp -f "${INIT_DIR}/kloxo-thirdparty-update.service" /etc/systemd/system/
 cp -f "${INIT_DIR}/kloxo-thirdparty-update.timer" /etc/systemd/system/
 cp -f "${INIT_DIR}/kloxo-apps.service" /etc/systemd/system/
+chmod 0644 /etc/systemd/system/kloxo-thirdparty-update.service /etc/systemd/system/kloxo-thirdparty-update.timer /etc/systemd/system/kloxo-apps.service
 systemctl daemon-reload
 systemctl enable --now kloxo-thirdparty-update.timer >/dev/null 2>&1
 systemctl enable kloxo-apps >/dev/null 2>&1

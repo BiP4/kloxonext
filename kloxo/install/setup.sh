@@ -142,7 +142,7 @@ if os_is_el ; then
 fi
 
 # Kloxo scripts call 'chkconfig'; Ubuntu does not ship it
-if ! command -v chkconfig >/dev/null 2>&1 ; then
+if ! command -v chkconfig >/dev/null 2>&1 || grep -qs KloxoNext /usr/sbin/chkconfig ; then
 	install -m 0755 "${ppath}/file/linux/compat/chkconfig" /usr/sbin/chkconfig
 fi
 
@@ -170,6 +170,7 @@ svc_start mariadb
 
 step "Install web servers"
 pkg_install_logical nginx apache
+os_systemd_overrides
 # the domain web server is started by Kloxo after its configuration is written
 svc_disable apache
 svc_stop apache
@@ -211,13 +212,17 @@ if [ -z "${OPT_PHP}" ] ; then
 	OPT_PHP="${PHP_PANEL_BRANCH} $(php_latest_available)"
 fi
 
-step "Install PHP for domains: $(for x in ${OPT_PHP} ; do echo -n "$(php_dotted "${x}") " ; done)"
+step "Install PHP for domains: $(for x in $(echo "${OPT_PHP}" | tr ' ' '\n' | sort -u) ; do echo -n "$(php_dotted "${x}") " ; done)"
+
+# multiple PHP is always on: every phpXYm gets its php-fpm service (per-domain 'PHP Selected')
+touch "${ppath}/etc/flag/enablemultiplephp.flg"
+
 for xy in $(echo "${OPT_PHP}" | tr ' ' '\n' | sort -u) ; do
 	sh /script/phpm-installer "php${xy}m"
 done
 
-touch "${ppath}/etc/flag/enablemultiplephp.flg"
 php_set_branch "$(php_latest_installed)"
+sh /script/enable-php-fpm
 
 sh /script/fixlxphpexe "php${PHP_PANEL_BRANCH}s"
 sh /script/set-kloxo-apps-php
@@ -253,6 +258,9 @@ sh /script/setdriver --server=localhost --class=spam --driver=bogofilter >/dev/n
 sh /script/skin-set-for-all >/dev/null 2>&1
 sh /script/set-hosts >/dev/null 2>&1
 sh /script/fix-service-list >/dev/null 2>&1
+
+step "Configure mail (Postfix + Dovecot)"
+sh /script/setup-mail
 
 step "Install third-party applications (phpMyAdmin, Roundcube, ...)"
 sh /script/thirdparty-update --install

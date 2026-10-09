@@ -97,3 +97,14 @@ $gl_class_array['pop3__none'] = "driver/mmail/pop3__nonelib.php";
 $gl_class_array['smtp__qmail'] = "driver/mmail/smtp__qmaillib.php";
 $gl_class_array['smtp__none'] = "driver/mmail/smtp__nonelib.php";
 
+
+// KloxoNext - Postfix + Dovecot mail
+$gl_class_array['mmail__postfix'] = "driver/mmail/mmail__postfixlib.php";
+$gl_class_array['mailaccount__postfix'] = "driver/mmail/mailaccount__postfixlib.php";
+$gl_class_array['mailforward__postfix'] = "driver/mmail/mailforward__postfixlib.php";
+$gl_class_array['autoresponder__postfix'] = "driver/mmail/autoresponder__postfixlib.php";
+$gl_class_array['mailcontent__postfix'] = "driver/mmail/mailcontent__postfixlib.php";
+$gl_class_array['mailqueue__postfix'] = "driver/mmail/mailqueue__postfixlib.php";
+$gl_class_array['mailtraffic__postfix'] = "driver/mmail/mailtraffic__postfixlib.php";
+$gl_class_array['servermail__postfix'] = "driver/mmail/servermail__postfixlib.php";
+$gl_class_array['smtp__postfix'] = "driver/mmail/smtp__postfixlib.php";

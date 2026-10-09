@@ -12,6 +12,7 @@ include_once "$dir/lib/html/commandlinelib.php";
 include_once "$dir/lib/sgbl.php";
 include_once "$dir/lib/gbl.php";
 include_once "$dir/lib/php/osplatformlib.php";
+include_once "$dir/lib/php/mailmapslib.php";
 include_once "$dir/lib/html/lib.php";
 include_once "$dir/lib/php/lxlib.php" ;
 include_once "$dir/lib/php/common.inc";

@@ -1,28 +1,16 @@
 <?php 
 
+// KloxoNext - Dovecot from the distribution (systemd); qmail supervise is gone
 class Pop3__dovecot extends lxDriverClass
 {
 	static function installMe()
 	{
-		$spath = '/var/qmail/supervise';
-
-		$darray = array('dovecot');
-
-		foreach ($darray as $k => $v) {
-			rename("{$spath}/{$v}/down", "{$spath}/{$v}/run");
-			rename("{$spath}/{$v}/log/down", "{$spath}/{$v}/log/run");
-		}
+		exec("sh /script/setup-mail >/dev/null 2>&1");
+		exec("systemctl enable --now dovecot >/dev/null 2>&1");
 	}
 
 	static function unInstallMe()
 	{
-		$spath = '/var/qmail/supervise';
-
-		$darray = array('dovecot');
-
-		foreach ($darray as $k => $v) {
-			rename("{$spath}/{$v}/run", "{$spath}/{$v}/down");
-			rename("{$spath}/{$v}/log/run", "{$spath}/{$v}/log/down");
-		}
+		exec("systemctl disable --now dovecot >/dev/null 2>&1");
 	}
 }

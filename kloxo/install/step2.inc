@@ -39,8 +39,8 @@ kloxo_prepare_dirs() {
 			webdrv='s:3:"web";s:5:"nginx";'
 		fi
 
-		# smtp keeps the historical 'qmail' driver id until the Postfix driver lands (phase 4)
-		echo 'O:6:"Remote":1:{s:4:"data";a:5:{'"${webdrv}"'s:4:"spam";s:10:"bogofilter";s:3:"dns";s:4:"bind";s:4:"pop3";s:7:"dovecot";s:4:"smtp";s:5:"qmail";}}' \
+		# mail: Postfix (smtp) + Dovecot (pop3/imap)
+		echo 'O:6:"Remote":1:{s:4:"data";a:5:{'"${webdrv}"'s:4:"spam";s:10:"bogofilter";s:3:"dns";s:4:"bind";s:4:"pop3";s:7:"dovecot";s:4:"smtp";s:7:"postfix";}}' \
 			> "${kloxopath}/etc/slavedb/driver"
 	fi
 

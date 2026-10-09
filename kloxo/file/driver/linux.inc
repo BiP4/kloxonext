@@ -5,7 +5,7 @@ $driver['hostdeny'] = "linux";
 $driver['dns'] = array("none", "bind", "djbdns", "pdns", "nsd", "yadifa");
 $driver['pop3'] = array("none", "dovecot", "courier");
 //$driver['imap4'] = array("none", "courier", "dovecot");
-$driver['smtp'] = array("none", "qmail");
+$driver['smtp'] = array("none", "postfix", "qmail");
 $driver['spam'] = array("none", "bogofilter", "spamassassin");
 $driver['mailinglist'] = "ezmlm";
 $driver['ffile'] = "linux";
@@ -21,7 +21,7 @@ $driver['web'] = array("none", "apache", "lighttpd", "nginx", "hiawatha",
 */
 $driver['web'] = array("none", "apache", "lighttpd", "nginx", "hiawatha", "lighttpdproxy", "nginxproxy", "hiawathaproxy");
 $driver['webcache'] = array("none", "varnish", "trafficserver", "squid");
-$driver['mmail'] = array("qmail");
+$driver['mmail'] = array("postfix", "qmail");
 $driver['cron'] = "linux";
 $driver['llog'] = "linux";
 $driver['davuser'] = 'lighttpd';

@@ -418,6 +418,19 @@ os_debian_bind_compat() {
 	fi
 }
 
+# Recent httpd/apache2 units run with ProtectHome=read-only, but Kloxo keeps
+# websites and their logs under /home: give the web servers write access.
+os_systemd_overrides() {
+	local u d
+	for u in httpd apache2 ; do
+		systemctl list-unit-files "${u}.service" >/dev/null 2>&1 || continue
+		d="/etc/systemd/system/${u}.service.d"
+		mkdir -p "${d}"
+		printf '# KloxoNext - websites and logs live in /home\n[Service]\nProtectHome=no\n' > "${d}/kloxonext.conf"
+	done
+	systemctl daemon-reload
+}
+
 # Random password without depending on mkpasswd/expect (differs across distros)
 os_random_password() {
 	local len="${1:-16}"

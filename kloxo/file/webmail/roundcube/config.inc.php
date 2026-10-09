@@ -12,7 +12,7 @@ $config['db_dsnw'] = 'mysql://roundcube:__DB_PASS__@localhost/roundcubemail';
 
 // Mail served by the local Postfix/Dovecot of this server
 $config['imap_host'] = 'localhost:143';
-$config['smtp_host'] = 'localhost:587';
+$config['smtp_host'] = 'tls://localhost:587';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 $config['imap_conn_options'] = $config['smtp_conn_options'] = [
