@@ -699,3 +699,58 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 .kn-main div[style*="width: 900px"] div.section,
 .kn-main div[style*="width: 900px"] div.section > * { width: 100% !important; max-width: 100%; }
 .kn-main div.section, .kn-main div.section * { resize: none !important; }
+
+/* ------------------------------------------------ dark theme: legacy inline colours
+   htmllib writes light backgrounds, light borders and dark text inline (the skin colour
+   #f4f6fb, #fed/#dfe/#eee boxes, #ddd borders, #024/#333 labels). Map them to tokens. */
+
+:root[data-theme="dark"] .kn-main :is(
+	[style*="#f4f6fb"], [style*="#F4F6FB"], [style*="#fafafa"], [style*="#f8f8f8"], [style*="#f5f5f5"],
+	[style*="#eee"], [style*="#EEE"], [style*="#efefef"], [style*="#e8e8e8"],
+	[style*="#fed"], [style*="#ffeedd"], [style*="#dfe"], [style*="#ddffee"], [style*="#efe"], [style*="#ffe"],
+	[style*="#eef"], [style*="#def"], [style*="#edf"], [style*="#fee"], [style*="#ffd"],
+	[style*="#f8fff8"], [style*="#f8f8ff"], [style*="#fffff0"], [style*="#ffffe0"],
+	[bgcolor="#f4f6fb"], [bgcolor="#eeeeee"], [bgcolor="#eee"], [bgcolor="#f0f0f0"], [bgcolor="#ffffee"]
+):not(input):not(button):not(.button):not(.submitbutton) {
+	background-color: var(--kn-surface-2) !important;
+	background-image: none !important;
+	color: var(--kn-text) !important;
+	border-color: var(--kn-border) !important;
+}
+
+/* light borders (#ddd/#ccc/#aaa and the skin colour) */
+:root[data-theme="dark"] .kn-main :is(
+	[style*="border: 1px solid #ddd"], [style*="border:1px solid #ddd"], [style*="solid #ddd"],
+	[style*="solid #ccc"], [style*="solid #aaa"], [style*="solid #eee"], [style*="solid #f4f6fb"]
+) { border-color: var(--kn-border) !important; }
+:root[data-theme="dark"] .kn-main div.section,
+:root[data-theme="dark"] .kn-main .section > div { border-color: var(--kn-border) !important; }
+
+/* dark inline text: icon labels (#024), headings (#333), misc greys */
+:root[data-theme="dark"] .kn-main :is(
+	[style*="color:#024"], [style*="color: #024"], [style*="color:#333"], [style*="color: #333"],
+	[style*="color:#444"], [style*="color: #444"], [style*="color:#555"], [style*="color: #555"],
+	[style*="color:#222"], [style*="color: #222"], [style*="color:#036"], [style*="color: #036"],
+	[style*="color:#003"], [style*="color: #003"], [style*="color:black"], [style*="color: black"]
+),
+:root[data-theme="dark"] .kn-main .icontextlink,
+:root[data-theme="dark"] .kn-main .if12 { color: var(--kn-text-2) !important; }
+:root[data-theme="dark"] .kn-main a:hover .icontextlink { color: var(--kn-primary) !important; }
+
+/* font icons drawn in navy/slate are invisible on the dark surface */
+:root[data-theme="dark"] .kn-main :is(.if16, .if24, .if32, .if48):is(
+	[style*="#34495e"], [style*="#2c3e50"], [style*="#024"], [style*="#333"], [style*="#000"]
+) { color: var(--kn-text-2) !important; }
+
+/* "Switch To Another" bar and paging cells */
+:root[data-theme="dark"] .kn-main .div_select_switch,
+:root[data-theme="dark"] .kn-main .div_select_switch * { color: var(--kn-text) !important; }
+:root[data-theme="dark"] .kn-main .div_select_switch select { background: var(--kn-surface) !important; }
+:root[data-theme="dark"] .kn-main :is([style*="#cde"], [style*="#ccddee"], [style*="#dde"], [style*="#cdf"], [style*="#bcd"]):not(input):not(button) {
+	background-color: var(--kn-surface-2) !important; color: var(--kn-text) !important;
+}
+/* warning boxes (#fdd / #fcc) */
+:root[data-theme="dark"] .kn-main :is([style*="#fdd"], [style*="#ffdddd"], [style*="#fcc"], [style*="#fde"]):not(input):not(button) {
+	background-color: var(--kn-danger-soft) !important; color: var(--kn-text) !important; border-color: var(--kn-border) !important;
+}
+:root[data-theme="dark"] .kn-main [style*="color:#f22"] { color: var(--kn-danger) !important; }
