@@ -964,3 +964,11 @@ $__information['sendmailban_addform__pre'] = "<p>Add 'Target' directory to ban P
 $__information['lxupdate_updateform_autoupdate_pre'] = "<p>When enabled, the server checks the git repository (GitHub) once a day " .
 	"and, if a newer commit exists, installs it and runs <b>'sh /script/cleanup'</b>. Your 'custom.*' files and settings are kept.</p>" .
 	"<p>Without this permission the panel is only updated when you press 'Update Now' or run <b>'sh /script/kloxonext-update --apply'</b>.</p>";
+
+$__information['firewall_updateform_state_pre'] = "<p>The panel manages <b>ConfigServer Security &amp; Firewall (CSF)</b> when it is installed, otherwise <b>firewalld</b> (AlmaLinux) or <b>ufw</b> (Ubuntu). " .
+	"SSH and the panel ports are always kept open, so changes here cannot lock you out.</p>";
+$__information['firewall_updateform_allow_pre'] = "<p>One IP or network (CIDR) per line, optionally followed by <b># comment</b>. Allowed IPs bypass the port rules.</p>";
+$__information['firewall_updateform_deny_pre'] = "<p>One IP or network (CIDR) per line, optionally followed by <b># comment</b>. Remove a line to unblock it.</p>";
+$__information['firewall_updateform_csfinstall_pre'] = "<p>ConfigServer (the original publisher of CSF) closed on 31 August 2025; CSF continues as GPLv3 community forks " .
+	"(for example github.com/Aetherinox/csf-firewall or github.com/Black-HOST/csf). Paste the https link of a release archive (.tgz or .zip) you trust. " .
+	"CSF replaces firewalld/ufw, keeps the ports that are open now and starts in <b>testing mode</b>: switch testing off on the Status form once access is confirmed.</p>";

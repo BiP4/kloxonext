@@ -537,3 +537,6 @@ $__throw["need_a_or_aaa_record"] = "Need A or AAA record declared";
 $__throw["create_certificate_failed"] = "Create Certificate failed";
 
 $__throw["invalid_port"] = "Invalid port (1-65535, not 80/443, SSL and plain ports must differ)";
+$__keyword['firewall'] = "Firewall";
+$__throw["firewall_error"] = "Firewall";
+$__throw["firewall_csf_install_started"] = "CSF installation started in background (a few minutes). Reload this page later; log: /usr/local/lxlabs/kloxo/log/csf-install.log";

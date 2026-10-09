@@ -1476,3 +1476,20 @@ $__description["installed_commit"] = array("Installed Commit");
 $__description["latest_commit"] = array("Latest Commit on GitHub");
 $__description["auto_update_panel"] = array("Update KloxoNext automatically from GitHub (daily, then cleanup)");
 $__description["automatic_updates"] = array("Automatic Updates");
+
+// KloxoNext - firewall
+$__description["firewall"] = array("Firewall");
+$__description["firewall_backend"] = array("Firewall in use");
+$__description["firewall_active"] = array("Status");
+$__description["firewall_required_ports"] = array("Always open");
+$__description["firewall_csf"] = array("CSF");
+$__description["firewall_state"] = array("Firewall enabled");
+$__description["firewall_csf_testing"] = array("CSF testing mode (rules are flushed every 5 minutes)");
+$__description["firewall_tcp_in"] = array("Incoming TCP ports (comma separated, ranges as 30000-30100)");
+$__description["firewall_udp_in"] = array("Incoming UDP ports");
+$__description["firewall_allow_list"] = array("Allowed IPs (whitelist)");
+$__description["firewall_deny_list"] = array("Blocked IPs");
+$__description["firewall_csf_archive_url"] = array("CSF archive URL (https, .tgz or .zip)");
+$__description["firewall_status"] = array("Status");
+$__description["firewall_ports"] = array("Open Ports");
+$__description["firewall_csf_install"] = array("Install CSF");

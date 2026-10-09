@@ -820,6 +820,7 @@ if (strpos($loginas, "@") !== false) {
 <?php
 		if ((check_if_many_server()) && ($syncserver !== 'localhost')) {	
 ?>
+						&#x00bb;&nbsp;<a href="/display.php?<?=$consumedlogin;?>frm_action=show&<?=$localhostquery;?>frm_o_o[1][class]=firewall"><?=$login->getKeywordUc('firewall');?></a> (localhost)<br/>
 						&#x00bb;&nbsp;<?=$ghtml->getTitleOnly("a=show&o=sshconfig");?>
 
 							&#x00bb;&nbsp;<a href="/display.php?<?=$consumedlogin;?>frm_action=show&<?=$localhostquery;?>frm_o_o[1][class]=sshconfig">localhost</a>
@@ -839,6 +840,7 @@ if (strpos($loginas, "@") !== false) {
 <?php
 		} else {
 ?>
+						&#x00bb;&nbsp;<a href="/display.php?<?=$consumedlogin;?>frm_action=show&<?=$localhostquery;?>frm_o_o[1][class]=firewall"><?=$login->getKeywordUc('firewall');?></a><br/>
 						&#x00bb;&nbsp;<a href="/display.php?<?=$consumedlogin;?>frm_action=show&<?=$serverquery;?>frm_o_o[1][class]=sshconfig"><?=$ghtml->getTitleOnly("a=show&o=sshconfig");?></a><br/>
 						&#x00bb;&nbsp;<a href="/display.php?<?=$consumedlogin;?>frm_action=list&<?=$serverquery;?>frm_o_cname=watchdog"><?=$ghtml->getTitleOnly("a=list&c=watchdog");?></a><br/>
 						&#x00bb;&nbsp;<a href="/display.php?<?=$consumedlogin;?>frm_action=list&<?=$serverquery;?>frm_o_cname=hostdeny"><?=$ghtml->getTitleOnly("a=list&c=hostdeny");?></a><br/>

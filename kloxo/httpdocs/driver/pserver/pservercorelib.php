@@ -144,6 +144,7 @@ class pservercore extends Lxclient
 	static $__desc_serverftp_o = array('d', '', '', '');
 	static $__desc_driver_o = array('d', '', '', '');
 	static $__desc_lxupdate_o = array('', '', '', '');
+	static $__desc_firewall_o = array('', '', '', '');
 	static $__desc_servermail_o = array('d', '', '', '');
 	static $__desc_serverspam_o = array('', '', '', '');
 	static $__desc_llog_o = array('d', '', '', '');

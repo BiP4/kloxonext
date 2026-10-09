@@ -75,6 +75,7 @@ $gl_class_array["diskusage"] = "driver/pserver/diskusagelib.php";
 $gl_class_array["uuser"] = "driver/pserver/uuserlib.php";
 $gl_class_array["ftpuser"] = "driver/ftp/ftpuserlib.php";
 $gl_class_array["lxupdate"] = "driver/pserver/lxupdatelib.php";
+$gl_class_array["firewall"] = "driver/pserver/firewalllib.php";
 $gl_class_array["releasenote"] = "driver/pserver/releasenotelib.php";
 $gl_class_array["anonftpipaddress"] = "driver/ftp/anonftpipaddresslib.php";
 $gl_class_array["firewall"] = "driver/pserver/firewalllib.php";

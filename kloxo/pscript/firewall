@@ -1,0 +1,389 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+#
+#    KloxoNext - firewall management used by the panel (Admin > Security > Firewall)
+#
+#    Backend, in order of preference:
+#      csf        ConfigServer Security & Firewall, when installed (/usr/sbin/csf)
+#      firewalld  AlmaLinux / Rocky
+#      ufw        Ubuntu
+#
+#      firewall status                     key=value lines
+#      firewall list allow|deny            "<ip/cidr> # comment" lines
+#      firewall set-ports <tcp> <udp>      comma lists, ranges as 30000-30100
+#      firewall sync allow|deny <file>     make the list equal to the file (same format as 'list')
+#      firewall enable | disable
+#      firewall csf-testing on|off         CSF TESTING mode (rules flushed every 5 minutes)
+#      firewall csf-install <https-url>    install CSF from a .tgz/.zip archive (GPL fork release)
+#
+#    SSH and the panel ports are always kept open (never locks the administrator out).
+#
+
+. /script/os.inc
+
+KLOXO_PATH="${KLOXO_PATH:-/usr/local/lxlabs/kloxo}"
+NOTES="${KLOXO_PATH}/etc/conf/firewall.notes"
+
+die() { echo "ERROR=$*" >&2 ; exit 1 ; }
+
+# ---------------------------------------------------------------- helpers
+
+ssh_port() {
+	local p
+	p="$(sshd -T 2>/dev/null | awk '$1=="port"{print $2; exit}')"
+	[ -z "${p}" ] && p="$(awk 'tolower($1)=="port"{print $2; exit}' /etc/ssh/sshd_config 2>/dev/null)"
+	echo "${p:-22}"
+}
+
+panel_ports() {
+	local s n
+	s="$(cat "${KLOXO_PATH}/init/port-ssl" 2>/dev/null)"
+	n="$(cat "${KLOXO_PATH}/init/port-nonssl" 2>/dev/null)"
+	echo "${s:-7777} ${n:-7778}"
+}
+
+# ports that must stay open whatever the administrator submits
+required_tcp() { echo "$(ssh_port) $(panel_ports)" | tr ' ' '\n' | grep -E '^[0-9]+$' | sort -un | tr '\n' ' ' ; }
+
+valid_ip() {
+	local ip="${1%/*}" pre="${1#*/}"
+	[ "${pre}" == "$1" ] && pre=""
+
+	if [[ "${ip}" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] ; then
+		local IFS=. o
+		for o in ${ip} ; do [ "${o}" -le 255 ] || return 1 ; done
+		[ -z "${pre}" ] || { [[ "${pre}" =~ ^[0-9]+$ ]] && [ "${pre}" -le 32 ] ; }
+	elif [[ "${ip}" =~ ^[0-9a-fA-F:]+$ ]] && [[ "${ip}" == *:* ]] ; then
+		[ -z "${pre}" ] || { [[ "${pre}" =~ ^[0-9]+$ ]] && [ "${pre}" -le 128 ] ; }
+	else
+		return 1
+	fi
+}
+
+# "80, 443,30000-30100" -> "80 443 30000-30100" (validated)
+norm_ports() {
+	local p out=""
+	for p in $(echo "$1" | tr ',;' '  ') ; do
+		p="${p//:/-}"
+		if [[ "${p}" =~ ^[0-9]+$ ]] && [ "${p}" -ge 1 ] && [ "${p}" -le 65535 ] ; then
+			out="${out} ${p}"
+		elif [[ "${p}" =~ ^([0-9]+)-([0-9]+)$ ]] && [ "${BASH_REMATCH[1]}" -lt "${BASH_REMATCH[2]}" ] && [ "${BASH_REMATCH[2]}" -le 65535 ] ; then
+			out="${out} ${p}"
+		else
+			die "invalid port '${p}'"
+		fi
+	done
+	echo "${out}" | tr ' ' '\n' | grep -v '^$' | sort -u -t- -k1,1n | tr '\n' ' '
+}
+
+note_get() { awk -v ip="$1" '$1==ip{ $1=""; sub(/^ /,""); print; exit }' "${NOTES}" 2>/dev/null ; }
+note_set() {
+	touch "${NOTES}" ; chmod 600 "${NOTES}"
+	awk -v ip="$1" '$1!=ip' "${NOTES}" > "${NOTES}.tmp" && mv -f "${NOTES}.tmp" "${NOTES}"
+	[ -n "$2" ] && echo "$1 $2" >> "${NOTES}"
+}
+
+backend() {
+	if [ -x /usr/sbin/csf ] ; then
+		echo csf
+	elif command -v firewall-cmd >/dev/null 2>&1 ; then
+		echo firewalld
+	elif command -v ufw >/dev/null 2>&1 ; then
+		echo ufw
+	elif os_is_debian ; then
+		echo ufw-missing
+	else
+		echo firewalld-missing
+	fi
+}
+
+ensure_backend() {
+	case "$(backend)" in
+		ufw-missing)       pkg_install ufw >/dev/null 2>&1 ;;
+		firewalld-missing) pkg_install firewalld >/dev/null 2>&1 ;;
+	esac
+	B="$(backend)"
+	[[ "${B}" == *-missing ]] && die "no firewall available (install of ${B%-missing} failed)"
+}
+
+# ---------------------------------------------------------------- csf
+
+csf_conf_get() { sed -n "s/^$1 *= *\"\(.*\)\"/\1/p" /etc/csf/csf.conf | head -1 ; }
+csf_conf_set() { sed -i "s|^$1 *= *\".*\"|$1 = \"$2\"|" /etc/csf/csf.conf ; }
+
+csf_status() {
+	echo "ACTIVE=$( [ -f /etc/csf/csf.disable ] && echo no || { csf -l >/dev/null 2>&1 && echo yes || echo no ; } )"
+	echo "CSF_TESTING=$( [ "$(csf_conf_get TESTING)" == "1" ] && echo on || echo off )"
+	if [ "$(csf_conf_get TESTING)" == "1" ] ; then
+		echo "LFD=stopped (lfd does not run in testing mode)"
+	else
+		echo "LFD=$(systemctl is-active lfd 2>/dev/null)"
+	fi
+	echo "CSF_VERSION=$(csf -v 2>/dev/null | grep -o 'v[0-9][0-9.]*' | head -1)"
+	echo "TCP_IN=$(csf_conf_get TCP_IN | tr ',' ' ' | sed 's/:/-/g')"
+	echo "UDP_IN=$(csf_conf_get UDP_IN | tr ',' ' ' | sed 's/:/-/g')"
+}
+
+csf_list() {
+	local f=/etc/csf/csf.$1
+	grep -v '^\s*#' "${f}" 2>/dev/null | grep -v '^\s*$' | grep -v '^Include' | \
+		sed -E 's/^([^ #|]+)[^#]*(#.*)?$/\1 \2/' | sed 's/ *$//'
+}
+
+# ---------------------------------------------------------------- firewalld
+
+fwd_status() {
+	echo "ACTIVE=$( [ "$(firewall-cmd --state 2>/dev/null)" == "running" ] && echo yes || echo no )"
+	echo "TCP_IN=$(firewall-cmd --permanent --list-ports 2>/dev/null | tr ' ' '\n' | sed -n 's#/tcp$##p' | tr '\n' ' ')"
+	echo "UDP_IN=$(firewall-cmd --permanent --list-ports 2>/dev/null | tr ' ' '\n' | sed -n 's#/udp$##p' | tr '\n' ' ')"
+	echo "SERVICES=$(firewall-cmd --permanent --list-services 2>/dev/null)"
+}
+
+fwd_list() {
+	if [ "$1" == "allow" ] ; then
+		firewall-cmd --permanent --zone=trusted --list-sources 2>/dev/null | tr ' ' '\n' | grep -v '^$'
+	else
+		firewall-cmd --permanent --list-rich-rules 2>/dev/null | \
+			sed -n 's/.*source address="\([^"]*\)".*\(drop\|reject\).*/\1/p'
+	fi | while read -r ip ; do
+		n="$(note_get "${ip}")"
+		echo "${ip}${n:+ # ${n}}"
+	done
+}
+
+fwd_rich() { local fam=ipv4 ; [[ "$1" == *:* ]] && fam=ipv6 ; echo "rule family=\"${fam}\" source address=\"$1\" drop" ; }
+
+# ---------------------------------------------------------------- ufw
+
+ufw_status() {
+	echo "ACTIVE=$(ufw status 2>/dev/null | grep -q '^Status: active' && echo yes || echo no)"
+	echo "TCP_IN=$(ufw show added 2>/dev/null | sed -n 's#^ufw allow \([0-9:]*\)/tcp$#\1#p' | sed 's/:/-/g' | tr '\n' ' ')"
+	echo "UDP_IN=$(ufw show added 2>/dev/null | sed -n 's#^ufw allow \([0-9:]*\)/udp$#\1#p' | sed 's/:/-/g' | tr '\n' ' ')"
+}
+
+ufw_list() {
+	local verb=allow
+	[ "$1" == "deny" ] && verb=deny
+	ufw show added 2>/dev/null | sed -n "s#^ufw \(insert [0-9]* \)\?${verb} from \([^ ]*\)\( comment '\(.*\)'\)\?\$#\2 \4#p" | \
+		while read -r ip c ; do echo "${ip}${c:+ # ${c}}" ; done
+}
+
+# ---------------------------------------------------------------- commands
+
+cmd_status() {
+	B="$(backend)"
+	echo "BACKEND=${B}"
+	echo "CSF_INSTALLED=$( [ -x /usr/sbin/csf ] && echo yes || echo no )"
+	echo "REQUIRED_TCP=$(required_tcp)"
+	case "${B}" in
+		csf)       csf_status ;;
+		firewalld) fwd_status ;;
+		ufw)       ufw_status ;;
+		*)         echo "ACTIVE=no" ;;
+	esac
+}
+
+cmd_list() {
+	[[ "$1" =~ ^(allow|deny)$ ]] || die "list allow|deny"
+	case "$(backend)" in
+		csf)       csf_list "$1" ;;
+		firewalld) fwd_list "$1" ;;
+		ufw)       ufw_list "$1" ;;
+	esac
+}
+
+cmd_set_ports() {
+	local tcp udp p
+	tcp="$(norm_ports "$1")" || exit 1
+	udp="$(norm_ports "$2")" || exit 1
+	tcp="$(echo "${tcp} $(required_tcp)" | tr ' ' '\n' | grep -v '^$' | sort -u -t- -k1,1n | tr '\n' ' ')"
+
+	ensure_backend
+
+	case "${B}" in
+		csf)
+			csf_conf_set TCP_IN "$(echo ${tcp} | tr ' ' ',' | tr '-' ':')"
+			csf_conf_set UDP_IN "$(echo ${udp} | tr ' ' ',' | tr '-' ':')"
+			csf -r >/dev/null 2>&1
+			;;
+		firewalld)
+			local cur
+			for cur in $(firewall-cmd --permanent --list-ports) ; do
+				firewall-cmd -q --permanent --remove-port="${cur}"
+			done
+			for p in ${tcp} ; do firewall-cmd -q --permanent --add-port="${p}/tcp" ; done
+			for p in ${udp} ; do firewall-cmd -q --permanent --add-port="${p}/udp" ; done
+			firewall-cmd -q --reload 2>/dev/null
+			;;
+		ufw)
+			local r
+			ufw show added 2>/dev/null | sed -n 's#^ufw allow \([0-9:]*/\(tcp\|udp\)\)$#\1#p' | while read -r r ; do
+				ufw --force delete allow "${r}" >/dev/null
+			done
+			for p in ${tcp} ; do ufw allow "${p//-/:}/tcp" >/dev/null ; done
+			for p in ${udp} ; do ufw allow "${p//-/:}/udp" >/dev/null ; done
+			;;
+	esac
+
+	echo "OK=ports applied"
+}
+
+cmd_sync() {
+	local kind="$1" file="$2" ip c line want have
+	[[ "${kind}" =~ ^(allow|deny)$ ]] || die "sync allow|deny <file>"
+	[ -f "${file}" ] || die "no file"
+
+	ensure_backend
+
+	declare -A W=() WC=()
+
+	while IFS= read -r line || [ -n "${line}" ] ; do
+		line="$(echo "${line}" | sed 's/\r//; s/^ *//; s/ *$//')"
+		[ -z "${line}" ] && continue
+		[[ "${line}" == \#* ]] && continue
+		ip="${line%%[ #]*}"
+		c="$(echo "${line#"${ip}"}" | sed 's/^ *#\? *//' | tr -cd '[:alnum:] ._:@/()-' | cut -c1-80)"
+		valid_ip "${ip}" || die "invalid IP '${ip}'"
+		W["${ip}"]=1
+		WC["${ip}"]="${c}"
+	done < "${file}"
+
+	declare -A H=()
+	while read -r ip _ ; do [ -n "${ip}" ] && H["${ip}"]=1 ; done < <(cmd_list "${kind}")
+
+	# removed
+	for ip in "${!H[@]}" ; do
+		[ -n "${W[${ip}]}" ] && continue
+		case "${B}" in
+			csf)       if [ "${kind}" == "allow" ] ; then csf -ar "${ip}" ; else csf -dr "${ip}" ; fi >/dev/null 2>&1 ;;
+			firewalld) if [ "${kind}" == "allow" ] ; then firewall-cmd -q --permanent --zone=trusted --remove-source="${ip}"
+			           else firewall-cmd -q --permanent --remove-rich-rule="$(fwd_rich "${ip}")" ; fi ;;
+			ufw)       ufw --force delete "${kind}" from "${ip}" >/dev/null 2>&1 ;;
+		esac
+		note_set "${ip}" ""
+	done
+
+	# added
+	for ip in "${!W[@]}" ; do
+		c="${WC[${ip}]}"
+		note_set "${ip}" "${c}"
+		[ -n "${H[${ip}]}" ] && continue
+		case "${B}" in
+			csf)       if [ "${kind}" == "allow" ] ; then csf -a "${ip}" "${c:-KloxoNext}" ; else csf -d "${ip}" "${c:-KloxoNext}" ; fi >/dev/null 2>&1 ;;
+			firewalld) if [ "${kind}" == "allow" ] ; then firewall-cmd -q --permanent --zone=trusted --add-source="${ip}"
+			           else firewall-cmd -q --permanent --add-rich-rule="$(fwd_rich "${ip}")" ; fi ;;
+			ufw)       if [ "${kind}" == "allow" ] ; then ufw allow from "${ip}" comment "${c:-KloxoNext}" >/dev/null
+			           else ufw insert 1 deny from "${ip}" comment "${c:-KloxoNext}" >/dev/null ; fi ;;
+		esac
+	done
+
+	[ "${B}" == "firewalld" ] && firewall-cmd -q --reload 2>/dev/null
+
+	echo "OK=${kind} list applied"
+}
+
+cmd_enable() {
+	ensure_backend
+
+	# open SSH + panel before switching anything on
+	local cur
+	cur="$(cmd_status | sed -n 's/^TCP_IN=//p')"
+	cmd_set_ports "${cur}" "$(cmd_status | sed -n 's/^UDP_IN=//p')" >/dev/null
+
+	case "${B}" in
+		csf)       rm -f /etc/csf/csf.disable ; csf -e >/dev/null 2>&1 ; systemctl enable --now csf lfd >/dev/null 2>&1 ;;
+		firewalld) systemctl enable --now firewalld >/dev/null 2>&1 ;;
+		ufw)       ufw --force enable >/dev/null ;;
+	esac
+
+	echo "OK=firewall enabled"
+}
+
+cmd_disable() {
+	case "$(backend)" in
+		csf)       csf -x >/dev/null 2>&1 ;;
+		firewalld) systemctl disable --now firewalld >/dev/null 2>&1 ;;
+		ufw)       ufw --force disable >/dev/null ;;
+	esac
+
+	echo "OK=firewall disabled"
+}
+
+cmd_csf_testing() {
+	[ -x /usr/sbin/csf ] || die "CSF is not installed"
+	[[ "$1" =~ ^(on|off)$ ]] || die "csf-testing on|off"
+	csf_conf_set TESTING "$( [ "$1" == "on" ] && echo 1 || echo 0 )"
+	csf -r >/dev/null 2>&1
+	systemctl restart lfd >/dev/null 2>&1
+	echo "OK=CSF testing mode $1"
+}
+
+cmd_csf_install() {
+	local url="$1" tmp src keep_tcp keep_udp
+	[[ "${url}" =~ ^https://[A-Za-z0-9._/~%+=?\&:-]+$ ]] || die "the archive URL must be https://"
+	[ -x /usr/sbin/csf ] && die "CSF is already installed"
+
+	# keep the ports already opened by the current firewall
+	keep_tcp="$(cmd_status | sed -n 's/^TCP_IN=//p')"
+	keep_udp="$(cmd_status | sed -n 's/^UDP_IN=//p')"
+
+	if os_is_debian ; then
+		pkg_install perl libwww-perl liblwp-protocol-https-perl libgd-graph-perl ipset iptables unzip >/dev/null 2>&1
+	else
+		pkg_install perl perl-libwww-perl perl-LWP-Protocol-https perl-GDGraph perl-Time-HiRes perl-Sys-Syslog \
+			perl-Math-BigInt ipset iptables-nft unzip >/dev/null 2>&1
+	fi
+
+	tmp="$(mktemp -d)"
+	trap 'rm -rf "${tmp}"' EXIT
+
+	curl -fsSL --max-time 300 -o "${tmp}/csf.pkg" "${url}" || die "download failed"
+
+	mkdir "${tmp}/x"
+	if unzip -tq "${tmp}/csf.pkg" >/dev/null 2>&1 ; then
+		unzip -q "${tmp}/csf.pkg" -d "${tmp}/x"
+	else
+		tar -xzf "${tmp}/csf.pkg" -C "${tmp}/x" 2>/dev/null || die "not a .tgz or .zip archive"
+	fi
+
+	# archives contain csf/install.sh (possibly one level deeper)
+	src="$(find "${tmp}/x" -maxdepth 3 -name install.sh -path '*csf*' | head -1)"
+	[ -z "${src}" ] && src="$(find "${tmp}/x" -maxdepth 3 -name install.sh | head -1)"
+	[ -z "${src}" ] && die "install.sh not found in the archive"
+
+	# CSF replaces firewalld / ufw
+	systemctl disable --now firewalld >/dev/null 2>&1
+	command -v ufw >/dev/null 2>&1 && ufw --force disable >/dev/null 2>&1
+
+	(cd "$(dirname "${src}")" && sh install.sh) > "${KLOXO_PATH}/log/csf-install.log" 2>&1
+	[ -x /usr/sbin/csf ] || die "CSF installation failed (see ${KLOXO_PATH}/log/csf-install.log)"
+
+	# start in TESTING mode with the ports that were open, SSH and the panel included;
+	# without earlier custom ports keep CSF's own hosting defaults (ftp, smtp, dns, http, imap ...)
+	csf_conf_set TESTING "1"
+	B=csf
+	extra=""
+	for p in ${keep_tcp} ; do
+		[[ " $(required_tcp) " == *" ${p} "* ]] || extra="${extra} ${p}"
+	done
+	if [ -z "${extra}" ] ; then
+		keep_tcp="$(csf_conf_get TCP_IN | tr ',' ' ' | tr ':' '-')"
+		keep_udp="$(csf_conf_get UDP_IN | tr ',' ' ' | tr ':' '-')"
+	fi
+	cmd_set_ports "${keep_tcp}" "${keep_udp:-53}" >/dev/null
+	systemctl enable --now csf lfd >/dev/null 2>&1
+
+	echo "OK=CSF installed (TESTING mode on - disable it once you have checked access)"
+}
+
+case "$1" in
+	status)      cmd_status ;;
+	list)        cmd_list "$2" ;;
+	set-ports)   cmd_set_ports "$2" "$3" ;;
+	sync)        cmd_sync "$2" "$3" ;;
+	enable)      cmd_enable ;;
+	disable)     cmd_disable ;;
+	csf-testing) cmd_csf_testing "$2" ;;
+	csf-install) cmd_csf_install "$2" ;;
+	*)           echo "usage: $0 status|list|set-ports|sync|enable|disable|csf-testing|csf-install" ; exit 2 ;;
+esac
