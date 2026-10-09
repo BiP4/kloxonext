@@ -1,27 +1,25 @@
-<br /> <br />
-<div align="center">
-	<table style="border-left: 1px solid #cccccc; spacing: 0; padding: 5px; width: 250px">
-		<tr>
-			<td colspan="3" style="border-bottom: 1px solid #cccccc; text-align: center"><b>Webmail List</b></td>
-		</tr>
 <?php
-$dirs = glob("*");
-$count = 1;
-foreach ($dirs as $dir) {
-//	if ($dir != "." && $dir != "..") {
-		if ($dir != "img" && $dir != "images" && $dir != "disabled"  && is_dir($dir)) {
-			if (file_exists("{$dir}/index.php")) {
-?>
-		<tr>
-			<td><?php echo $count; ?></td><td>-</td><td style="border-bottom: 1px solid #cccccc; width: 100%"><a target="_blank" href="/<?php echo $dir; ?>"><?php echo ucfirst("$dir"); ?></a></td>
-		</tr>
-<?php
-			}
+	$page = 'Webmail';
 
-			$count++;
+	$apps = array();
+
+	foreach (glob("*", GLOB_ONLYDIR) as $dir) {
+		if (in_array($dir, array('img', 'images', 'disabled'), true) || !file_exists("{$dir}/index.php")) {
+			continue;
 		}
-//	}
-}
+
+		$apps[] = $dir;
+	}
+
+	$labels = array('roundcube' => 'Roundcube', 'snappymail' => 'SnappyMail', 'rainloop' => 'RainLoop');
 ?>
-	</table>
-</div>
+	<section class="card" aria-labelledby="wm-title">
+		<h1 id="wm-title">Webmail</h1>
+		<p class="sub">Choose the webmail application to read your mail.</p>
+<?php if (empty($apps)) { ?>
+		<p>No webmail application is installed on this server.</p>
+<?php } ?>
+<?php foreach ($apps as $dir) { ?>
+		<p><a class="btn" href="/<?= htmlspecialchars($dir, ENT_QUOTES, 'UTF-8') ?>/"><?= htmlspecialchars(isset($labels[$dir]) ? $labels[$dir] : ucfirst($dir), ENT_QUOTES, 'UTF-8') ?></a></p>
+<?php } ?>
+	</section>

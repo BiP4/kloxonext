@@ -86,7 +86,7 @@ a:hover { color: var(--primary-hover); text-decoration: underline; }
 .field label { font-size: 13px; font-weight: 600; color: var(--text-2); }
 .field input { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 .field input:focus { outline: none; border-color: var(--primary); box-shadow: var(--focus); }
-.btn { width: 100%; font: inherit; font-weight: 600; padding: 11px 14px; border-radius: 10px; border: 0; background: var(--primary); color: var(--on-primary); cursor: pointer; }
+.btn { display: block; width: 100%; text-align: center; text-decoration: none !important; font: inherit; font-weight: 600; padding: 11px 14px; border-radius: 10px; border: 0; background: var(--primary); color: var(--on-primary) !important; cursor: pointer; }
 .btn:hover { background: var(--primary-hover); }
 .btn:focus-visible { outline: none; box-shadow: var(--focus); }
 .row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 13px; color: var(--text-3); }

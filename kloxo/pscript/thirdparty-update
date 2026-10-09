@@ -201,7 +201,19 @@ roundcube_configure() {
 }
 
 update_roundcube() {
-	local target="${WEBMAIL}/roundcube" cur latest url sum info
+	# Roundcube >= 1.7 must be served from its public_html/ directory: the
+	# application lives in webmail/.roundcube (hidden from the webmail chooser)
+	# and webmail/roundcube is a symlink to the public part.
+	local target="${WEBMAIL}/.roundcube" link="${WEBMAIL}/roundcube" cur latest url sum info
+
+	if [ -d "${link}" ] && [ ! -L "${link}" ] ; then
+		# layout of older KloxoNext/Kloxo installs
+		mv "${link}" "${target}"
+	fi
+
+	if [ -d "${target}" ] && [ ! -L "${link}" ] ; then
+		if [ -d "${target}/public_html" ] ; then ln -snf .roundcube/public_html "${link}" ; else ln -snf .roundcube "${link}" ; fi
+	fi
 
 	cur="$(state_get roundcube)"
 	[ -z "${cur}" ] && [ -f "${target}/program/include/iniset.php" ] && \
@@ -242,7 +254,14 @@ update_roundcube() {
 		rm -rf "${target}/installer"
 	fi
 
+	if [ -d "${target}/public_html" ] ; then
+		ln -snf .roundcube/public_html "${link}"
+	else
+		ln -snf .roundcube "${link}"
+	fi
+
 	chown -R apache:apache "${target}"
+	chown -h apache:apache "${link}"
 	state_set roundcube "${latest}"
 	log "  + Roundcube ${latest} installed"
 }
