@@ -22,6 +22,7 @@ if (!$kn_is_mailuser) {
 	include getLinkCustomfile(getcwd() . "/theme/skin/simplicity/default", "menu.php");
 	$kn_menu_html = ob_get_clean();
 	$kn_sections = kn_nav_sections($kn_menu_html, $login);
+	$kn_sections = kn_nav_curate($kn_sections);
 }
 
 // --- counters (same queries as the simplicity top bar) ---------------------
