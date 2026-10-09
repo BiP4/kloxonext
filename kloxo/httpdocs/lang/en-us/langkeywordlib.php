@@ -535,3 +535,5 @@ $__throw["program_is_already_updating"] = "Program is already updating";
 $__throw["need_a_or_aaa_record"] = "Need A or AAA record declared";
 
 $__throw["create_certificate_failed"] = "Create Certificate failed";
+
+$__throw["invalid_port"] = "Invalid port (1-65535, not 80/443, SSL and plain ports must differ)";

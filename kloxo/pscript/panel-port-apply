@@ -1,0 +1,31 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - apply new panel ports (Admin > Advanced > Control Panel Config)
+#
+#    Opens the ports in firewalld/ufw when they are active, then restarts the
+#    panel nginx (kloxo-web), whose ExecStartPre renders kloxo-nginx.conf with
+#    the ports stored in the database (init/changeport.php).
+#
+#    The panel runs this through 'systemd-run' so it lives outside kloxo-php:
+#    restarting the panel from its own PHP process used to kill the restart.
+
+KLOXO_PATH=/usr/local/lxlabs/kloxo
+
+cd "${KLOXO_PATH}/httpdocs" || exit 1
+
+ports="$(lxphp.exe ../bin/misc/panel-ports.php 2>/dev/null | tail -1)"
+
+for p in ${ports} ; do
+	[[ "${p}" =~ ^[0-9]+$ ]] && [ "${p}" -gt 0 ] && [ "${p}" -lt 65536 ] || continue
+
+	if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1 ; then
+		firewall-cmd -q --permanent --add-port="${p}/tcp" && firewall-cmd -q --add-port="${p}/tcp"
+	fi
+
+	if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q '^Status: active' ; then
+		ufw allow "${p}/tcp" >/dev/null
+	fi
+done
+
+systemctl restart kloxo-web.service

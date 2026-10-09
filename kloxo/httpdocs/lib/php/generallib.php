@@ -279,8 +279,20 @@ class General extends Lxdb
 
 		$kloxowrapper = $this->portconfig_b->kloxowrapper = $param['portconfig_b-kloxowrapper'];
 
-		exec("echo '$sslport' > /home/kloxo/httpd/cp/.ssl.port");
-		exec("echo '$nonsslport' > /home/kloxo/httpd/cp/.nonssl.port");
+		// KloxoNext - ports end up in shell commands and the panel nginx config
+		foreach (array($sslport, $nonsslport) as $p) {
+			if (!preg_match('/^[0-9]{1,5}$/', (string)$p) || ((int)$p < 1) || ((int)$p > 65535)
+					|| in_array((int)$p, array(80, 443), true)) {
+				throw new lxException($login->getThrow('invalid_port'), '', $p);
+			}
+		}
+
+		if ((int)$sslport === (int)$nonsslport) {
+			throw new lxException($login->getThrow('invalid_port'), '', $sslport);
+		}
+
+		file_put_contents("/home/kloxo/httpd/cp/.ssl.port", "{$sslport}\n");
+		file_put_contents("/home/kloxo/httpd/cp/.nonssl.port", "{$nonsslport}\n");
 
 		$loginpath = "../httpdocs/login";
 
@@ -342,7 +354,7 @@ class General extends Lxdb
 				$scheme = 'https';
 				$port = $this->portconfig_b->sslport;
 			} else {
-				$scheme = $_SERVER["HTTP_SCHEME"];
+				$scheme = (!empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] !== 'off')) ? 'https' : 'http';
 
 				if ($scheme === 'https') {
 					$port = $this->portconfig_b->sslport;
@@ -353,11 +365,16 @@ class General extends Lxdb
 
 			$requesturi = $_SERVER["REQUEST_URI"];
 
-			$cmd = "/tmp/kloxo-restart.sh";
-			$text = "sh /script/restart; 'rm' -f {$cmd}";
-			file_put_contents($cmd, $text);
+			// KloxoNext - apply outside the panel's own processes (a restart started
+			// from kloxo-php killed itself with kloxo-php before reaching kloxo-web),
+			// a few seconds later so this response still reaches the browser
+			$unit = "kloxo-panel-port-" . time();
+			exec("systemd-run --quiet --collect --unit={$unit} --on-active=3 /bin/bash /script/panel-port-apply >/dev/null 2>&1", $o, $rc);
 
-			lxshell_background("sh", $cmd);
+			if ($rc !== 0) {
+				exec("setsid nohup /bin/bash -c 'sleep 3; /bin/bash /script/panel-port-apply' </dev/null >/dev/null 2>&1 &");
+			}
+
 			$ghtml->print_redirect_self("{$scheme}://{$domain}:{$port}/display.php?frm_action=show");
 		}
 	}
