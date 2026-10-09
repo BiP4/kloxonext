@@ -202,6 +202,8 @@ pkg_install_logical pure-ftpd
 
 step "Install statistics and security tools"
 pkg_install_logical webalizer awstats fail2ban certbot
+# network diagnostics used by the panel (Server > Traceroute)
+pkg_install traceroute >/dev/null 2>&1
 
 # ---------------------------------------------------------------------------
 # PHP

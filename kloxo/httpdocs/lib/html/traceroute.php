@@ -29,6 +29,20 @@ class traceroute extends lxclass
 
 	function isSelect() { return false; }
 
+	// unanswered hop (firewalled router): '*' like traceroute itself, not -1
+	function display($var)
+	{
+		if (($var === 'responsetimes') && isset($this->responsetimes) && ((float)$this->responsetimes < 0)) {
+			return '*';
+		}
+
+		if (($var === 'responsetimes') && isset($this->responsetimes)) {
+			return "{$this->responsetimes} ms";
+		}
+
+		return parent::display($var);
+	}
+
 	static function perPage() { return 5000; }
 	static function initThisListRule($parent, $class) { return null; }
 
@@ -50,7 +64,13 @@ class traceroute extends lxclass
 			$server = $parent->syncserver;
 		}
 
-		$cmd = "traceroute -q 1 -n $host ";
+		// KloxoNext - only a plain IP / host name reaches the shell
+		if (!filter_var($host, FILTER_VALIDATE_IP) && !preg_match('/^[A-Za-z0-9.-]+$/', $host)) {
+			throw new lxException($login->getThrow("traceroute_failed"), '', $host);
+		}
+
+		// at most 20 hops, 2 seconds per probe, 60 seconds overall
+		$cmd = "timeout 60 traceroute -q 1 -n -w 2 -m 20 " . escapeshellarg($host);
 
 		$_result = rl_exec_get(null, "localhost", array("traceroute", "exec_traceroute"), array($cmd));
 
@@ -69,6 +89,11 @@ class traceroute extends lxclass
 
 	static function exec_traceroute($cmd)
 	{
+		// KloxoNext - not part of minimal installs: install it on first use
+		if (!file_exists('/usr/bin/traceroute') && !file_exists('/usr/sbin/traceroute')) {
+			OsPlatform::install('traceroute');
+		}
+
 		exec($cmd, $result);
 
 		return $result;
