@@ -6208,10 +6208,17 @@ function getDnsMasters($servername)
 
 	$addondb = new Sqlite(null, 'addondomain');
 
+	// KloxoNext - subdomains are served from the zone of their parent domain
+	$subs = array_flip(kn_dns_get_subdomain_list());
+
 	foreach ($d as $k => $v) {
 		foreach ($v as $k2 => $v2) {
 			//skip if empty record
 			if (!$v2) {
+				continue;
+			}
+
+			if (isset($subs[$v2])) {
 				continue;
 			}
 			

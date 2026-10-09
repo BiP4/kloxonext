@@ -61,7 +61,14 @@ foreach($dns_records as $k => $o) {
 <?php
             break;
         case "mx":
-            $key = '@';
+            // KloxoNext - MX of a subdomain merged into this zone: owner is its label
+            $mxhost = rtrim((string)$o->hostname, '.');
+            if (($mxhost === '') || ($mxhost === '__base__') || ($mxhost === '@') || ($mxhost === $domainname)) {
+                $mxhost = '';
+            } elseif (substr($mxhost, -strlen(".{$domainname}")) === ".{$domainname}") {
+                $mxhost = substr($mxhost, 0, -strlen(".{$domainname}"));
+            }
+            $key = ($mxhost === '') ? '@' : $mxhost;
             $priority = $o->priority;
             $value = $o->param;
 

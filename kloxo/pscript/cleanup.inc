@@ -44,6 +44,9 @@ if [ "${1}" == "simple" ] ; then
 	lxphp.exe ../bin/common/cleanup.php --without-services
 else
 	lxphp.exe ../bin/common/cleanup.php
+
+	# KloxoNext - re-render all zones (subdomains live in their parent's zone)
+	sh /script/fixdns >/dev/null 2>&1
 fi
 
 echo

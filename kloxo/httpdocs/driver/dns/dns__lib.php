@@ -44,6 +44,17 @@ class dns__ extends lxDriverClass
 	{
 		global $sgbl;
 
+		// KloxoNext - a subdomain has no zone of its own: its records live in the parent zone
+		$parent = $this->getSubdomainParent();
+
+		if ($parent) {
+			foreach (kn_dns_render_drivers() as $v) {
+				@unlink("/opt/configs/{$v}/conf/master/{$this->main->nname}");
+			}
+
+			return;
+		}
+
 		$input = array();
 
 		$domains[] = $this->main->nname;
@@ -60,12 +71,16 @@ class dns__ extends lxDriverClass
 		$input['serial'] = $this->main->__var_ddate;
 		$input['dns_records'] = $this->main->dns_record_a;
 
+		// KloxoNext - records of the subdomains (blog.example.com -> 'blog', 'www.blog', ...)
+		$subrecords = rl_exec_get('localhost', 'localhost', 'kn_dns_get_subdomain_records', array($this->main->nname));
+		$input['dns_records'] = kn_dns_merge_records($input['dns_records'], $subrecords);
+
 		// MR -- not work and not implementing yet!
 	//	$input['account'] = $this->parent->getRealClientParentO()->getPathFromName();
 
 		$input['rootpass'] = slave_get_db_pass();
 
-		$dnsdrvlist = getAllDnsDriverList();
+		$dnsdrvlist = kn_dns_render_drivers();
 
 		foreach ($dnsdrvlist as $v) {
 			if ($v === 'none') { continue; }
@@ -89,6 +104,16 @@ class dns__ extends lxDriverClass
 				}
 			}
 		}
+	}
+
+	/** KloxoNext - parent domain when this zone belongs to a subdomain (object first: on add the row is not saved yet). */
+	function getSubdomainParent()
+	{
+		if (!empty($this->main->__var_subdomain_parent)) {
+			return $this->main->__var_subdomain_parent;
+		}
+
+		return rl_exec_get('localhost', 'localhost', 'kn_dns_get_subdomain_parent', array($this->main->nname));
 	}
 
 	function syncCreateConf()
@@ -210,7 +235,15 @@ class dns__ extends lxDriverClass
 
 	function dbactionDelete()
 	{
+		// KloxoNext - before the row goes: a deleted subdomain must leave its parent zone
+		$parent = $this->getSubdomainParent();
+
 		$this->main->write();
+
+		if ($parent) {
+			// the master side scheduled the refresh, unless the delete came straight here
+			kn_dns_schedule_parent_refresh($parent);
+		}
 
 		$this->createAllowTransferIps();
 		$this->syncCreateConf();

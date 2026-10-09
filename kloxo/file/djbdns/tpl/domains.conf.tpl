@@ -53,8 +53,16 @@ foreach($dns_records as $k => $o) {
             $priority = $o->priority;
 
             $value = trim($value, '.');
+            // KloxoNext - MX of a subdomain merged into this zone: owner is its label
+            $mxhost = rtrim((string)$o->hostname, '.');
+            if (($mxhost === '') || ($mxhost === '__base__') || ($mxhost === '@') || ($mxhost === $domainname)) {
+                $mxhost = '';
+            } elseif (substr($mxhost, -strlen(".{$domainname}")) === ".{$domainname}") {
+                $mxhost = substr($mxhost, 0, -strlen(".{$domainname}"));
+            }
+            $mxowner = ($mxhost === '') ? $domainname : "{$mxhost}.{$domainname}";
 ?>
-@<?php echo $domainname; ?>::<?php echo $value; ?>:<?php echo $priority; ?>:<?php echo $ttl; ?>
+@<?php echo $mxowner; ?>::<?php echo $value; ?>:<?php echo $priority; ?>:<?php echo $ttl; ?>
 
 <?php
             break;

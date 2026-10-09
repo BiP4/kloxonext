@@ -72,6 +72,17 @@ class Dns extends DnsBase
 
 		$this->__var_addonlist = $this->getParentO()->getList('addondomain');
 
+		// KloxoNext - a subdomain's records are rendered in its parent's zone: tell the
+		// driver (it runs in the backend, without the parent object) and refresh the
+		// parent zone once this request has saved everything
+		$this->__var_subdomain_parent = null;
+		$dom = $this->getParentO();
+
+		if (is_object($dom) && isset($dom->dtype) && ($dom->dtype === 'subdomain') && !empty($dom->subdomain_parent)) {
+			$this->__var_subdomain_parent = $dom->subdomain_parent;
+			kn_dns_schedule_parent_refresh($dom->subdomain_parent);
+		}
+
 		$mydb = new Sqlite(null, "ipaddress");
 		$string = "syncserver = '$this->syncserver'";
 		$this->__var_ipssllist = $mydb->getRowsWhere($string, array('ipaddr', 'nname'));
