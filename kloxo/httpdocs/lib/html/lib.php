@@ -458,6 +458,15 @@ function changeDriverFunc($server, $class, $pgm)
 
 	$dr->write();
 
+	// KloxoNext - keep etc/slavedb/driver in step: cleanup (setSyncDrivers) trusts it
+	// over the table, so a stale copy used to revert the change on the next cleanup
+	if ($server->nname === 'localhost') {
+		$rmt = lfile_get_unserialize("../etc/slavedb/driver");
+		$data = (is_object($rmt) && isset($rmt->data) && is_array($rmt->data)) ? $rmt->data : array();
+		$data[$class] = $pgm;
+		slave_save_db('driver', $data);
+	}
+
 	print("Successfully changed driver for '{$class}' on '{$server->nname}' to '{$pgm}'\n");
 }
 
@@ -1341,20 +1350,23 @@ function exec_with_all_closed($cmd)
 
 	$string = null;
 
-	log_shell("Closed Exec {$sgbl->__path_program_root}/cexe/closeallinput '{$cmd}' >/dev/null 2>&1 &");
-	chmod("{$sgbl->__path_program_root}/cexe/closeallinput", 0755);
-	exec("{$sgbl->__path_program_root}/cexe/closeallinput '{$cmd}' >/dev/null 2>&1 &");
+	// KloxoNext - shell helper instead of the compiled cexe/closeallinput
+	$c = "/bin/bash " . escapeshellarg("{$sgbl->__path_program_root}/sbin/closeallinput.sh") . " " . escapeshellarg($cmd);
+
+	log_shell("Closed Exec {$c} >/dev/null 2>&1 &");
+	exec("{$c} </dev/null >/dev/null 2>&1 &");
 }
 
 function exec_with_all_closed_output($cmd)
 {
 	global $sgbl;
 
-	chmod("{$sgbl->__path_program_root}/cexe/closeallinput", 0755);
-	$res = shell_exec("{$sgbl->__path_program_root}/cexe/closeallinput '{$cmd}' 2>/dev/null");
-	log_shell("Closed Exec output: {$res} :  {$sgbl->__path_program_root}/cexe/closeallinput '{$cmd}'");
+	$c = "/bin/bash " . escapeshellarg("{$sgbl->__path_program_root}/sbin/closeallinput.sh") . " " . escapeshellarg($cmd);
 
-	return trim($res);
+	$res = shell_exec("{$c} </dev/null 2>/dev/null");
+	log_shell("Closed Exec output: {$res} :  {$c}");
+
+	return trim((string)$res);
 }
 
 // Convert Com to Php Array.
@@ -8147,8 +8159,9 @@ function setSyncDrivers($nolog = null)
 
 //	include "../file/driver/rhel.inc";
 
-	$classlist = array('web' => 'apache', 'webcache' => 'none', 'dns' => 'bind',
-		'pop3' => 'dovecot', 'smtp' => 'qmail', 'spam' => 'bogofilter');
+	// KloxoNext - default web server per OS family (as chosen by install/setup.sh)
+	$classlist = array('web' => (OsPlatform::isEl() ? 'apache' : 'nginx'), 'webcache' => 'none', 'dns' => 'bind',
+		'pop3' => 'dovecot', 'smtp' => 'postfix', 'spam' => 'bogofilter');
 
 	$nodriver = false;
 
@@ -8169,6 +8182,24 @@ function setSyncDrivers($nolog = null)
 		}
 
 		$driver_from_table = $gbl->getSyncClass(null, 'localhost', $key);
+
+		// KloxoNext - mail is Postfix + Dovecot; 'qmail' only survives from old defaults
+		if (($key === 'smtp') && ($driver_from_slavedb === 'qmail') && !file_exists('/var/qmail/bin/qmail-send')) {
+			$driver_from_slavedb = 'postfix';
+		}
+
+		// KloxoNext - early Ubuntu installs left 'apache' in slavedb while setup chose
+		// nginx (table): the web server actually running decides
+		if (($key === 'web') && ($driver_from_slavedb === 'apache') && $driver_from_table
+				&& ($driver_from_table !== 'apache') && OsPlatform::isDebian()) {
+			$a = $t = null;
+			exec("systemctl is-active apache2 2>/dev/null", $a);
+			exec("systemctl is-active " . escapeshellarg($driver_from_table) . " 2>/dev/null", $t);
+
+			if ((trim(implode('', (array)$a)) !== 'active') && (trim(implode('', (array)$t)) === 'active')) {
+				$driver_from_slavedb = $driver_from_table;
+			}
+		}
 
 		if ($driver_from_table !== $driver_from_slavedb) {
 		/*
@@ -8549,9 +8580,26 @@ function setActivateWebServer($nolog = null)
 		}
 
 		log_cleanup("- Activate '{$v}' as Web server", $nolog);
-		exec("chkconfig {$a} on >/dev/null 2>&1");
+		// KloxoNext - real unit name ('httpd' is only an alias of apache2 on Ubuntu)
+		$a = OsPlatform::serviceName($a);
+		exec("systemctl enable " . escapeshellarg($a) . " >/dev/null 2>&1 || chkconfig {$a} on >/dev/null 2>&1");
 
 		// KloxoNext - CGI for nginx/hiawatha comes from kloxo-fcgiwrap (setup-awstats)
+	}
+
+	// KloxoNext - stop web servers that are no longer selected (they would keep port 80)
+	$keep = array();
+
+	foreach ((array)$list as $v) {
+		$keep[] = OsPlatform::serviceName(($v === 'apache') ? 'httpd' : $v);
+	}
+
+	foreach (array('httpd', 'nginx', 'lighttpd', 'hiawatha') as $w) {
+		$u = OsPlatform::serviceName($w);
+
+		if (!in_array($u, $keep, true) && OsPlatform::serviceExists($u)) {
+			exec("systemctl disable --now " . escapeshellarg($u) . " >/dev/null 2>&1");
+		}
 	}
 }
 

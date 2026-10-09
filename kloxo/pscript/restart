@@ -24,9 +24,8 @@ rm -f ${bpath}/init/kloxo-hiawatha
 [ -L ${bpath}/init/kloxo-apps-fpm ] || sh /script/set-kloxo-apps-php
 ln -sf /opt/$(cat ${bpath}/init/kloxo_php_active)/custom/php-fpm.sh ${bpath}/init/kloxo-phpcgi
 
-if [ ! -f ${bpath}/sbin/kloxo.exe ] ; then
-	sh /script/create-kloxoexe
-fi
+# KloxoNext - the legacy C helpers are no longer built here: create-kloxoexe
+# deleted cexe/closeallinput first and then failed without gcc/glibc-static
 
 cp -f ${spath}/default_index.php ${tpath}/index.php
 cp -f ${spath}/login_inc.php ${tpath}/inc.php

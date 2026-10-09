@@ -235,12 +235,12 @@ function os_kill_process_user($username)
 
 function os_create_default_slave_driver_db()
 {
-	$a['web'] = "apache";
+	$a['web'] = (OsPlatform::isEl()) ? "apache" : "nginx";
 	$a['webcache'] = "none";
 	$a['dns'] = "bind";
 	$a['pop3'] = "dovecot";
 //	$a['imap4'] = "courier";
-	$a['smtp'] = "qmail";
+	$a['smtp'] = "postfix";
 	$a['spam'] = "bogofilter";
 	slave_save_db("driver", $a);
 }

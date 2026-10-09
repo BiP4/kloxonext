@@ -1280,7 +1280,7 @@ STRIN;
 				$a['pop3'] = (isset($this->pop3_driver)) ? $this->pop3_driver : 'dovecot';
 				// MR -- use pop3 driver because as the same as for imap4
 			//	$a['imap4'] = (isset($this->pop3_driver)) ? $this->pop3_driver : 'courier';
-				$a['smtp'] = (isset($this->smtp_driver)) ? $this->smtp_driver : 'qmail';
+				$a['smtp'] = (isset($this->smtp_driver)) ? $this->smtp_driver : 'postfix';
 
 				$this->pop3_driver = $a['pop3'];
 			//	$this->imap4_driver = $a['pop3'];
