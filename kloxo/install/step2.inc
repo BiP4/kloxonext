@@ -93,6 +93,9 @@ kloxo_apache_conf() {
 		cp -f "${sp}/_inactive_.conf" "${tp}/${x}.conf"
 	done
 
+	# mod_fcgid (EL9+) loads itself from conf.modules.d; Kloxo's conf.d/fcgid.conf decides
+	[ -f /etc/httpd/conf.modules.d/10-fcgid.conf ] && cp -f "${sp}/_inactive_.conf" /etc/httpd/conf.modules.d/10-fcgid.conf
+
 	# httpd 2.4 (mod_proxy_fcgi available)
 	touch "${kloxopath}/etc/flag/use_apache24.flg"
 }

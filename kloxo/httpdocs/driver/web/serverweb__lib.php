@@ -354,6 +354,13 @@ class serverweb__ extends lxDriverClass
 			}
 
 			$source = getLinkCustomfile($spath, "_inactive_.conf");
+
+			// KloxoNext - EL9+ mod_fcgid package loads the module from conf.modules.d;
+			// Kloxo's conf.d/fcgid.conf loads it only when php_type is fcgid
+			if (($l === 'fcgid') && file_exists('/etc/httpd/conf.modules.d/10-fcgid.conf')) {
+				lxfile_cp($source, '/etc/httpd/conf.modules.d/10-fcgid.conf');
+			}
+
 			if ($l === 'proxy_fcgi') {
 				lxfile_cp($source, "{$tpath}/00-proxy.conf");
 				//proxy_h2 requires proxy so remove for the moment until h2 behaviour coded
