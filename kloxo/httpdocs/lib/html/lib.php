@@ -7422,6 +7422,9 @@ function setCopyDnsConfFiles($dnsdriver, $nolog = null)
 
 		log_cleanup("- Copy etc/{$aliasdriver}.conf to {$pathtarget}/{$aliasdriver}.conf", $nolog);
 		lxfile_cp($t, "{$pathtarget}/{$aliasdriver}.conf");
+
+		// KloxoNext - named.conf includes named.custom.conf: render the custom zones
+		exec("sh /script/dns-custom apply --no-reload >/dev/null 2>&1");
 	} elseif ($aliasdriver === 'yadifa') {
 		$pathtarget = "{$pathetc}";
 

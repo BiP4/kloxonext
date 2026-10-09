@@ -972,3 +972,8 @@ $__information['firewall_updateform_deny_pre'] = "<p>One IP or network (CIDR) pe
 $__information['firewall_updateform_csfinstall_pre'] = "<p>ConfigServer (the original publisher of CSF) closed on 31 August 2025; CSF continues as GPLv3 community forks " .
 	"(for example github.com/Aetherinox/csf-firewall or github.com/Black-HOST/csf). Paste the https link of a release archive (.tgz or .zip) you trust. " .
 	"CSF replaces firewalld/ufw, keeps the ports that are open now and starts in <b>testing mode</b>: switch testing off on the Status form once access is confirmed.</p>";
+
+$__information['dnscustom_updateform_zones_pre'] = "<p>Hand-written reverse zones served by BIND and kept permanently: updates, cleanup and the DNS rebuild never change them. " .
+	"Pick a zone and press Update to edit it, or choose <b>-- new zone --</b>. Requires BIND as DNS server.</p>";
+$__information['dnscustom_updateform_edit_pre'] = "<p>Paste the complete zone file (\$ORIGIN, \$TTL, SOA, NS, PTR, \$GENERATE ...). " .
+	"It is checked with <b>named-checkzone</b> before it is saved; increase the SOA serial when secondary servers transfer the zone.</p>";

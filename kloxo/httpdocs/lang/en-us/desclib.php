@@ -1493,3 +1493,12 @@ $__description["firewall_csf_archive_url"] = array("CSF archive URL (https, .tgz
 $__description["firewall_status"] = array("Status");
 $__description["firewall_ports"] = array("Open Ports");
 $__description["firewall_csf_install"] = array("Install CSF");
+
+// KloxoNext - custom (reverse) DNS zones
+$__description["dnscustom"] = array("Reverse DNS (custom zones)");
+$__description["dnscustom_select"] = array("Zone");
+$__description["dnscustom_zone"] = array("Zone name (e.g. 207.180.81.in-addr.arpa)");
+$__description["dnscustom_content"] = array("Zone file (BIND format, \$GENERATE allowed)");
+$__description["dnscustom_delete"] = array("Delete this zone");
+$__description["dnscustom_zones"] = array("Custom Reverse Zones");
+$__description["dnscustom_edit"] = array("Edit Zone");

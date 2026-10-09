@@ -157,6 +157,9 @@ class dns__ extends lxDriverClass
 			$tpl = file_get_contents($tplsource);
 			getParseInlinePhp($tpl, $input);
 		}
+
+		// KloxoNext - permanent custom zones (Admin > Custom DNS Zones) after the generated lists
+		exec("sh /script/dns-custom apply --no-reload >/dev/null 2>&1");
 	}
 
 	function createAllowTransferIps()

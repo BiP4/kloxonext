@@ -540,3 +540,5 @@ $__throw["invalid_port"] = "Invalid port (1-65535, not 80/443, SSL and plain por
 $__keyword['firewall'] = "Firewall";
 $__throw["firewall_error"] = "Firewall";
 $__throw["firewall_csf_install_started"] = "CSF installation started in background (a few minutes). Reload this page later; log: /usr/local/lxlabs/kloxo/log/csf-install.log";
+$__keyword['dnscustom'] = "Reverse DNS (custom zones)";
+$__throw["dnscustom_error"] = "DNS zone";
