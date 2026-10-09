@@ -527,7 +527,7 @@ abstract class ClientCore extends Resourcecore
 						$vlist['cttype']= array('M', $this->cttype);
 					}
 				}
-				$vlist['ddate']= array('M', @ date('d-m-Y', $this->ddate));
+				$vlist['ddate']= array('M', lx_date('d-m-Y', $this->ddate));
 
 				if (!$this->isAdmin()) {
 					$vlist['parent_name_f'] = array('M', $this->getParentName());

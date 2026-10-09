@@ -2882,8 +2882,54 @@ function exec_class_method($class, $func)
 	return call_user_func_array(array($class, $func), $arglist);
 }
 
+/**
+ * KloxoNext - PHP 8: date()/getdate() need an int timestamp, but values read from the
+ * database are strings ('1696..', '' or a date text). Returns an int or null.
+ */
+function lx_ts($t)
+{
+	if (is_int($t)) {
+		return $t;
+	}
+
+	if (is_float($t)) {
+		return (int)$t;
+	}
+
+	if (is_string($t)) {
+		$t = trim($t);
+
+		if ($t === '') {
+			return null;
+		}
+
+		if (is_numeric($t)) {
+			return (int)$t;
+		}
+
+		$r = strtotime($t);
+
+		return ($r === false) ? null : $r;
+	}
+
+	return null;
+}
+
+/** date() for a stored timestamp; '-' when there is none */
+function lx_date($format, $t)
+{
+	$ts = lx_ts($t);
+
+	return ($ts === null) ? '-' : date($format, $ts);
+}
+
 function lxgettimewithoutyear($time)
 {
+	$time = lx_ts($time);
+
+	if ($time === null) {
+		return '-';
+	}
 	$curd = @ getdate(time());
 	$date = @ getdate($time);
 
@@ -2912,6 +2958,12 @@ function lxgettimewithoutyear($time)
 
 function lxgettime($time)
 {
+	$time = lx_ts($time);
+
+	if ($time === null) {
+		return '-';
+	}
+
 	$curd = @ getdate(time());
 	$date = @ getdate($time);
 /*

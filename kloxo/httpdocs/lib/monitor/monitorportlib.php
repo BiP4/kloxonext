@@ -96,11 +96,11 @@ class monitorport extends Lxdb
 	function display($var)
 	{
 		if ($var === 'updatetime') {
-			return @ date('Y-M-d:::H:i', $this->updatetime);
+			return lx_date('Y-M-d:::H:i', $this->updatetime);
 		}
 
 		if ($var === 'changetime') {
-			return @ date('Y-M-d::::H:i', $this->changetime);
+			return lx_date('Y-M-d::::H:i', $this->changetime);
 		}
 
 		if ($var === 'errorstring') {

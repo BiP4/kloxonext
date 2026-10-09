@@ -165,7 +165,7 @@ abstract class DomainBase extends DomainCore
 
 				$vlist['nname'] = array('M', $this->nname);
 				$vlist['uuser_dummy'] = array('M', $web->ftpusername);
-				$vlist['ddate']= array('M', @date('d-m-Y', $this->ddate));
+				$vlist['ddate']= array('M', lx_date('d-m-Y', $this->ddate));
 				$vlist['parent_name_f'] = array('M', $this->getParentName());
 				$webserv = " (ftp.$this->nname)";
 				$mailserv = " (mail.$this->nname)";

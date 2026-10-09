@@ -41,9 +41,9 @@ class TrafficHistory extends Lxclass
 	function display($var)
 	{
 		if ($var == 'month') {
-			$month = date('n', $this->$var);
+			$month = lx_date('n', $this->$var);
 			$month = intToMonth($month);
-			$year = date('Y', $this->$var);
+			$year = lx_date('Y', $this->$var);
 			return "$year $month";
 		}
 

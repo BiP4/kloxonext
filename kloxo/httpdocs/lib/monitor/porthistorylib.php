@@ -34,7 +34,7 @@ static function defaultSortDir() { return 'desc' ; }
 function display($var)
 {
 	if ($var === 'ddate') {
-		return @ date('Y-M-d:H:i:s', $this->ddate);
+		return lx_date('Y-M-d:H:i:s', $this->ddate);
 	}
 	if ($var === 'laststatustime') {
 		if ($this->isOn('portstatus')) {

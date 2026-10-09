@@ -35,12 +35,12 @@ static function createListNlist($parent, $view)
 function display($var)
 {
 	if ($var === 'updatetime') {
-		return date('Y-M-d:::H:i', $this->updatetime);
+		return lx_date('Y-M-d:::H:i', $this->updatetime);
 	}
 
 	if ($var === 'alivestatus') {
 		$v = $this->getObject('monitoringserverstatus');
-		return date('Y-M-d:::H:i', $v->updatetime);
+		return lx_date('Y-M-d:::H:i', $v->updatetime);
 	}
 
 	return $this->$var;
