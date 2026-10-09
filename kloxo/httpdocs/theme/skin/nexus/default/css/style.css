@@ -754,3 +754,11 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 	background-color: var(--kn-danger-soft) !important; color: var(--kn-text) !important; border-color: var(--kn-border) !important;
 }
 :root[data-theme="dark"] .kn-main [style*="color:#f22"] { color: var(--kn-danger) !important; }
+
+/* the logo area and footer keep their size; only the menu scrolls (on long pages the
+   brand used to shrink and the logo looked squeezed). Legacy page CSS must not change
+   the font of the panel chrome (it set Tahoma on body). */
+.kn-brand, .kn-sidebar-foot { flex: 0 0 auto; }
+.kn-nav { min-height: 0; }
+.kn-sidebar, .kn-topbar, .kn-brand-name { font-family: var(--kn-font) !important; }
+.kn-brand-mark { flex: 0 0 32px; line-height: 1; }
