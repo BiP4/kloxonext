@@ -146,7 +146,11 @@ update_phpmyadmin() {
 
 	[ "${MODE}" == "check" ] && return 0
 	[ ! -d "${PMA}" ] && [ "${MODE}" != "install" ] && return 0
-	newer "${latest}" "${cur}" || [ ! -f "${PMA}/index.php" ] || return 0
+	if ! newer "${latest}" "${cur}" && [ -f "${PMA}/index.php" ] ; then
+		# up to date: still refresh the KloxoNext config / signon script
+		pma_configure "${PMA}"
+		return 0
+	fi
 
 	url="https://files.phpmyadmin.net/phpMyAdmin/${latest}/phpMyAdmin-${latest}-all-languages.tar.xz"
 	fetch "${url}" "${TMP}/pma.tar.xz" || { log "  ! download failed" ; return 1 ; }

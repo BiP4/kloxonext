@@ -30,6 +30,8 @@ $i++;
 $cfg['Servers'][$i]['auth_type'] = 'signon';
 $cfg['Servers'][$i]['SignonSession'] = 'SignonSession';
 $cfg['Servers'][$i]['SignonURL']     = 'examples/signon.php';
+/* KloxoNext - logout must also drop the single signon session (else the next visit logs straight back in) */
+$cfg['Servers'][$i]['LogoutURL']     = 'examples/signon.php?logout=1';
 /* Server parameters */
 $cfg['Servers'][$i]['host'] = 'localhost';
 $cfg['Servers'][$i]['connect_type'] = 'tcp';
