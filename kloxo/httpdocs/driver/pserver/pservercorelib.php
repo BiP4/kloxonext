@@ -1074,8 +1074,14 @@ STRIN;
 		}
 
 		$list = service__Linux::getMainServiceList();
+		$desc = service__Linux::getServiceDescriptions();
 
 		foreach ((array)$list as $l => $g) {
+			// KloxoNext - only what is installed on this server
+			if (!OsPlatform::serviceExists($l)) {
+				continue;
+			}
+
 			$nname = $l . "___" . $this->nname;
 			$ob = new Service($this->__masterserver, $this->__readserver, $nname);
 			$res['syncserver'] = $this->nname;
@@ -1084,13 +1090,17 @@ STRIN;
 			$res['status'] = 'on';
 			$res['parent_clname'] = $this->getClName();
 
-			if (isset($sgbl->__var_service_desc[$l])) {
+			if (isset($desc[$l])) {
+				$res['description'] = $desc[$l];
+			} elseif (isset($sgbl->__var_service_desc[$l])) {
 				$res['description'] = $sgbl->__var_service_desc[$l];
 			} else {
 				$res['description'] = "";
 			}
 
 			$ob->create($res);
+			// KloxoNext - list rebuild only: a new row must not 'chkconfig on' the service
+			$ob->metadbaction = "writeonly";
 			$this->addToList('service', $ob);
 		}
 

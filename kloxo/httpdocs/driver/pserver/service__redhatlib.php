@@ -28,7 +28,14 @@ class Service__Redhat extends lxDriverClass
 		}
 
 		foreach ($cmdlist as $key => $cmd) {
-			exec_with_all_closed("service {$cmd} {$act}");
+			// KloxoNext - real unit name (httpd -> apache2, spamassassin -> spamd on Ubuntu)
+			$unit = OsPlatform::serviceName($cmd);
+
+			if (getServiceType() === 'systemd') {
+				exec_with_all_closed("systemctl {$act} " . escapeshellarg($unit));
+			} else {
+				exec_with_all_closed("service {$unit} {$act}");
+			}
 		}
 	}
 
@@ -117,6 +124,26 @@ class Service__Redhat extends lxDriverClass
 			$__l['install_state'] = 'dull';
 			$__l['state'] = 'off';
 			$__l['boot_state'] = 'off';
+
+			// KloxoNext - systemd knows: is-active / is-enabled of the real unit
+			if (getServiceType() === 'systemd') {
+				$unit = escapeshellarg(OsPlatform::serviceName($__l['servicename']));
+				$a = $e = null;
+				exec("systemctl is-active {$unit} 2>/dev/null", $a);
+				exec("systemctl is-enabled {$unit} 2>/dev/null", $e);
+				$a = trim(implode('', (array)$a));
+				$e = trim(implode('', (array)$e));
+
+				if (($e === '') || ($e === 'not-found') || !isServiceExists($__l['servicename'])) {
+					continue;
+				}
+
+				$__l['install_state'] = 'on';
+				$__l['state'] = (($a === 'active') || ($a === 'activating') || ($a === 'reloading')) ? 'on' : 'off';
+				$__l['boot_state'] = (($e === 'enabled') || ($e === 'alias') || ($e === 'static')) ? 'on' : 'off';
+
+				continue;
+			}
 			
 			if (isServiceExists($__l['servicename'])) {
 				$__l['install_state'] = 'on';

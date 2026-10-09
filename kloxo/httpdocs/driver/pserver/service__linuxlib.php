@@ -35,39 +35,62 @@ class Service__Linux extends Lxlclass
 		return $nval;
 	}
 
+	/**
+	 * KloxoNext - services shown on Server > Services: name => description.
+	 * Only the ones installed on the server are listed (see pserver::getandWriteService).
+	 */
+	static function getServiceDescriptions()
+	{
+		$d = array(
+			'kloxo-web'       => 'KloxoNext panel web server (nginx)',
+			'kloxo-php'       => 'KloxoNext panel PHP-FPM',
+			'kloxo-apps'      => 'KloxoNext PHP-FPM for phpMyAdmin / webmail',
+			'kloxo-wrap'      => 'KloxoNext backend (applies queued changes)',
+			'kloxo-fcgiwrap'  => 'CGI gateway (AWStats, cgi-bin)',
+			'httpd'           => 'Apache web server',
+			'nginx'           => 'Nginx web server',
+			'lighttpd'        => 'Lighttpd web server',
+			'hiawatha'        => 'Hiawatha web server',
+			'varnish'         => 'Varnish web cache',
+			'squid'           => 'Squid web cache',
+			'trafficserver'   => 'Apache Traffic Server web cache',
+			'php-fpm'         => 'PHP-FPM (default PHP branch of the websites)',
+		);
+
+		// one PHP-FPM per installed PHP branch: php84m-fpm, php85m-fpm ...
+		foreach ((array)glob('/opt/php[0-9]*m', GLOB_ONLYDIR) as $dir) {
+			$b = basename($dir);
+			$v = substr($b, 3, 1) . '.' . substr($b, 4, -1);
+			$d["{$b}-fpm"] = "PHP {$v} FPM (websites using PHP {$v})";
+		}
+
+		$d += array(
+			'mariadb'         => 'MariaDB database server',
+			'named'           => 'BIND DNS server',
+			'postfix'         => 'Postfix mail server (SMTP)',
+			'dovecot'         => 'Dovecot IMAP / POP3 server',
+			'opendkim'        => 'OpenDKIM mail signing',
+			'spamassassin'    => 'SpamAssassin spam filter',
+			'pure-ftpd'       => 'Pure-FTPd FTP server',
+			'csf'             => 'ConfigServer Security & Firewall',
+			'lfd'             => 'CSF login failure daemon',
+			'firewalld'       => 'firewalld firewall',
+			'ufw'             => 'ufw firewall',
+			'fail2ban'        => 'Fail2Ban intrusion prevention',
+			'crond'           => 'Cron scheduler',
+		);
+
+		return $d;
+	}
+
 	static function getMainServiceList()
 	{
-		global $gbl, $sgbl, $login, $ghtml;
+		// name => name (the old 'grep string' column is not used any more)
+		$nval = array();
 
-		$nval['httpd'] = 'httpd';
-		$nval['lighttpd'] = 'lighttpd';
-		$nval['nginx'] = 'nginx';
-		$nval['hiawatha'] = 'hiawatha';
-	//	$nval['openlitespeed'] = 'lsws';
-	//	$nval['monkey'] = 'monkey';
-
-		$nval['varnish'] = 'varnish';
-		$nval['squid'] = 'squid';
-		$nval['trafficserver'] = 'trafficserver';
-
-		$nval['php-fpm'] = 'php-fpm';
-
-		$nval['named'] = 'named';
-		$nval['djbdns'] = "tinydns";
-	//	$nval['maradns'] = "maradns";
-	//	$nval['powerdns'] = "powerdns";
-		$nval['pdns'] = "pdns";
-		$nval['nsd'] = "nsd";
-	//	$nval['mydns'] = "mydns";
-		$nval['yadifad'] = "yadifad";
-
-		$nval['qmail'] = 'qmail';
-	//	$nval['courier-imap'] = 'courier';
-	//	$nval['spamassassin'] = 'spamassassin';
-	//	$nval['dovecot'] = 'dovecot';
-
-		$nval['iptables'] = "iptables";
-		$nval['firewalld'] = "firewalld";
+		foreach (array_keys(self::getServiceDescriptions()) as $n) {
+			$nval[$n] = $n;
+		}
 
 		return $nval;
 	}

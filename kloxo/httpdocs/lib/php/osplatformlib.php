@@ -84,6 +84,8 @@ final class OsPlatform
 		'clamd'   => 'clamav-daemon',
 		'freshclam' => 'clamav-freshclam',
 		'spamd'   => 'spamd',
+		'spamassassin' => 'spamd',
+		'named'   => 'named',
 		'snmpd'   => 'snmpd',
 	);
 

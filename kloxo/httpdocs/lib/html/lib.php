@@ -7243,6 +7243,9 @@ function setInitialServices($nolog = null)
 
 	setCopyIndexFileToAwstatsDir($nolog);
 
+	// KloxoNext - Server > Services lists what is installed now
+	fixservice($nolog);
+
 	installChooser($nolog);
 
 	setInstallMailserver($nolog);
