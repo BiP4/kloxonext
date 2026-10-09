@@ -389,10 +389,11 @@ class Client extends ClientBase
 				return;
 			}
 			
-			$user = $dbad->nname;
+			// KloxoNext - the database user (nname is the database name)
+			$user = (!empty($dbad->username)) ? $dbad->username : $dbad->nname;
 			$pass = $dbad->dbpassword;
 			
-			$alist[] = create_simpleObject(array('url' => "{$dbadminUrl}?pma_username={$user}&pma_password={$pass}", 
+			$alist[] = create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass), 
 				'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 		} catch (Exception $e) {}
 	}

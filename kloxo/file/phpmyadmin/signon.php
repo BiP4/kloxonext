@@ -66,12 +66,62 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-/* login: credentials posted by the panel (or the form below) */
-if (isset($_POST['user'])) {
+/* login link from the panel: ?kn=<token encrypted with etc/conf/pma.secret> (see lib/html/pmassolib.php) */
+function kn_token_credentials(string $token): ?array
+{
+    // etc/conf/pma.secret is outside this pool's open_basedir: the same secret is
+    // phpMyAdmin's blowfish_secret (config.inc.php is rendered from it)
+    $cfg = [];
+    $i = 0;
+    @include __DIR__ . '/../config.inc.php';
+    $secret = $cfg['blowfish_secret'] ?? '';
+
+    if (!is_string($secret) || strlen($secret) !== 32 || !function_exists('sodium_crypto_secretbox_open')) {
+        return null;
+    }
+
+    $key = hash_hmac('sha256', 'kloxonext-pma-signon', $secret, true);
+    $raw = base64_decode(strtr($token, '-_', '+/'), true);
+
+    if ($raw === false || strlen($raw) <= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES) {
+        return null;
+    }
+
+    $data = sodium_crypto_secretbox_open(
+        substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES), substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES), $key);
+
+    $d = ($data === false) ? null : json_decode($data, true);
+
+    if (!is_array($d) || !isset($d['u'], $d['p'], $d['e']) || ((int)$d['e'] < time())) {
+        return null;
+    }
+
+    return ['user' => (string)$d['u'], 'password' => (string)$d['p']];
+}
+
+$cred = null;
+
+// the panel renders its links as POST forms (query values become hidden fields)
+$kn = $_POST['kn'] ?? $_GET['kn'] ?? null;
+
+if ($kn !== null) {
+    $cred = kn_token_credentials((string)$kn);
+
+    if ($cred === null) {
+        $_SESSION['PMA_single_signon_error_message'] = 'The phpMyAdmin link has expired. Reload the page in the control panel and open phpMyAdmin again, or sign in below.';
+    }
+} elseif (isset($_POST['user'])) {
+    /* credentials posted by the form below */
+    $cred = ['user' => (string)$_POST['user'], 'password' => (string)($_POST['password'] ?? '')];
+}
+
+/* login */
+if ($cred !== null) {
     session_regenerate_id(true);
 
-    $_SESSION['PMA_single_signon_user'] = (string)$_POST['user'];
-    $_SESSION['PMA_single_signon_password'] = (string)($_POST['password'] ?? '');
+    $_SESSION['PMA_single_signon_user'] = $cred['user'];
+    $_SESSION['PMA_single_signon_password'] = $cred['password'];
+    unset($_SESSION['PMA_single_signon_error_message']);
     $_SESSION['PMA_single_signon_cfgupdate'] = ['verbose' => 'KloxoNext'];
     $_SESSION['PMA_single_signon_HMAC_secret'] = bin2hex(random_bytes(16));
 

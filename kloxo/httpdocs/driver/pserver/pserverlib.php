@@ -291,7 +291,7 @@ class pserver extends pservercore {
 				$alist[] = create_simpleObject(array('url' => "{$dbadminUrl}?auth_user={$user}&auth_pwd={$pass}",
 					'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 			} else {
-				$alist[] = create_simpleObject(array('url' => "{$dbadminUrl}?user={$user}&password={$pass}",
+				$alist[] = create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass),
 					'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 			}
 		} catch (Exception $e) {}

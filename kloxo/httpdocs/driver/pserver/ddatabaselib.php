@@ -243,7 +243,7 @@ class databasecore extends Lxdb
 					$alist['property'][] = create_simpleObject(array('url' => "{$dbadminUrl}?auth_user={$user}&auth_pwd={$pass}",
 						'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 				} else {
-					$alist['property'][] = create_simpleObject(array('url' => "{$dbadminUrl}?pma_username={$user}&pma_password={$pass}", 
+					$alist['property'][] = create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass), 
 						'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 				}
 			}
@@ -458,7 +458,7 @@ class mysqldb extends databasecore
 		//	$pass = urlencode($pass);
 			
 			if ($dbadminUrl) {
-				return create_simpleObject(array('url' => "{$dbadminUrl}?pma_username={$user}&pma_password={$pass}",
+				return create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass),
 					'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 			}
 		}
@@ -503,7 +503,7 @@ class mysqldb extends databasecore
 	//	$pass = urlencode($pass);
 
 		if ($dbadminUrl) {
-			$alist['property'][] = create_simpleObject(array('url' => "{$dbadminUrl}?pma_username={$user}&pma_password={$pass}",
+			$alist['property'][] = create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass),
 				'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 		}
 	}
