@@ -209,10 +209,10 @@ cmd_set_ports() {
 		firewalld)
 			local cur
 			for cur in $(firewall-cmd --permanent --list-ports) ; do
-				firewall-cmd -q --permanent --remove-port="${cur}"
+				firewall-cmd -q --permanent --remove-port="${cur}" 2>/dev/null
 			done
-			for p in ${tcp} ; do firewall-cmd -q --permanent --add-port="${p}/tcp" ; done
-			for p in ${udp} ; do firewall-cmd -q --permanent --add-port="${p}/udp" ; done
+			for p in ${tcp} ; do firewall-cmd -q --permanent --add-port="${p}/tcp" 2>/dev/null ; done
+			for p in ${udp} ; do firewall-cmd -q --permanent --add-port="${p}/udp" 2>/dev/null ; done
 			firewall-cmd -q --reload 2>/dev/null
 			;;
 		ufw)
@@ -226,6 +226,83 @@ cmd_set_ports() {
 	esac
 
 	echo "OK=ports applied"
+}
+
+# one line per open rule / firewalld service / listening socket:
+#   rule|tcp|80|                 port or range opened by the firewall
+#   service|tcp|9090|cockpit     firewalld service
+#   listen|tcp|80|nginx          socket listening on a non-loopback address
+cmd_ports() {
+	local st p proto svc sp
+	st="$(cmd_status)"
+
+	for p in $(echo "${st}" | sed -n 's/^TCP_IN=//p') ; do echo "rule|tcp|${p}|" ; done
+	for p in $(echo "${st}" | sed -n 's/^UDP_IN=//p') ; do echo "rule|udp|${p}|" ; done
+
+	if [ "$(backend)" == "firewalld" ] ; then
+		for svc in $(firewall-cmd --permanent --list-services 2>/dev/null) ; do
+			for sp in $(firewall-cmd --permanent --service="${svc}" --get-ports 2>/dev/null) ; do
+				echo "service|${sp#*/}|${sp%/*}|${svc}"
+			done
+		done
+	fi
+
+	ss -H -lntup 2>/dev/null | awk '
+		{
+			proto = $1; local = $5; proc = $0
+			port = local; sub(/.*:/, "", port)
+			addr = local; sub(/:[^:]*$/, "", addr)
+			if (addr ~ /^(127\.|\[?::1\]?|\[?::ffff:127\.)/ || addr ~ /%lo$/) next
+			name = "-"
+			if (match(proc, /\(\("[^"]+"/)) name = substr(proc, RSTART + 3, RLENGTH - 4)
+			if (proto == "tcp" || proto == "udp") print "listen|" proto "|" port "|" name
+		}' | sort -u
+}
+
+# "80/tcp", "30000-30100/udp" or "service:cockpit"
+cmd_port_change() {
+	local action="$1" spec="$2" proto port tcp udp r
+
+	ensure_backend
+
+	if [[ "${spec}" == service:* ]] ; then
+		[ "${B}" == "firewalld" ] || die "services exist only with firewalld"
+		[[ "${spec#service:}" =~ ^[a-z0-9_-]+$ ]] || die "invalid service"
+		if [ "${action}" == "close" ] ; then
+			firewall-cmd -q --permanent --remove-service="${spec#service:}" 2>/dev/null || die "cannot remove service ${spec#service:}"
+		else
+			firewall-cmd -q --permanent --add-service="${spec#service:}" 2>/dev/null || die "unknown service ${spec#service:}"
+		fi
+		firewall-cmd -q --reload 2>/dev/null
+		echo "OK=service ${spec#service:} $( [ "${action}" == "close" ] && echo closed || echo opened )"
+		return
+	fi
+
+	[[ "${spec}" =~ ^([0-9]+(-[0-9]+)?)/(tcp|udp)$ ]] || die "invalid port '${spec}' (use 80/tcp or 30000-30100/udp)"
+	port="${BASH_REMATCH[1]}"
+	proto="${BASH_REMATCH[3]}"
+	norm_ports "${port}" >/dev/null || exit 1
+
+	tcp="$(cmd_status | sed -n 's/^TCP_IN=//p')"
+	udp="$(cmd_status | sed -n 's/^UDP_IN=//p')"
+
+	if [ "${action}" == "close" ] ; then
+		if [ "${proto}" == "tcp" ] ; then
+			for r in $(required_tcp) ; do
+				if [ "${port}" == "${r}" ] || { [[ "${port}" == *-* ]] && [ "${r}" -ge "${port%-*}" ] && [ "${r}" -le "${port#*-}" ] ; } ; then
+					die "port ${r}/tcp (SSH or the panel) must stay open"
+				fi
+			done
+			tcp="$(echo " ${tcp} " | sed "s/ ${port} / /")"
+		else
+			udp="$(echo " ${udp} " | sed "s/ ${port} / /")"
+		fi
+	else
+		if [ "${proto}" == "tcp" ] ; then tcp="${tcp} ${port}" ; else udp="${udp} ${port}" ; fi
+	fi
+
+	cmd_set_ports "$(echo ${tcp} | tr ' ' ',')" "$(echo ${udp} | tr ' ' ',')" >/dev/null || exit 1
+	echo "OK=${spec} $( [ "${action}" == "close" ] && echo closed || echo opened )"
 }
 
 cmd_sync() {
@@ -380,6 +457,9 @@ case "$1" in
 	status)      cmd_status ;;
 	list)        cmd_list "$2" ;;
 	set-ports)   cmd_set_ports "$2" "$3" ;;
+	ports)       cmd_ports ;;
+	close-port)  cmd_port_change close "$2" ;;
+	open-port)   cmd_port_change open "$2" ;;
 	sync)        cmd_sync "$2" "$3" ;;
 	enable)      cmd_enable ;;
 	disable)     cmd_disable ;;

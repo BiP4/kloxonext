@@ -1485,13 +1485,13 @@ $__description["firewall_required_ports"] = array("Always open");
 $__description["firewall_csf"] = array("CSF");
 $__description["firewall_state"] = array("Firewall enabled");
 $__description["firewall_csf_testing"] = array("CSF testing mode (rules are flushed every 5 minutes)");
-$__description["firewall_tcp_in"] = array("Incoming TCP ports (comma separated, ranges as 30000-30100)");
-$__description["firewall_udp_in"] = array("Incoming UDP ports");
+$__description["firewall_tcp_in"] = array("TCP ports to open (comma separated, ranges as 30000-30100)");
+$__description["firewall_udp_in"] = array("UDP ports to open");
 $__description["firewall_allow_list"] = array("Allowed IPs (whitelist)");
 $__description["firewall_deny_list"] = array("Blocked IPs");
 $__description["firewall_csf_archive_url"] = array("CSF archive URL (https, .tgz or .zip)");
 $__description["firewall_status"] = array("Status");
-$__description["firewall_ports"] = array("Open Ports");
+$__description["firewall_ports"] = array("Add Ports");
 $__description["firewall_csf_install"] = array("Install CSF");
 
 // KloxoNext - custom (reverse) DNS zones
@@ -1502,3 +1502,12 @@ $__description["dnscustom_content"] = array("Zone file (BIND format, \$GENERATE 
 $__description["dnscustom_delete"] = array("Delete this zone");
 $__description["dnscustom_zones"] = array("Custom Reverse Zones");
 $__description["dnscustom_edit"] = array("Edit Zone");
+
+$__description["firewall_port"] = array("Open Ports");
+$__description["firewall_port_number"] = array("Port");
+$__description["firewall_protocol"] = array("Protocol");
+$__description["firewall_port_state"] = array("Firewall");
+$__description["firewall_port_kind"] = array("Opened by");
+$__description["firewall_port_program"] = array("Listening program");
+$__description["firewall_close_port"] = array("Close");
+$__description["firewall_open_port"] = array("Open");

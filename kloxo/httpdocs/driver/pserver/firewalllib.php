@@ -35,6 +35,9 @@ class Firewall extends lxClass
 	static $__acdesc_update_deny = array("", "", "firewall_deny_list");
 	static $__acdesc_update_csfinstall = array("", "", "firewall_csf_install");
 
+	// open ports, read live from the firewall (driver/pserver/fwportlib.php)
+	static $__desc_fwport_l = array("v", "", "virtual");
+
 	function get() {}
 	function write() {}
 
@@ -46,6 +49,15 @@ class Firewall extends lxClass
 	function createShowPropertyList(&$alist)
 	{
 		$alist['property'][] = 'a=show';
+		$alist['property'][] = 'a=list&c=fwport';
+	}
+
+	// the open ports list is shown under the forms
+	function createShowClist($subaction)
+	{
+		$clist['fwport'] = null;
+
+		return $clist;
 	}
 
 	function createShowUpdateform()
@@ -179,8 +191,9 @@ class Firewall extends lxClass
 				return $vlist;
 
 			case "ports":
-				$vlist['tcp_in_f'] = array('m', array('value' => str_replace(' ', ',', trim(isset($st['TCP_IN']) ? $st['TCP_IN'] : ''))));
-				$vlist['udp_in_f'] = array('m', array('value' => str_replace(' ', ',', trim(isset($st['UDP_IN']) ? $st['UDP_IN'] : ''))));
+				// add ports; the list below the forms shows / closes the open ones
+				$vlist['tcp_in_f'] = array('m', array('value' => ''));
+				$vlist['udp_in_f'] = array('m', array('value' => ''));
 
 				return $vlist;
 
@@ -229,13 +242,21 @@ class Firewall extends lxClass
 		self::checkAccess();
 		$this->checkLocal();
 
-		$tcp = isset($param['tcp_in_f']) ? $param['tcp_in_f'] : '';
-		$udp = isset($param['udp_in_f']) ? $param['udp_in_f'] : '';
+		$specs = array();
 
-		$out = self::run(array('set-ports', $tcp, $udp), $ok);
+		foreach (array('tcp' => 'tcp_in_f', 'udp' => 'udp_in_f') as $proto => $f) {
+			foreach (preg_split('/[\s,;]+/', isset($param[$f]) ? (string)$param[$f] : '', -1, PREG_SPLIT_NO_EMPTY) as $p) {
+				$specs[] = str_replace(':', '-', $p) . "/{$proto}";
+			}
+		}
 
-		if (!$ok) {
-			self::fail($out);
+		// every port applied (and the firewall reloaded) right away
+		foreach ($specs as $spec) {
+			$out = self::run(array('open-port', $spec), $ok);
+
+			if (!$ok) {
+				self::fail($out);
+			}
 		}
 
 		return null;
