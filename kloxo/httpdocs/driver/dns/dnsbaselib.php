@@ -266,7 +266,7 @@ class dns_record_a extends LxDnsClass
 			$vlist['hostname'] = array('m', array('value'=> '__base__'));
 			$vlist['param'] = array('m', array('posttext' => "."));
 		} elseif ($typetd['val'] === 'mx') {
-			$vlist['priority'] = array('s', array('5', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'));
+			$vlist['priority'] = array('s', array('0', '1', '2', '3', '4', '5', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'));
 			$vlist['param'] = array('m', array('posttext' => "."));
 		} elseif ($typetd['val'] === 'cname') {
 			$vlist['hostname'] = array('m', array('posttext' => ".$parent->nname."));
