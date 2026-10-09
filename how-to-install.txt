@@ -2,7 +2,7 @@ KloxoNext - install
 
 Supported: AlmaLinux/Rocky 9.x and 10.x, Ubuntu 26.04 LTS (fresh server, FQDN hostname).
 
-  git clone https://github.com/<you>/kloxonext.git /root/kloxonext
+  git clone https://github.com/BiP4/kloxonext.git /root/kloxonext
   bash /root/kloxonext/kloxonext-install.sh
 
 The admin password is printed once at the end of the installation.

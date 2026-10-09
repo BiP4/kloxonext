@@ -19,7 +19,7 @@ Apache, BIND, Pure-FTPd, Postfix, Dovecot. No custom Kloxo RPM repository is nee
 On a fresh server with a fully qualified hostname (`hostnamectl set-hostname server1.example.com`):
 
 ```bash
-git clone https://github.com/<you>/kloxonext.git /root/kloxonext
+git clone https://github.com/BiP4/kloxonext.git /root/kloxonext
 bash /root/kloxonext/kloxonext-install.sh
 ```
 

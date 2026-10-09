@@ -9,7 +9,7 @@
 #        bash /root/kloxonext/kloxonext-install.sh
 #
 #    Or straight from a repository URL:
-#        bash kloxonext-install.sh --repo=https://github.com/<you>/kloxonext.git [--branch=main]
+#        bash kloxonext-install.sh --repo=https://github.com/BiP4/kloxonext.git [--branch=main]
 #
 #    Every other option is passed to kloxo/install/setup.sh:
 #        --php="84 85"  --admin-password=...  --install-type=slave  --yes
