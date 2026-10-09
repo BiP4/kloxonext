@@ -6586,6 +6586,16 @@ function setJailshellSystem($nolog = null)
 {
 	log_cleanup("Install jailshell to system", $nolog);
 
+	// KloxoNext - jailed shells (sshd ChrootDirectory + boot mounts), see /script/kn-jail
+	log_cleanup("- Jailed shell for client users (kn-jail)", $nolog);
+	exec("sh /script/kn-jail setup >/dev/null 2>&1");
+
+	// the old PHP web console ran commands as root; replaced by the ttyd terminal
+	if (lxfile_exists("../httpdocs/web-console")) {
+		log_cleanup("- Remove the old root web console", $nolog);
+		lxfile_rm_rec("../httpdocs/web-console");
+	}
+
 	if (!lxfile_exists("/usr/bin/execzsh.sh")) {
 		log_cleanup("- Install process", $nolog);
 		addLineIfNotExistInside("/etc/shells", "/usr/bin/lxjailshell", "");

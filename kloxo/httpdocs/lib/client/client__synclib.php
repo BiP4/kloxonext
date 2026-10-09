@@ -4,6 +4,9 @@ class client__sync extends lxDriverClass {
 
 	function dbactionDelete()
 	{
+		// KloxoNext - unmount and remove the jailed shell before the account goes
+		exec("sh /script/kn-jail disable " . escapeshellarg($this->main->username) . " >/dev/null 2>&1");
+
 		lxshell_return("userdel", $this->main->username);
 
 		lxfile_rm_rec("__path_client_root/{$this->main->nname}");
@@ -107,8 +110,22 @@ class client__sync extends lxDriverClass {
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 		
-		$shell = fix_disabled($this->main->shell, $sgbl->__var_noaccess_shell);
-		lxshell_return("usermod", "-s", $shell,  $this->main->nname);
+		// KloxoNext - '/usr/bin/lxjailshell' = bash locked into the user's home (SSH, SFTP,
+		// panel terminal), see /script/kn-jail; anything else removes the jail
+		$user = escapeshellarg($this->main->nname);
+
+		if ($this->main->shell === '/usr/bin/lxjailshell') {
+			exec("sh /script/kn-jail enable {$user} 2>&1", $out, $rc);
+
+			if ($rc !== 0) {
+				log_log("shell_access", "jail of {$this->main->nname}: " . implode(' ', (array)$out));
+			}
+		} else {
+			exec("sh /script/kn-jail disable {$user} >/dev/null 2>&1");
+
+			$shell = fix_disabled($this->main->shell, $sgbl->__var_noaccess_shell);
+			lxshell_return("usermod", "-s", $shell,  $this->main->nname);
+		}
 		
 		if ($this->main->isOn('disable_system_flag')) {
 			lxshell_return("usermod", "-L", $this->main->nname);

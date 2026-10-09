@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+#    KloxoNext - started by ttyd (kloxo-terminal.service) for every web terminal connection.
+#
+#    $1 is a one-time token created by the panel (sshclient page) in
+#    session/term_<token>: "<user>|<expiry>". It is deleted on first use.
+#      root            -> root login shell (admin, Server > SSH Terminal)
+#      jailed client   -> bash inside /home/kloxo/jail/<user> (only his own home)
+#      full client     -> the user's login shell
+#
+
+KLOXO_PATH=/usr/local/lxlabs/kloxo
+tok="$1"
+
+fail() {
+	printf '\r\n  %s\r\n\r\n  Open the terminal again from the KloxoNext panel.\r\n' "$1"
+	sleep 30
+	exit 1
+}
+
+[[ "${tok}" =~ ^[a-f0-9]{48}$ ]] || fail "Invalid or missing terminal session."
+
+f="${KLOXO_PATH}/session/term_${tok}"
+[ -f "${f}" ] || fail "This terminal session has expired or was already used."
+
+IFS='|' read -r user expiry < "${f}"
+rm -f -- "${f}"
+
+[[ "${expiry}" =~ ^[0-9]+$ ]] && [ "${expiry}" -ge "$(date +%s)" ] || fail "This terminal session has expired."
+[[ "${user}" =~ ^[a-z_][a-z0-9_.-]{0,31}$ ]] || fail "Invalid user."
+getent passwd "${user}" >/dev/null || fail "Unknown user."
+
+export TERM=xterm-256color LANG="${LANG:-C.UTF-8}"
+
+if [ "${user}" == "root" ] ; then
+	cd /root || cd /
+	exec /bin/bash -l
+fi
+
+home="$(getent passwd "${user}" | cut -d: -f6)"
+shell="$(getent passwd "${user}" | cut -d: -f7)"
+
+case "$(sh /script/kn-jail status "${user}")" in
+	jailed)
+		sh /script/kn-jail mount "${user}" >/dev/null 2>&1 || fail "The jail of ${user} cannot be mounted."
+		exec chroot --userspec="${user}:$(id -gn "${user}")" --groups="$(id -Gn "${user}" | tr ' ' ',')" \
+			"/home/kloxo/jail/${user}" /usr/bin/env -i HOME="${home}" USER="${user}" LOGNAME="${user}" \
+			SHELL=/bin/bash TERM="${TERM}" LANG="${LANG}" PATH=/usr/local/bin:/usr/bin:/bin \
+			/bin/bash -c "cd \"\$HOME\" 2>/dev/null; exec /bin/bash -l"
+		;;
+	full)
+		exec runuser -l "${user}" -s "${shell}"
+		;;
+	*)
+		fail "Shell access is disabled for ${user}."
+		;;
+esac

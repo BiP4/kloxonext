@@ -362,8 +362,9 @@ abstract class ClientCore extends Resourcecore
 				return $vlist;
 
 			case "shell_access":
-				$res[] = "/bin/bash";
+				// KloxoNext - jailed (own home only) first: the safe choice for customers
 				$res[] = "/usr/bin/lxjailshell";
+				$res[] = "/bin/bash";
 				$res = add_disabled($res);
 
 				$vlist['nname'] = array('M', null);

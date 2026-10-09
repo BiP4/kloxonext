@@ -1,0 +1,308 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+#
+#    KloxoNext - jailed shell for client users (SSH, SFTP and the panel web terminal)
+#
+#    A user in the group 'kloxojail' is locked by sshd (ChrootDirectory) into
+#    /home/kloxo/jail/<user>, which contains only:
+#      - the system programs, read-only (/usr, /opt with the PHP branches ...)
+#      - a minimal /etc (no other accounts, no shadow file)
+#      - his own home directory /home/<user> (read-write)
+#      - /tmp, /dev (null, zero, random, tty, pts), /proc (own processes only)
+#
+#      kn-jail setup                 sshd rule + boot unit (run by cleanup)
+#      kn-jail enable <user>         add to kloxojail, build and mount the jail
+#      kn-jail disable <user>        remove from kloxojail, unmount and delete the jail
+#      kn-jail mount <user>          (re)build /etc and mount everything (idempotent)
+#      kn-jail umount <user>         unmount everything below the jail
+#      kn-jail mount-all             mount the jails of every kloxojail member (boot)
+#      kn-jail status <user>         jailed|full|none
+#
+
+. /script/os.inc >/dev/null 2>&1
+
+JROOT=/home/kloxo/jail
+GROUP=kloxojail
+
+die() { echo "ERROR=$*" ; exit 1 ; }
+
+valid_user() {
+	[[ "$1" =~ ^[a-z_][a-z0-9_.-]{0,31}$ ]] || die "invalid user name"
+	[ "$1" != "root" ] || die "root cannot be jailed"
+	getent passwd "$1" >/dev/null || die "no such user: $1"
+}
+
+user_home() { getent passwd "$1" | cut -d: -f6 ; }
+
+is_mounted() { mountpoint -q "$1" 2>/dev/null ; }
+
+bind_ro() {
+	local src="$1" dst="$2"
+	[ -e "${src}" ] || return 0
+	if [ -d "${src}" ] ; then mkdir -p "${dst}" ; else mkdir -p "$(dirname "${dst}")" ; touch "${dst}" ; fi
+	is_mounted "${dst}" && return 0
+	mount --bind "${src}" "${dst}" && mount -o remount,bind,ro "${dst}"
+}
+
+bind_rw() {
+	local src="$1" dst="$2"
+	[ -e "${src}" ] || return 0
+	if [ -d "${src}" ] ; then mkdir -p "${dst}" ; else mkdir -p "$(dirname "${dst}")" ; touch "${dst}" ; fi
+	is_mounted "${dst}" && return 0
+	mount --bind "${src}" "${dst}"
+}
+
+# --------------------------------------------------------------------- /etc
+
+build_etc() {
+	local u="$1" j="$2" f g
+
+	mkdir -p "${j}/etc"
+	chmod 755 "${j}/etc"
+
+	# accounts: root and the user only
+	getent passwd root > "${j}/etc/passwd"
+	getent passwd "${u}" >> "${j}/etc/passwd"
+	: > "${j}/etc/group"
+	getent group root >> "${j}/etc/group"
+	for g in $(id -Gn "${u}") ; do
+		getent group "${g}" | awk -F: -v u="${u}" '{ print $1 ":x:" $3 ":" (($4 ~ ("(^|,)" u "(,|$)")) ? u : "") }' >> "${j}/etc/group"
+	done
+	chmod 644 "${j}/etc/passwd" "${j}/etc/group"
+
+	printf 'passwd: files\ngroup: files\nhosts: files dns\n' > "${j}/etc/nsswitch.conf"
+
+	for f in resolv.conf hosts host.conf localtime ld.so.cache ld.so.conf profile bashrc bash.bashrc \
+			inputrc environment os-release mime.types shells protocols services DIR_COLORS \
+			my.cnf php.ini wgetrc vimrc virc nanorc gitconfig ; do
+		[ -e "/etc/${f}" ] && cp -dpf "/etc/${f}" "${j}/etc/${f}" 2>/dev/null
+	done
+}
+
+# --------------------------------------------------------------------- mount / umount
+
+cmd_mount() {
+	local u="$1" j home d s
+
+	valid_user "${u}"
+	j="${JROOT}/${u}"
+	home="$(user_home "${u}")"
+	[ -d "${home}" ] || die "home directory ${home} missing"
+
+	# sshd: the chroot and every parent must be root-owned and not writable by others
+	mkdir -p "${JROOT}" "${j}"
+	chown root:root /home/kloxo "${JROOT}" "${j}" 2>/dev/null
+	chmod 755 "${JROOT}" "${j}"
+
+	# /bin /sbin /lib /lib64: same symlinks as the host (merged /usr) or read-only binds
+	for d in bin sbin lib lib64 lib32 ; do
+		if [ -L "/${d}" ] ; then
+			[ -L "${j}/${d}" ] || ln -sfn "$(readlink "/${d}")" "${j}/${d}"
+		elif [ -d "/${d}" ] ; then
+			bind_ro "/${d}" "${j}/${d}"
+		fi
+	done
+
+	bind_ro /usr "${j}/usr"
+	bind_ro /opt "${j}/opt"
+
+	# the panel itself and the generated server configuration stay invisible
+	for d in /usr/local/lxlabs /opt/configs ; do
+		[ -d "${d}" ] || continue
+		is_mounted "${j}${d}" || mount -t tmpfs -o ro,size=4k,mode=755 kn-jail-hidden "${j}${d}"
+	done
+
+	build_etc "${u}" "${j}"
+
+	# configuration the tools need (read-only): certificates, PHP, MariaDB client, alternatives
+	for s in /etc/pki /etc/ssl /etc/ca-certificates /etc/alternatives /etc/opt /etc/php /etc/php.d \
+			/etc/my.cnf.d /etc/mysql /etc/profile.d /etc/ld.so.conf.d /etc/bash_completion.d /etc/terminfo \n			/etc/environment-modules /etc/xdg ; do
+		[ -d "${s}" ] && bind_ro "${s}" "${j}${s}"
+	done
+
+	# /dev
+	mkdir -p "${j}/dev/pts"
+	chmod 755 "${j}/dev"
+	[ -c "${j}/dev/null" ]    || mknod -m 666 "${j}/dev/null" c 1 3
+	[ -c "${j}/dev/zero" ]    || mknod -m 666 "${j}/dev/zero" c 1 5
+	[ -c "${j}/dev/full" ]    || mknod -m 666 "${j}/dev/full" c 1 7
+	[ -c "${j}/dev/random" ]  || mknod -m 444 "${j}/dev/random" c 1 8
+	[ -c "${j}/dev/urandom" ] || mknod -m 444 "${j}/dev/urandom" c 1 9
+	[ -c "${j}/dev/tty" ]     || mknod -m 666 "${j}/dev/tty" c 5 0
+	[ -c "${j}/dev/ptmx" ]    || mknod -m 666 "${j}/dev/ptmx" c 5 2
+	is_mounted "${j}/dev/pts" || mount --bind /dev/pts "${j}/dev/pts"
+	ln -sfn /proc/self/fd "${j}/dev/fd"
+
+	# /proc: only the user's own processes are visible
+	mkdir -p "${j}/proc"
+	is_mounted "${j}/proc" || mount -t proc -o hidepid=2 proc "${j}/proc"
+
+	# /tmp private to the jail
+	mkdir -p "${j}/tmp" "${j}/var" "${j}/run"
+	chmod 1777 "${j}/tmp"
+	ln -sfn ../tmp "${j}/var/tmp"
+
+	# MariaDB socket (EL: /var/lib/mysql/mysql.sock, Ubuntu: /run/mysqld)
+	[ -S /var/lib/mysql/mysql.sock ] && bind_rw /var/lib/mysql/mysql.sock "${j}/var/lib/mysql/mysql.sock"
+	[ -d /run/mysqld ] && bind_rw /run/mysqld "${j}/run/mysqld"
+
+	# the user's own home, read-write
+	bind_rw "${home}" "${j}${home}"
+
+	echo "OK=jail of ${u} mounted"
+}
+
+cmd_umount() {
+	local u="$1" j m
+
+	[[ "${u}" =~ ^[a-z_][a-z0-9_.-]{0,31}$ ]] || die "invalid user name"
+	j="${JROOT}/${u}"
+	[ -d "${j}" ] || { echo "OK=no jail" ; return 0 ; }
+
+	# deepest first
+	for m in $(findmnt -rn -o TARGET | grep -F "${j}/" | sort -r) ; do
+		umount "${m}" 2>/dev/null || umount -l "${m}" 2>/dev/null
+	done
+
+	echo "OK=jail of ${u} unmounted"
+}
+
+# --------------------------------------------------------------------- enable / disable
+
+cmd_enable() {
+	local u="$1"
+
+	valid_user "${u}"
+	getent group "${GROUP}" >/dev/null || groupadd -r "${GROUP}"
+	usermod -aG "${GROUP}" "${u}" >/dev/null 2>&1
+	usermod -s /bin/bash "${u}" >/dev/null 2>&1
+
+	cmd_mount "${u}" >/dev/null || exit 1
+	echo "OK=${u} has a jailed shell"
+}
+
+cmd_disable() {
+	local u="$1" j
+
+	[[ "${u}" =~ ^[a-z_][a-z0-9_.-]{0,31}$ ]] || die "invalid user name"
+	[ "${u}" != "root" ] || die "root cannot be jailed"
+	j="${JROOT}/${u}"
+
+	getent group "${GROUP}" >/dev/null && gpasswd -d "${u}" "${GROUP}" >/dev/null 2>&1
+
+	if [ -d "${j}" ] ; then
+		cmd_umount "${u}" >/dev/null
+
+		# never delete through a bind mount (the user's real home is mounted in there)
+		if findmnt -rn -o TARGET | grep -qF "${j}" ; then
+			die "jail of ${u} is still mounted; not removed"
+		fi
+
+		rm -rf --one-file-system -- "${j:?}"
+	fi
+
+	echo "OK=jail of ${u} removed"
+}
+
+cmd_status() {
+	local u="$1"
+	getent passwd "${u}" >/dev/null || { echo "none" ; return ; }
+	if id -Gn "${u}" 2>/dev/null | tr ' ' '\n' | grep -qx "${GROUP}" ; then
+		echo "jailed"
+	elif [[ "$(getent passwd "${u}" | cut -d: -f7)" =~ (bash|sh|zsh)$ ]] ; then
+		echo "full"
+	else
+		echo "none"
+	fi
+}
+
+cmd_mount_all() {
+	local u
+	getent group "${GROUP}" >/dev/null || return 0
+	for u in $(getent group "${GROUP}" | cut -d: -f4 | tr ',' ' ') ; do
+		cmd_mount "${u}" >/dev/null 2>&1 && echo "OK=${u}"
+	done
+}
+
+# --------------------------------------------------------------------- setup
+
+cmd_setup() {
+	local conf=/etc/ssh/sshd_config.d/50-kloxonext-jail.conf
+
+	getent group "${GROUP}" >/dev/null || groupadd -r "${GROUP}"
+	mkdir -p "${JROOT}"
+	chown root:root "${JROOT}"
+	chmod 755 "${JROOT}"
+
+	if [ ! -f /etc/ssh/sshd_config ] ; then
+		echo "- OpenSSH server not installed: only the panel web terminal is jailed"
+	else
+	mkdir -p /etc/ssh/sshd_config.d
+	cat > "${conf}" <<-EOF
+	# KloxoNext - client users with a jailed shell only see their own home directory
+	Match Group ${GROUP}
+	    ChrootDirectory ${JROOT}/%u
+	    AllowTcpForwarding no
+	    AllowAgentForwarding no
+	    X11Forwarding no
+	    PermitTunnel no
+	Match all
+	EOF
+	chmod 644 "${conf}"
+
+	# older sshd_config without the drop-in directory
+	if ! grep -qiE '^\s*Include\s+/etc/ssh/sshd_config.d/' /etc/ssh/sshd_config ; then
+		sed -i '1i Include /etc/ssh/sshd_config.d/*.conf' /etc/ssh/sshd_config
+	fi
+
+	if sshd -t 2>/dev/null ; then
+		systemctl reload sshd >/dev/null 2>&1 || systemctl reload ssh >/dev/null 2>&1
+	else
+		rm -f "${conf}"
+		die "sshd rejected the jail configuration"
+	fi
+	fi
+
+	cat > /etc/systemd/system/kloxo-jail.service <<-EOF
+	[Unit]
+	Description=KloxoNext - mount the jailed shells of the client users
+	After=local-fs.target
+
+	[Service]
+	Type=oneshot
+	RemainAfterExit=yes
+	ExecStart=/bin/bash /usr/local/lxlabs/kloxo/pscript/kn-jail mount-all
+
+	[Install]
+	WantedBy=multi-user.target
+	EOF
+	systemctl daemon-reload
+	systemctl enable kloxo-jail >/dev/null 2>&1
+
+	cmd_mount_all >/dev/null
+
+	# web terminal (Server > SSH Terminal, client SSH Terminal)
+	command -v ttyd >/dev/null 2>&1 || pkg_install ttyd >/dev/null 2>&1
+	if command -v ttyd >/dev/null 2>&1 ; then
+		cp -f /usr/local/lxlabs/kloxo/init/kloxo-terminal.service /etc/systemd/system/kloxo-terminal.service
+		chmod 644 /etc/systemd/system/kloxo-terminal.service
+		systemctl daemon-reload
+		systemctl enable kloxo-terminal >/dev/null 2>&1
+		systemctl restart kloxo-terminal >/dev/null 2>&1
+	else
+		echo "- ttyd not available: the panel web terminal is disabled"
+	fi
+
+	echo "OK=jail setup done"
+}
+
+case "$1" in
+	setup)     cmd_setup ;;
+	enable)    cmd_enable "$2" ;;
+	disable)   cmd_disable "$2" ;;
+	mount)     cmd_mount "$2" ;;
+	umount)    cmd_umount "$2" ;;
+	mount-all) cmd_mount_all ;;
+	status)    cmd_status "$2" ;;
+	*)         echo "usage: $0 setup|enable|disable|mount|umount|mount-all|status <user>" ; exit 2 ;;
+esac

@@ -1,0 +1,16 @@
+[Unit]
+Description=KloxoNext web terminal (ttyd) - Server > SSH Terminal, client shells are jailed
+Documentation=https://github.com/BiP4/kloxonext
+After=network.target
+
+[Service]
+Type=simple
+# only reachable through the panel nginx (/terminal/); every connection needs a one-time token
+ExecStart=/usr/bin/ttyd --interface 127.0.0.1 --port 7681 --base-path /terminal --url-arg --writable --check-origin \
+	--client-option titleFixed=KloxoNext --client-option fontSize=14 --client-option disableLeaveAlert=true \
+	/bin/bash /usr/local/lxlabs/kloxo/sbin/kn-terminal
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

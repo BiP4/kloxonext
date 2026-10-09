@@ -1,5 +1,12 @@
 <?php
 
+// KloxoNext - SSH Terminal page: a real terminal in the browser (ttyd behind the panel
+// nginx at /terminal/, see init/kloxo-terminal.service and sbin/kn-terminal).
+//   server page (admin)  -> root shell
+//   client page          -> the client's shell; with 'jailed' shell access it only sees
+//                           its own home directory (/script/kn-jail)
+// Every page view creates a one-time token valid for 60 seconds.
+
 class sshclient extends lxclass
 {
 	static $__desc = array("", "", "ssh_client");
@@ -15,94 +22,76 @@ class sshclient extends lxclass
 		global $gbl, $sgbl, $login, $ghtml;
 
 		$parent = $this->getParentO();
+		$note = '';
 
-		$v = lfile_get_contents("thirdparty/sshterm-applet/sshterm-applet.htm");
-
-	//	if ($parent->is__table('pserver')) {
 		if ($parent->getClass() === 'pserver') {
-			$username = "root";
-			$ip = getFQDNforServer($parent->nname);
+			if (!$login->isAdmin() || !$parent->isLocalhost('nname')) {
+				$this->printMessage("The terminal is available for the local server and the administrator only.");
 
-			$sshport = db_get_value("sshconfig", $parent->nname, "ssh_port");
+				return;
+			}
 
-			if (!$sshport) { $sshport = "22"; }
-
-			$connectimmediately = "true";
-	//	} else if ($parent->is__table('client')) {
-		} else if ($parent->getClass() === 'client') {
+			$user = 'root';
+			$note = 'Root shell of this server.';
+		} elseif ($parent->getClass() === 'client') {
 			if ($parent->isDisabled('shell') || !$parent->shell) {
-				exit;
+				$this->printMessage("Shell access is disabled for this account. The administrator can enable it on the 'Shell Access' page of the client.");
+
+				return;
 			}
 
-			$username = $parent->username;
-
-			$ip = getFQDNforServer("localhost");
-
-			$sshport = db_get_value("sshconfig", $parent->websyncserver, "ssh_port");
-
-			if (!$sshport) { $sshport = "22"; }
-
-			$connectimmediately = "true";
+			$user = $parent->username;
+			$note = ($parent->shell === '/usr/bin/lxjailshell')
+				? "Jailed shell: only the home directory of {$user} is visible."
+				: "Shell of {$user}.";
 		} else {
-			$username = "root";
+			$this->printMessage("No terminal for this object.");
 
-			$ip = $parent->getOneIP();
-
-			$sshport = db_get_value("sshconfig", $parent->syncserver, "ssh_port");
-
-			if (!$ip) {
-				throw new lxException($login->getThrow("need_to_add_at_least_one_ip_to_vps_for_logging_in"));
-			}
-
-			if (!$sshport) { $sshport = "22"; }
-			
-			$connectimmediately = "true";
+			return;
 		}
 
-		if ($login->nname === 'admin') {
-			$ar['ip_address'] = $gbl->c_session->ip_address;
-			$ar['session'] = $gbl->c_session->tsessionid;
-			lfile_put_serialize("../session/ssh_{$ar['session']}", $ar['ip_address']);
-			$servar = base64_encode(serialize($ar));
-?>
-<div style="text-align:center">
-<IFRAME style="width:800px; height:600px" src="web-console/index.php?session=<?php echo $servar; ?>"></IFRAME>
-</div>
-<?php
-		} else {
-			if (file_exists("thirdparty/jcterm")) {
-?>
+		if (!preg_match('/^[a-z_][a-z0-9_.-]{0,31}$/', (string)$user)) {
+			$this->printMessage("Invalid user.");
 
-<div style="text-align:center">
-	<applet code="com.jcraft.jcterm.JCTermApplet.class" 
-			archive="jcterm-0.0.10.jar?167,jsch-0.1.46.jar?835,jzlib-1.1.1.jar?742" 
-			codebase="thirdparty/jcterm/" height="600" width="800">   
-		<param name="jcterm.font_size" value="13">
-		<param name="jcterm.fg_bg" value="#000000:#ffffff,#ffffff:#000000,#00ff00:#000000">
-		<!-- <param name="jcterm.config.repository" value="com.jcraft.jcterm.ConfigurationRepositoryFS"> -->
-		<param name="jcterm.destinations" value="<?= $parent->username ?>@<?= $ip ?>:<?= $sshport ?>">
-	</applet>
-</div>
-<?php
-			} else {
-?>
+			return;
+		}
 
-<div style="text-align:center; width: 640px; height: 480px; margin: 0 auto; border: 0; padding: 0">
-	<applet style="width: 640px; height: 480px; border: 1px solid #ddd" 
-		archive="SSHTermApplet-signed.jar,SSHTermApplet-jdkbug-workaround-signed.jar,SSHTermApplet-jdk1.3.1-dependencies-signed.jar"
-		code="com.sshtools.sshterm.SshTermApplet" codebase="thirdparty/sshterm-applet/"
-		mayscript="mayscript">
+		// one-time token, read and deleted by sbin/kn-terminal
+		$tok = bin2hex(random_bytes(24));
+		$dir = "{$sgbl->__path_program_root}/session";
 
-		<param name=sshapps.connection.host value="<?= $ip ?>">
-		<param name=sshapps.connection.port value="<?= $sshport ?>">
-		<param name=sshapps.connection.userName value="<?= $parent->username ?>">
-		<param name=sshapps.connection.authenticationMethod value=password>
-		<param name=sshapps.connection.connectImmediately value=<?= $connectimmediately ?>">
-	</applet>
-</div>
-<?php
+		if (!is_dir($dir)) {
+			mkdir($dir, 0700, true);
+		}
+
+		// drop tokens nobody used
+		foreach ((array)glob("{$dir}/term_*") as $old) {
+			if (is_file($old) && (filemtime($old) < time() - 300)) {
+				@unlink($old);
 			}
 		}
+
+		file_put_contents("{$dir}/term_{$tok}", "{$user}|" . (time() + 60) . "\n");
+		chmod("{$dir}/term_{$tok}", 0600);
+
+		$h = function ($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); };
+?>
+<div class="kn-terminal">
+	<div class="kn-terminal-bar"><?= $h($note) ?> <span>Reload the page for a new session.</span></div>
+	<iframe class="kn-terminal-frame" src="/terminal/?arg=<?= $h($tok) ?>" title="Terminal"></iframe>
+</div>
+<style>
+.kn-terminal { max-width: 1200px; }
+.kn-terminal-bar { margin: 0 0 8px; font-size: 13px; color: var(--kn-text-2, #475569); }
+.kn-terminal-bar span { color: var(--kn-text-3, #64748b); }
+.kn-terminal-frame { width: 100%; height: min(70vh, 640px); border: 1px solid var(--kn-border, #ddd); border-radius: 10px; background: #000; }
+</style>
+<?php
+	}
+
+	function printMessage($msg)
+	{
+		print("<div style='padding: 16px'>" . htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') . "</div>");
 	}
 
 	static function initThisObjectRule($parent, $class) { return "sshclient"; }
