@@ -649,6 +649,12 @@ foreach ($certnamelist as $ip => $certname) {
 					}
 ?>
 	</Location>
+
+	# KloxoNext - error pages are reachable without the stats password (401 page)
+	<Location "/error/">
+		AuthType None
+		Require all granted
+	</Location>
 <?php
 				}
 			}

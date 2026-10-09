@@ -1,102 +1,64 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<title>Kloxo : Error 503</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-</head>
-
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<meta name="robots" content="noindex, nofollow">
+	<title>503 Service Unavailable · KloxoNext</title>
 <style>
+/* KloxoNext - error page (same look as the login / webmail / cp pages; static, no PHP) */
+:root {
+	--bg: #f4f6fb; --surface: #fff; --border: #e3e8f0; --text: #0f172a; --text-2: #475569; --text-3: #64748b;
+	--primary: #2563eb; --primary-hover: #1d4ed8; --on-primary: #fff; --focus: 0 0 0 3px rgba(37, 99, 235, .3);
+	--font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0b1120; --surface: #111a2e; --border: #1f2a44; --text: #e2e8f0; --text-2: #b6c2d6; --text-3: #8a97ad;
+		--primary: #60a5fa; --primary-hover: #93c5fd; --on-primary: #0b1120; --focus: 0 0 0 3px rgba(96, 165, 250, .35);
+	}
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
 body {
-	font-family: Tahoma, Verdana, Arial, Helvertica, sans-serif;
-	font-size: 8pt;
-	font-weight: 100;
-	background-image:url('/images/abstract.jpg');
-	background-color:#cccccc;
-	margin: 0;
+	font-family: var(--font); font-size: 15px; line-height: 1.5; color: var(--text);
+	background:
+		radial-gradient(1200px 600px at 10% -10%, rgba(59, 130, 246, .16), transparent 60%),
+		radial-gradient(900px 500px at 110% 110%, rgba(139, 92, 246, .14), transparent 60%),
+		var(--bg);
+	min-height: 100vh; display: flex; flex-direction: column;
 }
-a {
-	text-decoration: none;
-}
-img {
-	border: 0;
-}
-
-img.logo {
-	margin: 5px;
-	padding: 0;
-}
-
-table.header {
-	border-collapse: collapse;
-	border-spacing: 0;
-	width: 100%;
-	font-family: Tahoma, Verdana, Arial, Helvertica, sans-serif;
-	font-size: 8pt;
-	font-weight: 100;
-}
-
-table.content {
-	border-collapse: collapse;
-	border-spacing: 0;
-	width: 100%;
-	font-family: Tahoma, Verdana, Arial, Helvertica, sans-serif;
-	font-size: 8pt;
-	font-weight: 100%;
-}
-
-table.content_body td {
-	border-collapse: collapse;
-	border: 1px dashed #cccccc;
-	font-family: Tahoma, Verdana, Arial, Helvertica, sans-serif;
-	font-size: 10pt;
-	color: #444444;
-	padding:10px;
-	spacing:0;
-}
-
-table.content_title td {
-	border-collapse: collapse;
-	border: 0;
-	font-family: Tahoma, Verdana, Arial, Helvertica, sans-serif;
-	font-size: 12pt;
-	color: #336699;
-}
-
+.page-head { display: flex; align-items: center; padding: 20px 28px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 600; font-size: 18px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; font-weight: 800; }
+.brand b { color: var(--primary); }
+.page-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.page-foot { text-align: center; padding: 18px; color: var(--text-3); font-size: 12px; }
+.card { width: 100%; max-width: 420px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 20px 50px rgba(15, 23, 42, .12); padding: 32px; text-align: center; }
+.code { font-size: 56px; font-weight: 800; line-height: 1; margin: 0 0 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.card h1 { font-size: 22px; margin: 0 0 6px; }
+.card p { margin: 0 0 24px; color: var(--text-2); }
+.btn { display: block; width: 100%; text-align: center; text-decoration: none; font-weight: 600; padding: 11px 14px; border-radius: 10px; background: var(--primary); color: var(--on-primary); }
+.btn:hover { background: var(--primary-hover); }
+.btn:focus-visible { outline: none; box-shadow: var(--focus); }
+@media (max-width: 480px) { .card { padding: 24px 20px; border-radius: 14px; } .page-head { padding: 16px; } }
 </style>
-
+</head>
 <body>
+	<header class="page-head">
+		<span class="brand"><span class="brand-mark" aria-hidden="true">K</span><span>Kloxo<b>Next</b></span></span>
+	</header>
 
-<table class="header">
-	<tr>
-		<td width="100%"><img style="margin:5px; padding:5px; height:50px" class="logo" src="/images/logo.png" alt="hosting-logo"></td>
-		<td><a href="//kloxo.org/" title="Kloxo website"><img style="margin:5px; padding:5px; height:50px" class="logo" src="/images/kloxong.png" alt="kloxo-logo"></a></td>
-	</tr>
-</table>
-<table class="content">
-	<tr>
-		<td width="50">&nbsp;</td>
-		<td valign="middle" width="100%">
-<div align="center">
-		<table class="content_title" width="640">
-			<tr>
-				<td><br>
-				<br>
-				<b>Error 503 - Service Unavailable</b> </td>
-			</tr>
-		</table>
-		<br>
-		<table  class="content_body" width="640">
-			<tr>
-				<td width="100%" bgcolor="#eeeeee">
-					The server is currently unavailable (overloaded or down)<br></td>
-			</tr>
-		</table>
-</div>
-		</td>
-		<td width="50">&nbsp;</td>
-	</tr>
-</table>
+	<main class="page-main">
+		<section class="card" aria-labelledby="err-title">
+			<div class="code">503</div>
+			<h1 id="err-title">Service Unavailable</h1>
+			<p>The service is temporarily unavailable. Please try again in a few minutes.</p>
+			<a class="btn" href="/">Go to the home page</a>
+		</section>
+	</main>
 
+	<footer class="page-foot">Powered by KloxoNext</footer>
 </body>
-
 </html>

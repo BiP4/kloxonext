@@ -5345,8 +5345,11 @@ function setDefaultPages($nolog = null)
 			lxfile_cp(getLinkCustomfile($filepath, "default_index.php"), "{$httpdpath}/{$p}/index.php");
 		}
 
-		log_cleanup("- Skeleton for {$p} web page", $nolog);
-		lxshell_unzip("__system__", "{$httpdpath}/{$p}/", $targetzip);
+		// KloxoNext - the error pages are self-contained (no skeleton, its index.html would replace /error/)
+		if ($p !== 'error') {
+			log_cleanup("- Skeleton for {$p} web page", $nolog);
+			lxshell_unzip("__system__", "{$httpdpath}/{$p}/", $targetzip);
+		}
 
 		log_cleanup("- robots.txt for {$p} web page", $nolog);
 		lxfile_cp(getLinkCustomfile($filepath, "default_robots.txt"), "{$httpdpath}/{$p}/robots.txt");
@@ -5383,9 +5386,6 @@ function setDefaultPages($nolog = null)
 	log_cleanup("- Files for error web pages", $nolog);
 	lxfile_unix_chown("{$hdocspath}/error", "lxlabs:lxlabs");
 	lxfile_unix_chmod("{$hdocspath}/error", "0755");
-
-	log_cleanup("- Skeleton for error web pages", $nolog);
-	lxshell_unzip("__system__", "{$hdocspath}/error", $sourcezip);
 
 	log_cleanup("- Copy error web pages to '{$httpdpath}/error'", $nolog);
 	exec("cp -rf {$hdocspath}/error $httpdpath");
