@@ -184,7 +184,7 @@ function kn_nav_render($sections)
 			. "<summary class=\"kn-nav-top\" title=\"{$h($s['title'])}\">" . kn_nav_icon($s['icon'])
 			. "<span class=\"kn-nav-text\">{$h($s['title'])}</span>"
 			. "<svg class=\"kn-chevron\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"m9 6 6 6-6 6\"/></svg>"
-			. "</summary><div class=\"kn-nav-sub\">{$body}</div></details>\n";
+			. "</summary><div class=\"kn-nav-sub\"><div class=\"kn-nav-flyout-title\">{$h($s['title'])}</div>{$body}</div></details>\n";
 	}
 
 	return $out . "</nav>\n";

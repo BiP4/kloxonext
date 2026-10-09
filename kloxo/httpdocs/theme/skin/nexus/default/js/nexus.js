@@ -21,7 +21,20 @@
 		} else {
 			var c = root.classList.toggle('kn-collapsed');
 			store('kn-sidebar', c ? 'collapsed' : null);
+			syncSections();
 		}
+	}
+
+	function collapsedDesktop() {
+		return root.classList.contains('kn-collapsed') && !mobile.matches;
+	}
+
+	// collapsed: every flyout closed (they open on hover); expanded: the section
+	// holding the current page is open
+	function syncSections() {
+		document.querySelectorAll('.kn-nav-section').forEach(function (d) {
+			d.open = !collapsedDesktop() && !!d.querySelector('[aria-current="page"]');
+		});
 	}
 
 	document.addEventListener('click', function (e) {
@@ -50,7 +63,7 @@
 			if (!d.contains(e.target)) { d.removeAttribute('open'); }
 		});
 
-		if (root.classList.contains('kn-collapsed') && !mobile.matches) {
+		if (collapsedDesktop()) {
 			document.querySelectorAll('.kn-nav-section[open]').forEach(function (d) {
 				if (!d.contains(e.target)) { d.removeAttribute('open'); }
 			});
@@ -66,18 +79,52 @@
 
 	// only one sidebar section open at a time keeps the menu short
 	document.querySelectorAll('.kn-nav-section').forEach(function (d) {
+		var summary = d.querySelector('summary');
+		var timer = null;
+
+		function place() {
+			var sub = d.querySelector('.kn-nav-sub');
+			if (!sub) { return; }
+			var r = summary.getBoundingClientRect();
+			sub.style.top = Math.max(8, Math.min(r.top - 8, window.innerHeight - sub.offsetHeight - 8)) + 'px';
+		}
+
+		function show() {
+			if (!collapsedDesktop()) { return; }
+			clearTimeout(timer);
+			d.open = true;
+			place();
+		}
+
+		function hide() {
+			if (!collapsedDesktop()) { return; }
+			clearTimeout(timer);
+			// short delay: lets the pointer travel from the icon into the flyout
+			timer = setTimeout(function () { d.open = false; }, 180);
+		}
+
 		d.addEventListener('toggle', function () {
 			if (!d.open) { return; }
 			document.querySelectorAll('.kn-nav-section[open]').forEach(function (o) {
 				if (o !== d) { o.removeAttribute('open'); }
 			});
-			if (root.classList.contains('kn-collapsed') && !mobile.matches) {
-				var sub = d.querySelector('.kn-nav-sub');
-				var r = d.getBoundingClientRect();
-				if (sub) { sub.style.top = Math.min(r.top, window.innerHeight - 320) + 'px'; }
-			}
+			if (collapsedDesktop()) { place(); }
+		});
+
+		// collapsed sidebar: flyouts follow the pointer / keyboard focus, clicks do not pin them
+		d.addEventListener('mouseenter', show);
+		d.addEventListener('mouseleave', hide);
+		d.addEventListener('focusin', show);
+		d.addEventListener('focusout', function (e) {
+			if (!d.contains(e.relatedTarget)) { hide(); }
+		});
+		summary.addEventListener('click', function (e) {
+			if (collapsedDesktop()) { e.preventDefault(); show(); }
 		});
 	});
+
+	mobile.addEventListener('change', syncSections);
+	syncSections();
 
 	/* ---- light / dark theme --------------------------------------------- */
 

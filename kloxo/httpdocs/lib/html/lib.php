@@ -8093,11 +8093,12 @@ function getTimeZoneList()
 
 function trimming($data)
 {
-	if (gettype($data) == 'array') {
-		return array_map("trim", $data);
-	} else {
-		return trim($data);
+	// KloxoNext - recursive: form data can hold nested arrays (PHP 8 trim() rejects them)
+	if (is_array($data)) {
+		return array_map("trimming", $data);
 	}
+
+	return is_string($data) ? trim($data) : $data;
 }
 
 function getFSBlockSizeInKb()

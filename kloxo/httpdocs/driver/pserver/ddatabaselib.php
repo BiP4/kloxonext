@@ -390,6 +390,10 @@ class databasecore extends Lxdb
 
 	static function loadExtension($dbtype)
 	{
+		// KloxoNext - the old 'mysql' extension was removed in PHP 7; Kloxo uses mysqli
+		$ext = array('mysql' => 'mysqli', 'pgsql' => 'pgsql', 'mssql' => 'pdo_dblib');
+		$dbtype = isset($ext[$dbtype]) ? $ext[$dbtype] : $dbtype;
+
 		if (!extension_loaded($dbtype)) {
 			dprint("Warning No $dbtype <br> ");
 			exit;

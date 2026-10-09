@@ -1056,7 +1056,7 @@ class ClientBase extends ClientCore
 				}
 
 				// accept to more contact mail - http://forum.lxcenter.org/index.php?t=msg&goto=89118
-				$contact = implode(",", str_replace(" ", "", $param['contactemail']));
+				$contact = array_filter(explode(",", str_replace(" ", "", $param['contactemail'])));
 
 				foreach ($contact as $c) {
 					if (!validate_email($c)) {

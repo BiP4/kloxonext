@@ -28,6 +28,11 @@ class Sgbl
 
 		$this->__var_program_name = 'kloxo';
 
+		// KloxoNext - production by default; commands.php/backend.php raise it (check_for_debug)
+		if (!isset($this->dbg)) {
+			$this->dbg = -1;
+		}
+
 		$t = file_get_contents('/usr/local/lxlabs/kloxo/bin/kloxoversion');
 		$a = explode('.', $t);
 

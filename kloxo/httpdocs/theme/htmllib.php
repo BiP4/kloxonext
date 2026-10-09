@@ -5805,11 +5805,16 @@ class HtmlLib
 			dprint("<br /> <br /> Redirect called with splash <br /> ");
 			dprint(" <b><br /> <br />  Click <a href=\"$redirect_url\"><b> here to go to Continue. </a> </b> \n");
 
-			if ($sgbl->dbg < 0 || (isset($gbl->__no_debug_redirect) && $gbl->__no_debug_redirect)) {
+			// KloxoNext - $sgbl->dbg can be unset (null) here; only a positive value means debug
+			if (!($sgbl->dbg > 0) || (isset($gbl->__no_debug_redirect) && $gbl->__no_debug_redirect)) {
+				if (!headers_sent()) {
+					header("Location: {$redirect_url}");
+				}
 ?>
 			<head>
 				<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
 				<META HTTP-EQUIV="Refresh" CONTENT="0;URL=<?= $redirect_url ?>">
+				<script>location.replace(<?= json_encode($redirect_url) ?>);</script>
 <?php
 				if ($windowurl) {
 ?>
