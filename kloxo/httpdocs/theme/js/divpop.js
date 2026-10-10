@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var crossobj, dragapproved, offsetx, offsety, tempx, tempy;
 /******************************************
 * Popup Box- By Jim Silver @ jimsilver47@yahoo.com
 * Visit http://www.dynamicdrive.com/ for full source code

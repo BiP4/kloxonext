@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var err, m1, m2, m3, msg;
 function fieldcheck(form)
 {
 	err=0;

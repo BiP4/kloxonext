@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var BROWSER_GECKO, BROWSER_IE, BROWSER_OTHER, TARGET_BLANK, TARGET_OTHER, TARGET_PARENT, TARGET_SELF, TARGET_TOP, disp, ichild, image, menuclass, visib;
 
 // link target constants
 TARGET_OTHER  = 0;

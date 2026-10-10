@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var a, img;
 
 
 function preloadImages() 

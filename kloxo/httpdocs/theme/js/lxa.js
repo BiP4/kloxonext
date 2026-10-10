@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var Item, a, c, col, crossobj, d, e, elements, expandMess, field, field2, frm, frmelement, i, nid, option, r, retractMess, row, tid, txt, w;
 
 function hide_a_div_box(nameid){
 crossobj= document.getElementById(nameid);

@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var help_data;
 function changeContent(id,message) {
   if (document.getElementById || document.all) {
   if (!top.leftframe) {

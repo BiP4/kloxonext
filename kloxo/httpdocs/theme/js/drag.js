@@ -1,3 +1,5 @@
+// KloxoNext - globals shared between functions / scripts, declared explicitly
+var i;
 function parseList(ul, title) {
 	var items = ul.getElementsByTagName("div");
 	var out = "";
