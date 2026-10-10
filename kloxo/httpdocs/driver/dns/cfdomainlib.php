@@ -30,8 +30,9 @@ class Cfdomain extends lxClass
 
 	function createShowPropertyList(&$alist)
 	{
+		// no relative 'o=dns' link here: it would open a DNS object *under* this page and
+		// saving it stored a zone named 'cfdomain' (BIND then refused to start)
 		$alist['property'][] = 'a=show';
-		$alist['property'][] = 'a=show&o=dns';
 	}
 
 	function createShowUpdateform()

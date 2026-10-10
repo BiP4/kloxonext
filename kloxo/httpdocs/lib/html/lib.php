@@ -6221,6 +6221,12 @@ function getDnsMasters($servername)
 			if (isset($subs[$v2])) {
 				continue;
 			}
+
+			// KloxoNext - only real domain names become zones: a stray row (e.g. 'cfdomain')
+			// without a zone file stops BIND from starting
+			if (!kn_dns_is_zone_name($v2)) {
+				continue;
+			}
 			
 			$e[] = $v2;
 

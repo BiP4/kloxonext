@@ -220,3 +220,37 @@ function kn_dns_render_drivers()
 
 	return $list;
 }
+
+/** A zone name: at least two labels, letters/digits/hyphens (no panel object names) */
+function kn_dns_is_zone_name($name)
+{
+	return is_string($name) && (strpos($name, '.') !== false)
+		&& preg_match('/^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9][a-z0-9-]*[a-z0-9]$/i', $name);
+}
+
+/**
+ * Remove DNS rows that belong to no domain: a DNS object opened below a panel page
+ * (e.g. 'cfdomain') was saved under that page's name. Only names without a dot.
+ */
+function kn_dns_remove_stray_rows()
+{
+	static $done = false;
+
+	if ($done) {
+		return;
+	}
+
+	$done = true;
+
+	$db = new Sqlite(null, 'dns');
+	$rows = $db->getRowsWhere("nname NOT LIKE '%.%'", array('nname'));
+
+	foreach ((array)$rows as $r) {
+		if (empty($r['nname']) || !preg_match('/^[a-z0-9_-]+$/i', $r['nname'])) {
+			continue;
+		}
+
+		$db->rawQuery("DELETE FROM dns WHERE nname = '{$r['nname']}'");
+		log_log("dns_stray", "removed DNS row '{$r['nname']}' (no domain)");
+	}
+}

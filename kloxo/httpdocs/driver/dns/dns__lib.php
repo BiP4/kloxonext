@@ -158,6 +158,9 @@ class dns__ extends lxDriverClass
 			getParseInlinePhp($tpl, $input);
 		}
 
+		// KloxoNext - DNS rows that are no zone (created under a panel page by mistake)
+		kn_dns_remove_stray_rows();
+
 		// KloxoNext - permanent custom zones (Admin > Custom DNS Zones) after the generated lists
 		exec("sh /script/dns-custom apply --no-reload >/dev/null 2>&1");
 	}
