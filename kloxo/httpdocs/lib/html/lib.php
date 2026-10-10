@@ -4852,7 +4852,12 @@ function lxguard_main($clearflag = false, $since = false)
 	exec("sh /script/remove-blackhole-block");
 
 //	exec("cat /etc/tcprules.d/tcp.smtp|grep -v ':deny'|grep -v '# MR'|grep -E ':allow,|:deny,'", $out);
-	exec("cat /etc/tcprules.d/tcp.smtp|grep -E ':allow,|:deny,' > /etc/tcprules.d/tcp.smtp2; mv -f /etc/tcprules.d/tcp.smtp2 /etc/tcprules.d/tcp.smtp");
+	// qmail only (tcprules); KloxoNext mail is Postfix
+	$has_qmail = is_file('/etc/tcprules.d/tcp.smtp');
+
+	if ($has_qmail) {
+		exec("cat /etc/tcprules.d/tcp.smtp|grep -E ':allow,|:deny,' > /etc/tcprules.d/tcp.smtp2; mv -f /etc/tcprules.d/tcp.smtp2 /etc/tcprules.d/tcp.smtp");
+	}
 
 	foreach ($deny as $k => $v) {
 		if (csb($k, "127")) {
@@ -4888,12 +4893,19 @@ function lxguard_main($clearflag = false, $since = false)
 	$end_tcprules[] = "###End Program tcp.smtp config Area";
 	$end_str_tcprules = $end_tcprules[0];
 
-	file_put_between_comments("root", $start_tcprules, $end_tcprules, $start_str_tcprules, $end_str_tcprules, "/etc/tcprules.d/tcp.smtp", $str_tcprules);
-//	file_put_between_comments("root", $start_tcprules, $end_tcprules, $start_str_tcprules, $end_str_tcprules, "/etc/tcprules.d/tcp.smtp", $note);
-	exec("/usr/bin/qmailctl cdb");
+	if ($has_qmail) {
+		file_put_between_comments("root", $start_tcprules, $end_tcprules, $start_str_tcprules, $end_str_tcprules, "/etc/tcprules.d/tcp.smtp", $str_tcprules);
+	//	file_put_between_comments("root", $start_tcprules, $end_tcprules, $start_str_tcprules, $end_str_tcprules, "/etc/tcprules.d/tcp.smtp", $note);
+
+		if (is_executable('/usr/bin/qmailctl')) {
+			exec("/usr/bin/qmailctl cdb");
+		}
+	}
 
 	// MR -- no need this action where enough 'route host'
-	file_put_contents('/var/qmail/spamdyke/blacklist_ip', $str_spamdyke);
+	if (is_dir('/var/qmail/spamdyke')) {
+		file_put_contents('/var/qmail/spamdyke/blacklist_ip', $str_spamdyke);
+	}
 //	file_put_contents('/var/qmail/spamdyke/blacklist_ip', '');
 
 	if ($clearflag) {

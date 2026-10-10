@@ -23,10 +23,24 @@ function lx_password_hash($password)
 	return crypt((string)$password, '$6$rounds=5000$' . $salt . '$');
 }
 
-// PHP 7 array_map() returned null (with a warning) for a non-array argument
+// PHP 7 array_map() returned null (with a warning) for a non-array argument.
+// The callback (trim ...) is applied to the scalar values only, nested lists are
+// walked (lxguard access.info is ip => list of hits; trim(array) is a TypeError on PHP 8)
 function lx_array_map_safe($callback, $value)
 {
-	return is_array($value) ? array_map($callback, $value) : null;
+	if (!is_array($value)) {
+		return null;
+	}
+
+	foreach ($value as $k => $v) {
+		if (is_array($v)) {
+			$value[$k] = lx_array_map_safe($callback, $v);
+		} elseif (is_scalar($v)) {
+			$value[$k] = call_user_func($callback, (string)$v);
+		}
+	}
+
+	return $value;
 }
 
 if (function_exists('mysqli_report')) {
