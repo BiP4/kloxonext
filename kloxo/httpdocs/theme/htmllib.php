@@ -303,7 +303,7 @@ class HtmlLib
 	{
 ?>
 
-		<table class="tableheader" width="95%">
+		<table role="presentation" class="tableheader" width="95%">
 			<tr align="right">
 				<td>
 					<b><?= get_description($obj) ?> Info for <?= $obj->getId() ?></b>
@@ -311,7 +311,7 @@ class HtmlLib
 			</tr>
 		</table>
 
-		<table cellpadding="0" cellspacing="0" border="0" width="70%" align="center">
+		<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="70%" align="center">
 			<tr height="20">
 <?php
 		$class = get_class($obj);
@@ -1767,7 +1767,7 @@ class HtmlLib
 			}
 ?>
 							<div id="item_<?= $nametitle ?>" class="section">
-								<table cellpadding='2' cellspacing='0'>
+								<table role="presentation" cellpadding='2' cellspacing='0'>
 <?php
 			if ($show_direction !== 'horizontal') {
 ?>
@@ -2160,14 +2160,14 @@ class HtmlLib
 		</form>
 
 <div style="padding:0px; border:1px solid #eee; background-color: #def; width: 330px; margin: 0 auto;">
-	<table cellpadding="10" cellspacing="5" border="0" width="100%" style="background-color:#efead8;">
+	<table role="presentation" cellpadding="10" cellspacing="5" border="0" width="100%" style="background-color:#efead8;">
 		<tr>
 			<td nowrap width="100%" align="center"><?=$login->getKeywordUC('permissions_change');?></td>
 		</tr>
 	</table>
 
 	<form name="chmod" method="get" action="/display.php" accept-charset="utf-8">
-		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+		<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
 			<tr>
 				<td colspan="4" height="4">&nbsp;</td>
 			</tr>
@@ -2305,13 +2305,13 @@ class HtmlLib
 		</form>
 
 <div style="padding:0px; border:1px solid #eee; background-color: #def; width: 330px; margin: 0 auto;">
-	<table cellpadding="10" cellspacing="5" border="0" width="100%" style="background-color:#efead8;">
+	<table role="presentation" cellpadding="10" cellspacing="5" border="0" width="100%" style="background-color:#efead8;">
 		<tr>
 			<td nowrap width="100%" align="center"><?=$login->getKeywordUC('ownership_change');?></td>
 		</tr>
 	</table>
 	<form name="chown" method="get" action="/display.php" accept-charset="utf-8">
-		<table cellpadding="0" cellspacing="0" border="0" width="100%">
+		<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
 			<tr>
 				<td colspan="4" height="4">&nbsp;</td>
 			</tr>
@@ -4013,7 +4013,7 @@ class HtmlLib
 		$rewind_link = null;
 ?>
 
-		<table width="10">
+		<table role="presentation" width="10">
 			<tr>
 				<td bgcolor="#fff" nowrap>
 <?php
@@ -4229,14 +4229,14 @@ class HtmlLib
 
 		<div id=search_<?= $unique_name ?> style="<?= $visiblity ?>;" class="div_showhide">
 			<form name="lpfform_rsearch" method="get" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" onsubmit="return true;" accept-charset="utf-8">
-				<table width='100%' border='0' align="center" cellpadding='0' style='<?= $backgroundstring ?> border: 1px solid #<?= $col ?>'>
+				<table role="presentation" width='100%' border='0' align="center" cellpadding='0' style='<?= $backgroundstring ?> border: 1px solid #<?= $col ?>'>
 					<tr>
 						<td><img width=26 height=26 src="<?= $img ?>"></td>
 					</tr>
 					<tr>
 						<td width=10> &nbsp; </td>
 						<td>
-							<table width="100%" height="100%" cellpadding="0" cellspacing="0">
+							<table role="presentation" width="100%" height="100%" cellpadding="0" cellspacing="0">
 								<tr>
 
 <?php
@@ -4573,7 +4573,7 @@ class HtmlLib
 ?>
 
 		<div class="div_showhide">
-			<table width="100%" cellpadding="0" cellspacing="0" border="0" style="<?= $backgroundstring ?>  border: 1px solid #<?= $col ?>; padding: 10px;">
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="<?= $backgroundstring ?>  border: 1px solid #<?= $col ?>; padding: 10px;">
 				<tr>
 					<td><?php $this->print_list_submit($class, $blist, $unique_name); ?></td>
 					<td><?= $this->print_search($parent, $class) ?></td>
@@ -4588,7 +4588,7 @@ class HtmlLib
 ?>
 
 		<div class="div_showhide">
-			<table cellpadding="0" cellspacing="0" width="100%" border=0 valign="middle">
+			<table role="presentation" cellpadding="0" cellspacing="0" width="100%" border=0 valign="middle">
 				<tr>
 					<td colspan="100" height="6"></td>
 				</tr>
@@ -4705,7 +4705,7 @@ class HtmlLib
 		}
 ?>
 		<div class="<?= $divclass ?>">
-			<table style="margin:0;padding:0" cellspacing="1" cellpadding="3" width="100%" align="center">
+			<table role="presentation" style="margin:0;padding:0" cellspacing="1" cellpadding="3" width="100%" align="center">
 				<tr>
 					<td colspan="<?= $nlcount ?>"></td>
 				</tr>
@@ -4783,7 +4783,7 @@ class HtmlLib
 				}
 ?>
 					<td <?= $wrapstr ?> width="<?= $width ?>">
-						<table cellspacing="0" cellpadding="2"  border="0">
+						<table role="presentation" cellspacing="0" cellpadding="2"  border="0">
 							<tr>
 								<td class="collist" <?= $wrapstr ?> rowspan="2">
 
@@ -4958,7 +4958,7 @@ class HtmlLib
 				</tr>
 				<tr>
 					<td colspan="<?= $nlcount ?>">
-						<table cellpadding="0" cellspacing="0" border="0" width="100%">
+						<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
 							<tr height="1" style="background:#6698c9 <?= $img_url ?>">
 							</tr>
 							<tr>
@@ -4979,7 +4979,7 @@ class HtmlLib
 <?php
 		if ($sellist) {
 ?>
-									<table <?= $blackstyle ?>>
+									<table role="presentation" <?= $blackstyle ?>>
 										<tr>
 											<td>
 												<form method="post" action="<?= htmlspecialchars($_SERVER["PHP_SELF"], ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
@@ -5028,11 +5028,11 @@ class HtmlLib
 			$imgbtm3 = get_general_image_path() . "/button/btm_03.gif";
 			$imgshow = get_general_image_path() . "/button/btn_show.gif";
 ?>
-			<table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top: 1px solid #ddd">
+			<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-top: 1px solid #ddd">
 				<tr>
 					<td>
 						<form name="perpage_<?= $unique_name ?>" method="get" action="/display.php" accept-charset="utf-8">
-							<table cellpadding="0" cellspacing="0" border="0">
+							<table role="presentation" cellpadding="0" cellspacing="0" border="0">
 								<tr>
 <?php
 			if ($skin_name === 'feather') {
@@ -5055,7 +5055,7 @@ class HtmlLib
 			}
 ?>
 
-										<table width="100%" cellpadding="0" cellspacing="0">
+										<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 											<tr>
 <?php
 			if ($skin_name === 'feather') {
@@ -5142,7 +5142,7 @@ class HtmlLib
 ?>
 
 							<form method="get" action="/display.php" accept-charset="utf-8">
-								<table cellpadding="0" cellspacing="0" border="0" valign="middle">
+								<table role="presentation" cellpadding="0" cellspacing="0" border="0" valign="middle">
 									<tr valign="middle">
 										<td style="background: #eee;">&nbsp;<b>Page</b>
 <?php
@@ -5209,7 +5209,7 @@ class HtmlLib
 
 ?>
 
-		<table height="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
+		<table role="presentation" height="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
 			<tr align="left">
 
 <?php
@@ -5868,7 +5868,7 @@ class HtmlLib
 ?>
 
 		<br/><br/>
-		<table cellpadding="0" cellspacing="0" border="0" width="20%">
+		<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="20%">
 			<tr>
 				<td bgcolor="<?= $login->skin->table_title_color ?>"><b><?= $heading ?></b>
 				</td>
@@ -5955,7 +5955,7 @@ class HtmlLib
 		}
 ?>
 
-		<table width='100%'>
+		<table role="presentation" width='100%'>
 			<tr>
 				<td width='10'></td>
 				<td align='left'>
@@ -6824,7 +6824,7 @@ class HtmlLib
 ?>
 
 	<span title='<?= $alt ?>'>
-		<table <?= $idvar ?> style='border: 1px solid #<?= $skincolor ?>; cursor: pointer' onmouseover="getElementById('aaid_<?= $name ?>').style.textDecoration='none'; this.style.backgroundColor='#fff'; this.style.border='1px solid #<?= $skincolor ?>';" onmouseout="this.style.border='1px solid #<?= $skincolor ?>'; this.style.backgroundColor=''; getElementById('aaid_<?= $name ?>').style.textDecoration='none';" cellpadding='3' cellspacing='3' height='10' width='10' valign='top'>
+		<table role="presentation" <?= $idvar ?> style='border: 1px solid #<?= $skincolor ?>; cursor: pointer' onmouseover="getElementById('aaid_<?= $name ?>').style.textDecoration='none'; this.style.backgroundColor='#fff'; this.style.border='1px solid #<?= $skincolor ?>';" onmouseout="this.style.border='1px solid #<?= $skincolor ?>'; this.style.backgroundColor=''; getElementById('aaid_<?= $name ?>').style.textDecoration='none';" cellpadding='3' cellspacing='3' height='10' width='10' valign='top'>
 			<tr>
 				<td valign='top' align='center'><?= $imgvar ?></td>
 			</tr>
@@ -6979,17 +6979,17 @@ class HtmlLib
 
 ?>
 
-		<table cellpadding=0 cellspacing=0 border=0 width=100%>
+		<table role="presentation" cellpadding=0 cellspacing=0 border=0 width=100%>
 			<tr>
 				<td width=60% valign=bottom>
-					<table cellpadding=0 cellspacing=0 border=0 width=100%>
+					<table role="presentation" cellpadding=0 cellspacing=0 border=0 width=100%>
 						<tr>
 							<td width=100% height=2 background="<?= $imgtopline ?>"></td>
 						</tr>
 					</table>
 				</td>
 				<td align=right width=1%>
-					<table cellpadding=0 cellspacing=0 border=0 width=100%>
+					<table role="presentation" cellpadding=0 cellspacing=0 border=0 width=100%>
 						<tr>
 							<td><img src="<?= $imgheadleft ?>"></td>
 							<td nowrap width=100% background="<?= $imgheadbg ?>"><b><span style="color:#fff"><?= $title ?></span></b></td>
@@ -7006,7 +7006,7 @@ class HtmlLib
 	{
 ?>
 
-		<table cellpadding=0 cellspacing=0 border=0 width=100%>
+		<table role="presentation" cellpadding=0 cellspacing=0 border=0 width=100%>
 			<tr>
 				<td height=2 bgcolor="#ace"></td>
 			</tr>
@@ -7052,12 +7052,12 @@ class HtmlLib
 
 		<form name="<?= $form ?>" action="/display.php" method="post" accept-charset="utf-8">
 			<input type='hidden' name='frm_token' value='<?= getCSRFToken(); ?>'>
-			<table cellpadding='0' cellspacing='0'>
+			<table role="presentation" cellpadding='0' cellspacing='0'>
 				<tr>
 					<td></td>
 					<td> <?= $variable_description ?> </td>
 					<td>
-						<table width='100%' cellspacing='0' cellpadding='0'>
+						<table role="presentation" width='100%' cellspacing='0' cellpadding='0'>
 							<tr align='center'>
 								<td><b><?=$login->getKeywordUc('available');?></b></td>
 								<td></td>
@@ -7094,7 +7094,7 @@ class HtmlLib
 									</select>
 								</td>
 								<td class='col' width='15%' align='center'>
-									<table align='center'>
+									<table role="presentation" align='center'>
 										<tr>
 											<td><INPUT TYPE='button' class='submitbutton' onClick="multiSelectPopulate('<?= $form ?>', '<?= trim($variablename) ?>',  '<?= $ts_name1 ?>', '<?= $ts_name2 ?>')" VALUE="&nbsp;&#x00bb;&nbsp;"></td>
 										</tr>
@@ -7241,7 +7241,7 @@ class HtmlLib
 
 		<br />
 
-		<table style="padding: 4px; border: 0;">
+		<table role="presentation" style="padding: 4px; border: 0;">
 			<tr>
 				<td><b><?=$login->getKeywordUc('available');?></b></td>
 				<td colspan=1></td>
@@ -8573,7 +8573,7 @@ function uploadAbort(e) { // upload abort
 		}
 ?>
 
-		<table cellpadding="0" align="center" cellspacing="0" width="100%">
+		<table role="presentation" cellpadding="0" align="center" cellspacing="0" width="100%">
 			<tr>
 				<td width="<?= $width ?>" align="right"><img src="<?= $a ?>/images/tl.gif" align="center"></td>
 				<td style="background: url(<?= $a ?>/images/dot.gif) 0 0 repeat-x"></td>
@@ -9703,7 +9703,7 @@ function uploadAbort(e) { // upload abort
 		$icondir = get_image_path();
 ?>
 
-		<table cellpadding=0 cellspacing=0>
+		<table role="presentation" cellpadding=0 cellspacing=0>
 			<tr>
 				<td><img src='<?= $icondir ?>/aboutus.jpg'></td>
 			</tr>
@@ -9827,14 +9827,14 @@ function uploadAbort(e) { // upload abort
 
 ?>
 
-		<table width="100%" border="0" cellpadding="0">
+		<table role="presentation" width="100%" border="0" cellpadding="0">
 			<tr>
 				<td>
-					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
 						<tr>
 							<td width="60%">&nbsp;</td>
 							<td height="22" width="40%" align="right">
-								<table cellpadding="0" cellspacing="0" border="0" width="200">
+								<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="200">
 									<tr>
 										<td width="10" height="22"></td>
 										<td height="22">
@@ -9856,7 +9856,7 @@ function uploadAbort(e) { // upload abort
 												<?php $this->print_current_input_vars(array("frm_hpfilter")); ?>
 
 												<input type="hidden" id="frm_clear_filter" name="frm_clear_filter" value="true">
-												<table cellpadding="0" cellspacing="0" border="0" width="100%">
+												<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
 													<tr>
 														<td width="31%" align="center" nowrap>&nbsp;<a href="javascript:document.lpform_showall.submit();"><?=$showall_text;?></a></td>
 													</tr>
@@ -9942,7 +9942,7 @@ function uploadAbort(e) { // upload abort
 <?php
 		}
 ?>
-		<table class="tbl_content_content">
+		<table role="presentation" class="tbl_content_content">
 			<tr>
 				<td class="td_top_align">
 <?php

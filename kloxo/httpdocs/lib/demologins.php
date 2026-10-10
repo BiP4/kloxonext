@@ -15,7 +15,7 @@ $res['Mail Account'] = array('postmaster@example.com', 'mailaccount');
 $color = "style='border:1px solid black'";
 ?>
 
-<table cellspacing="0" cellpadding="0">
+<table role="presentation" cellspacing="0" cellpadding="0">
 <tr> <td colspan="2">Demo:</td></tr>
 
 <?php

@@ -24,7 +24,7 @@ function __ac_desc_desktop($object)
 
 ?>
 
-	<table cellpadding="0" width="90%" cellspacing="1" style='border:1px solid #<?=$col?>; background:#fffafa;'>
+	<table role="presentation" cellpadding="0" width="90%" cellspacing="1" style='border:1px solid #<?=$col?>; background:#fffafa;'>
 		<tr></tr>
 		<tr height="50">
 			<td align="center">
@@ -35,7 +35,7 @@ function __ac_desc_desktop($object)
 
 ?>
 
-					<table cellpadding="0" cellspacing="0">
+					<table role="presentation" cellpadding="0" cellspacing="0">
 						<tr>
 							<td>
 <?php
@@ -49,7 +49,7 @@ function __ac_desc_desktop($object)
 		</tr>
 	</table>
 
-	<table width="90%" cellpadding="0" valign="top" cellspacing="20" height="200">
+	<table role="presentation" width="90%" cellpadding="0" valign="top" cellspacing="20" height="200">
 		<tr>
 			<td valign=top>
 <?php
@@ -61,7 +61,7 @@ function __ac_desc_desktop($object)
 					<div id="content">
 						<h2 class="expanded" align="center" onMouseover="this.style.background='url(<?=$skindir?>/onexpand.gif)'" onMouseout="this.style.background='url(<?=$skindir?>/expand.gif)'"><code>History</code>
 						</h2>
-						<table cellpadding="0" cellspacing="0" style="background:#f0f0f0;">
+						<table role="presentation" cellpadding="0" cellspacing="0" style="background:#f0f0f0;">
 <?php
 							$count = 0;
 
@@ -127,12 +127,12 @@ function __ac_desc_updateshow($object)
 
 ?>
 
-	<table cellpadding="0" cellspacing="0" width="90%">
+	<table role="presentation" cellpadding="0" cellspacing="0" width="90%">
 		<tr>
 			<td> <?=$out?> </td>
 		</tr>
 	</table>
-	<table cellpadding="0" cellspacing="0">
+	<table role="presentation" cellpadding="0" cellspacing="0">
 		<tr>
 			<td> [<a href="<?=$url?>"> Go Back </a>]</td>
 		</tr>
@@ -245,10 +245,10 @@ function __ac_desc_show($object)
 		if (isset($showalist['__v_message'])) {
 ?>
 
-			<table cellpadding="16" width="100%" cellspacing="0" border="0">
+			<table role="presentation" cellpadding="16" width="100%" cellspacing="0" border="0">
 				<tr>
 					<td align="center">
-						<table cellpadding="4" width="80%" cellspacing="13" border="1" height="80">
+						<table role="presentation" cellpadding="4" width="80%" cellspacing="13" border="1" height="80">
 							<tr>
 								<td>&nbsp;&nbsp;<img src="theme/general/button/warningpic.gif">&nbsp;<?=$showalist['__v_message']?></td>
 							</tr>
@@ -1798,7 +1798,7 @@ function print_navigation($navig)
 		var gl_imgleftpoint = '<?=$imgrightpoint?>';
 	</script>
 
-<table class="tbl_navigation"><tr><td nowrap='nowarp'>
+<table role="presentation" class="tbl_navigation"><tr><td nowrap='nowarp'>
 <div style="padding: 2px">
 <?php
 		if ($button_type !== 'image') {
@@ -1976,7 +1976,7 @@ function __ac_desc_resource($object)
 	$treename = fix_nname_to_be_variable($object->nname);
 ?>
 
-	<table valign=top>
+	<table role="presentation" valign=top>
 		<tr align=left>
 			<td width='10'><input class='submitbutton' onClick='<?=$treename?>.closeAll();' type='button' value="Close">
 			</td>
@@ -2190,7 +2190,7 @@ function do_display_init()
 		$parent = $gbl->c_session->ssl_param['parent_clname'];
 ?>
 
-		<table cellpadding='0' height='26' cellspacing='0' background="<?=$skindir?>/expand.gif">
+		<table role="presentation" cellpadding='0' height='26' cellspacing='0' background="<?=$skindir?>/expand.gif">
 			<tr>
 				<td nowrap><a href="<?=$url?>"> Back to HyperVM ($parent) </a></td>
 				<td width='10'>&nbsp;|&nbsp;</td>
@@ -2212,7 +2212,7 @@ function do_display_init()
 	/*
 ?>
 
-		<table cellpadding=0 cellspacing=0 bgcolor="<?=$col?>">
+		<table role="presentation" cellpadding=0 cellspacing=0 bgcolor="<?=$col?>">
 			<tr>
 				<td nowrap> Consumed Login</td>
 				<td><a href="/display.php?frm_consumedlogin=true&frm_action=desktop">Desktop </a></td>
@@ -2511,7 +2511,7 @@ function print_head_image()
 	if ($skin_name !== 'feather') { return; }
 ?>
 	<link href="<?=$skindir?>/css/style.css" rel="stylesheet" type="text/css" />
-	<table class='bgtop3' style="width:100%; border-spacing:0; border-collapse:collapse; padding:0; margin:0; border:0; background:url(<?=$skindir_default?>/images/completefeather.jpg)">
+	<table role="presentation" class='bgtop3' style="width:100%; border-spacing:0; border-collapse:collapse; padding:0; margin:0; border:0; background:url(<?=$skindir_default?>/images/completefeather.jpg)">
 		<tr>
 			<td width='100%' id='td1'></td>
 <?php

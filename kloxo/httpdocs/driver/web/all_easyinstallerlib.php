@@ -260,7 +260,7 @@ class all_easyinstaller extends Lxclass
 		$stringright = "<table cellpadding=1 cellspacing=0 width=100% border=0>$stringright </table>\n";
 		$divheight = 700;
 ?> 
-<table cellpadding=0 cellspacing=0 width=95% border=0 height=600 bordercolor=black><tr> 
+<table role="presentation" cellpadding=0 cellspacing=0 width=95% border=0 height=600 bordercolor=black><tr> 
 
 <td valign=top width=130> 
 <div dir=rtl id=mydivleft style='overflow:auto;height:<?php echo $divheight ?> '>
@@ -269,13 +269,13 @@ class all_easyinstaller extends Lxclass
 </td> 
 
 <td valign=top>
-<table cellpadding=0 valign=top width=100% cellspacing=0 border=0>
+<table role="presentation" cellpadding=0 valign=top width=100% cellspacing=0 border=0>
 <tr valign=top ><td height=10 style='border-top: 1px solid black;' colspan=10 bgcolor=<?php echo $color ?> ></td> </tr> 
 
 <tr valign=top> 
 <td colspan=3 height=<?php echo $divheight?> width=10 valign=top style='border-bottom: 0px solid black; ' bgcolor=<?php echo $color ?> >
 </td> <td style='border-bottom: 0px solid black; border-top: 0px solid black'>
-<table cellpadding=0 width=100% cellspacing=15> <tr> <td colspan=3 valign=top>
+<table role="presentation" cellpadding=0 width=100% cellspacing=15> <tr> <td colspan=3 valign=top>
 <?php	
 	$pimg = "$lowername.gif";
 	print "<img src=/theme/easyinstaller/$pimg>";

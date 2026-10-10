@@ -255,7 +255,7 @@ class Ffile extends Lxclass
 	function print_back()
 	{
 ?>
-	<table width='90%'>
+	<table role="presentation" width='90%'>
 		<tr>
 			<td>
 				<a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8') ?>?frm_action=show&amp;frm_o_nname=<?php echo htmlspecialchars(urlencode(dirname($this->nname)), ENT_QUOTES, 'UTF-8') ?>"> Back </a>
@@ -576,7 +576,7 @@ class Ffile extends Lxclass
 ?>
 
 <div style="width:910px; margin:0 auto">
-<table>
+<table role="presentation">
 	<tr>
 		<td><?=$icon_text;?></td>
 		<td nowrap style='background <?= $background ?>'>

@@ -207,10 +207,10 @@ class Html extends Htmllib
 		<div style="background-color: #fff; border-top: 1px solid #ddd">
 			<br />
 			<div style="width:910px; margin: 0 20px">
-				<table cellspacing='2' cellpadding='2' width='100%' align='center'>
+				<table role="presentation" cellspacing='2' cellpadding='2' width='100%' align='center'>
 					<tr>
 						<td colspan="<?= $nlcount; ?>">
-							<table style="padding: 0; margin: 0; border: 0; border-collapse: collapse; width:100%">
+							<table role="presentation" style="padding: 0; margin: 0; border: 0; border-collapse: collapse; width:100%">
 								<tr>
 									<td valign='bottom'></td>
 									<td>
@@ -227,7 +227,7 @@ class Html extends Htmllib
 ?>
 									</td>
 									<td align='right' valign='bottom'>
-										<table style="border: 0; padding: 0; margin: 0; border-collapse: collapse; height: 27px">
+										<table role="presentation" style="border: 0; padding: 0; margin: 0; border-collapse: collapse; height: 27px">
 											<tr>
 <?php
 		if (!$sellist) {
@@ -258,11 +258,11 @@ class Html extends Htmllib
 			if (!isFlatSkin($skin_name)) {
 ?>
 
-										<table cellpadding='0' cellspacing='0' border='0' width='100%' height='35' background="<?= $imgbtnbg; ?>">
+										<table role="presentation" cellpadding='0' cellspacing='0' border='0' width='100%' height='35' background="<?= $imgbtnbg; ?>">
 											<tr>
 												<td><img src="<?= $imgbtncrv; ?>"></td>
 												<td width='80%' align='left'>
-													<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+													<table role="presentation" width='100%' cellpadding='0' cellspacing='0' border='0'>
 														<tr>
 															<td valign='bottom'><?php $this->print_list_submit($class, $blist, $unique_name); ?></td>
 														</tr>
@@ -276,11 +276,11 @@ class Html extends Htmllib
 			} else {
 ?>
 
-										<table style="border: 0; padding: 4px; margin: 0; background-color: <?=$skin_color?>">
+										<table role="presentation" style="border: 0; padding: 4px; margin: 0; background-color: <?=$skin_color?>">
 											<tr>
 												<td></td>
 												<td width='80%' align='left'>
-													<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+													<table role="presentation" width='100%' cellpadding='0' cellspacing='0' border='0'>
 														<tr>
 															<td valign='bottom'><?php $this->print_list_submit($class, $blist, $unique_name); ?></td>
 														</tr>
@@ -305,17 +305,17 @@ class Html extends Htmllib
 		} else {
 							$descr = $this->getActionDescr($_SERVER['PHP_SELF'], $this->__http_vars, $class, $var, $identity);
 ?>
-							<table cellpadding='0' cellspacing='0' border='0' width='100%'>
+							<table role="presentation" cellpadding='0' cellspacing='0' border='0' width='100%'>
 								<tr>
 									<td width='70%' valign='bottom'>
-										<table cellpadding='0' cellspacing='0' border='0' width='100%'>
+										<table role="presentation" cellpadding='0' cellspacing='0' border='0' width='100%'>
 											<tr>
 												<td width='100%' height='2' background="<?= $imgtopline; ?>"></td>
 											</tr>
 										</table>
 									</td>
 									<td align=right>
-										<table cellpadding='0' cellspacing='0' border='0' width='100%'>
+										<table role="presentation" cellpadding='0' cellspacing='0' border='0' width='100%'>
 											<tr>
 												<td><img src="<?= $imgheadleft; ?>"></td>
 												<td nowrap width='100%' background="<?= $imgheadbg; ?>"><span color="#ffffff"><b>Confirm <?= $descr[1] ?>:</b><?= get_plural($classdesc[2]) ?> from <?= $parent->display("nname"); ?></span></td>
@@ -381,7 +381,7 @@ class Html extends Htmllib
 			if ($sortby && $sortby === $name) {
 				$wrapstr .= " background='$imgtablerowheadselect'";
 ?>
-					<td <?= $wrapstr ?> width='<?= $width ?>'><table cellpadding='0' cellspacing='0' border='0'> <tr> <td <?= $wrapstr ?> rowspan='2'>
+					<td <?= $wrapstr ?> width='<?= $width ?>'><table role="presentation" cellpadding='0' cellspacing='0' border='0'> <tr> <td <?= $wrapstr ?> rowspan='2'>
 <?php
 			} else {
 					$wrapstr .= " background='$imgtablerowhead'";
@@ -507,7 +507,7 @@ class Html extends Htmllib
 		if (!$rowcount) {
 			if ($ghtml->frm_searchstring) {
 ?>
-						<table width='95%'>
+						<table role="presentation" width='95%'>
 							<tr align='center'>
 								<td width='100%'>&nbsp;<b>&nbsp;No Matches Found&nbsp;</b></td>
 							</tr>
@@ -515,7 +515,7 @@ class Html extends Htmllib
 <?php
 			} else {
 ?>
-						<table width='95%'>
+						<table role="presentation" width='95%'>
 							<tr align='center'>
 								<td width='100%'>&nbsp;<b>No <?= get_plural($classdesc[2]) ?>&nbsp;under&nbsp;<?= $parent->nname ?></b>&nbsp;</td>
 							</tr>
@@ -528,7 +528,7 @@ class Html extends Htmllib
 		</tr>
 		<tr>
 			<td colspan="<?=$nlcount ?>">
-				<table cellpadding='0' cellspacing='0' border=0 width='100%'>
+				<table role="presentation" cellpadding='0' cellspacing='0' border=0 width='100%'>
 					<tr height='1' style='background:url(<?=$imgtopline ?>)'>
 						<td></td>
 					</tr>
@@ -543,7 +543,7 @@ class Html extends Htmllib
 								}
 							</script>
 
-							<table>
+							<table role="presentation">
 								<tr>
 									<td>
 										<a class='button' href="javascript:window.close()">&nbsp;Cancel&nbsp;</a>

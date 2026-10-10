@@ -68,7 +68,7 @@ $alist[] = "a=updateform&sa=password";
 */
 $gbl->__c_object = $login;
 ?>
-<table cellpadding="0" cellspacing="0"> <tr>
+<table role="presentation" cellpadding="0" cellspacing="0"> <tr>
 <?php
 $count = 0;
 $icount = 0;
@@ -108,7 +108,7 @@ return;
 ?> 
 <body topmargin=0 bottommargin=0 leftmargin=0 rightmargin=0 class="bdy1" onload="foc()">
 	<link href="/theme/css/header.css" rel="stylesheet" type="text/css" />
-<table id="tab1" border="0" cellpadding="0" cellspacing="0">
+<table role="presentation" id="tab1" border="0" cellpadding="0" cellspacing="0">
 <tr><td class="top2"><div class="menuover" style="margin-top:2px;margin-left:0%">
 
 <?php 
