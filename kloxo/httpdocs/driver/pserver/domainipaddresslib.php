@@ -146,7 +146,6 @@ class DomainIpaddress extends Lxdb
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 		return null;
-		return $alist;
 	}
 
 }

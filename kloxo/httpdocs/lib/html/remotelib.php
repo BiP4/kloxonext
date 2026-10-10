@@ -58,20 +58,6 @@ function do_do_the_action($rmt)
 	return do_local_action($rmt);
 
 	// This code never gets executed
-	if ($rmt->action == "set" || $rmt->action == 'get') {
-		if (isLocalhost($rmt->slaveserver)) {
-		} else {
-		//	return rl_exec(null, $rmt->slaveserver, $rmt);
-		}
-	} else {
-		if ($rmt->action == 'dowas') {
-			$object = $rmt->robject;
-			$object->__masterserver = null;
-			dprint("in dowas\n");
-
-			return $object->doWas();
-		}
-	}
 }
 
 function do_the_action($rmt, $res)
@@ -426,7 +412,6 @@ function send_to_some_stream_server($type, $size, $raddress, $var, $fd, $reexec 
 
 			exec_with_all_closed("sh /script/load-wrapper >/dev/null 2>&1 &");
 			throw new lxException($login->getThrow('no_socket_connect_to_server'), '', $raddress);
-			throw new lxException($login->getThrow('restarting_backend'), '', $raddress);
 		} else {
 			throw new lxException($login->getThrow('no_socket_connect_to_server'), '', $raddress);
 		}
@@ -895,23 +880,6 @@ function myclone($object)
 {
 	return clone $object;
 
-	if (!is_subclass_of($object, "lxclass")) {
-		return clone $object;
-	}
-	$class = $object->get__table();
-
-	$newobject = new $class($object->__masterserver, $object->__readserver, $object->nname);
-
-	foreach ($object as $k => $v) {
-	/*
-		 if (is_object($v)) {
-			 continue;
-		 }
-	*/
-		$newobject->$k = $v;
-	}
-
-	return $newobject;
 }
 
 /**

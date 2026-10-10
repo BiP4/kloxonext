@@ -56,9 +56,6 @@ class ExclusiveIp extends Lxclass
 
 		return null;
 
-		$alist['__title_main'] = $login->getKeywordUc('actions');
-
-		return $alist;
 	}
 
 	function createShowUpdateform()

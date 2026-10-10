@@ -450,21 +450,6 @@ class Domaind extends DomainBase
 	{
 		return null;
 		
-		$sql = new Sqlite($parent->__masterserver, "pserver");
-		$res = $sql->getTable(array('nname'));
-		$rs = get_namelist_from_arraylist($res);
-		
-		if (lx_count($rs) > 1) {
-			$nlist['webpserver'] = array('s', $rs);
-			$nlist['mmailpserver'] = array('s', $rs);
-			$nlist['dnspserver'] = array('s', $rs);
-		}
-		
-		$rs = lx_array_merge(array(array("--any--"), $rs));
-		$nlist['nname'] = null;
-	//	$nlist['status'] = array('s', array('--any--', 'on', 'off'));
-		
-		return $nlist;
 	}
 
 	static function createListNlist($parent, $view)
@@ -1070,31 +1055,6 @@ class Domaind extends DomainBase
 
 		return $dname;
 
-		if (is_numeric($dname[0])) {
-			$dname = "a" . $dname;
-		}
-
-		if (strlen($dname) > 15) {
-			$dname = substr($dname, 0, 15);
-		}
-		$sq = new Sqlite(null, 'uuser');
-		if (!$sq->getRowsWhere("nname = '" . kn_sql_escape($dname) . "'")) {
-			return $dname;
-		}
-
-		$dnamebase = $dname;
-		$i = 0;
-		
-		while (true) {
-			$i++;
-			if ($sq->getRowsWhere("nname = '" . kn_sql_escape($dname) . "'")) {
-				$dname = $dnamebase . "$i";
-			} else {
-				break;
-			}
-		}
-
-		return $dname;
 	}
 
 	static function addCommand($parent, $class, $p)

@@ -1327,20 +1327,12 @@ function isLicensed($var)
 function is_composite($class)
 {
 	return false;
-	return csa($class, "__");
 }
 
 function get_composite($class)
 {
 	return array(null, null, $class);
 
-	$list = explode("__", $class);
-
-	if (lx_count($list) === 2) {
-		return array($list[0], null, $list[1]);
-	}
-
-	return array($list[0], $list[1], $list[2]);
 }
 
 function setLicenseTodefault()
@@ -1764,11 +1756,6 @@ function add_http_host($elem)
 	global $gbl, $sgbl, $login, $ghtml;
 	return $elem;
 
-	$host = $_SERVER['SERVER_NAME'];
-	//$port = $sgbl->__var_prog_port;
-	//$host = "http://" . $host . ":" .  "$port";
-	//$host = "https://" . $host . ":" .  "$port";
-	return $host . $elem;
 }
 
 function get_image_path($path = null)
@@ -1895,7 +1882,6 @@ function backtrace_once()
 		if ($count > 2) break;
 		if ($count === 2 && (basename($q['file']) === 'sqlitelib.php')) {
 			return null;
-			continue;
 		}
 		$string .= $q['file'] . ":" . $q['line'] . ": " . $q['function'] . '(';
 		if (isset($q['args'])) {
@@ -2104,21 +2090,6 @@ function createEncName($name)
 
 	return $name;
 
-	if ($sgbl->dbg > 0) {
-		return $name;
-	}
-
-	$name = str_replace("_", "", $name);
-	$name = str_replace("php", "", $name);
-	$name = str_replace("a", "r", $name);
-	$name = str_replace("e", "z", $name);
-	$name = str_replace("i", "q", $name);
-	$name = str_replace("o", "j", $name);
-	$name = str_replace("t", "y", $name);
-	$name = str_replace("s", "x", $name);
-	$name = str_replace("r", "p", $name);
-
-	return $name;
 }
 
 function check_password($unenc, $enc)

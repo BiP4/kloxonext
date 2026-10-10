@@ -69,10 +69,6 @@ class monitorserver extends Lxdb
 	{
 		return null;
 		
-		$uflist[] = 'a=addform&dta[var]=atype&dta[val]=standard&c=monitorport';
-		$uflist[] = 'a=addform&dta[var]=atype&dta[val]=general&c=monitorport';
-		
-		return $uflist;
 	}
 
 	function getId() { return strtilfirst($this->nname, "___"); }

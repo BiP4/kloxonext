@@ -1987,39 +1987,6 @@ class HtmlLib
 		return; // [FIXME]
 
 		// We need only the form images, and the normal non form action images need not be saved.
-		if (!csa($path, "list") && !csa($path, "form")) {
-			return;
-		}
-
-		if ($sgbl->dbg <= 1) {
-			return;
-		}
-
-		if (lfile_exists(getreal($path))) {
-			return;
-		}
-
-		$cont = null;
-
-		$icon = $login->getSpecialObject('sp_specialplay')->icon_name;
-
-		$file = "__path_program_htmlbase/$icon.missing_image.txt";
-
-		if (lfile_exists($file)) {
-			$cont = lfile($file);
-			foreach ($cont as $k => &$__c) {
-				$__c = trim($__c);
-				if (!$__c) {
-					unset($cont[$k]);
-				}
-			}
-		}
-
-		$cont = array_push_unique($cont, $path);
-		$cont = implode("\n", $cont);
-		$cont .= "\n";
-
-		lfile_put_contents($file, $cont);
 	}
 
 	function get_date()
@@ -6665,20 +6632,6 @@ class HtmlLib
 
 		return $name;
 
-		if ($sgbl->dbg > 0) {
-			return $name;
-		}
-
-		$name = str_replace("_", "", $name);
-		$name = str_replace("php", "", $name);
-		$name = str_replace("a", "z", $name);
-		$name = str_replace("e", "r", $name);
-		$name = str_replace("i", "x", $name);
-		$name = str_replace("s", "q", $name);
-		$name = str_replace("o", "p", $name);
-		$name = str_replace("r", "j", $name);
-
-		return $name;
 	}
 
 	function resolve_int_ext(&$url, &$psuedourl, &$target)
@@ -9379,25 +9332,6 @@ function uploadAbort(e) { // upload abort
 			if (is_array($a)) {
 				continue;
 
-				if ($k === 'home') {
-					continue;
-				}
-				if ($this->is_special_url($a)) {
-					continue;
-				}
-
-
-				if (csb($k, "__title")) {
-					continue;
-				}
-
-				$desc = get_plural($k);
-				$menuimg = "$skindir/browse.gif";
-				$endimg = "$skindir/right_point.gif";
-
-				$desc = "<span style=font-weight:bold>$desc</span>";
-				$mnu = $this->getMenuDescrString($menuimg, $desc, $endimg);
-
 ?>
 
 			window.<?= $name ?><?= $k ?> = new Menu("<?= $mnu ?>", 100);
@@ -9437,7 +9371,6 @@ function uploadAbort(e) { // upload abort
 				// Dont print property etc...
 				continue;
 
-				$aa = $this->getFullUrl($a[0], $base);
 ?>
 
 				<?= $name ?>.addMenuItem(<?= $name ?><?= $k ?>, frame1+"<?= $aa ?>", 'Properties', 'mainframe');

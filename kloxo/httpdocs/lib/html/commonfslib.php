@@ -623,7 +623,6 @@ function lxfile_getfile($file, $bytes = null)
 
 	if ($lines === 'download') {
 		throw new lxException($login->getThrow('could_not_download_here'));
-		$lines = null;
 	}
 	if (!$lines) {
 		$data = file_get_contents($file);

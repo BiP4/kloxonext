@@ -689,16 +689,6 @@ class Web extends Lxdb
 		return;
 
 	//	$path[] = "{$sgbl->__path_customer_root}/{$customer_name}/{$domainname}";
-		$path[] = "{$sgbl->__path_customer_root}/{$customer_name}/__processed_stats/{$domainname}";
-		$path[] = "{$sgbl->__path_program_home}/domain/{$domainname}/__backup/";
-	//	$path[] = "{$sgbl->__path_httpd_root}/{$domainname}";
-
-		$t = 0;
-		foreach ($path as $p) {
-			$t += lxfile_dirsize($p);
-		}
-
-		return $t;
 	}
 
 	function deleteDir()

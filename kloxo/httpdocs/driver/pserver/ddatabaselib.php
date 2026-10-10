@@ -169,9 +169,6 @@ class databasecore extends Lxdb
 	function createShowRlist($subaction)
 	{
 		return null;
-		$rlist['priv'] = null;
-		return $rlist;
-
 	}
 
 	function getDbAdminUrl()
@@ -282,11 +279,6 @@ class databasecore extends Lxdb
 
 		return true;
 
-		if ($this->isOn('easyinstaller_flag')) {
-			return false;
-		}
-
-		return true;
 	}
 
 	static function createListNlist($parent, $view)

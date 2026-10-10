@@ -405,17 +405,6 @@ class ffile__common
 		
 		return;
 
-		$bp = basename($p);
-		
-		if ($filepass[$p]['type'] === 'dir') {
-			$tfile = lx_tmp_file("__path_tmp", "lx_$bp");
-			getFromFileserv($this->main->pasteserver, $this->main->filepass[$p], $tfile);
-			lxfile_mkdir("{$this->main->fullpath}/$bp");
-			lxshell_unzip("__system__", "{$this->main->fullpath}/$bp", $tfile);
-			lunlink($tfile);
-		} else {
-			getFromFileserv($this->main->pasteserver, $this->main->filepass[$p], "{$this->main->fullpath}/$bp");
-		}
 	}
 
 	function uploadDirect()

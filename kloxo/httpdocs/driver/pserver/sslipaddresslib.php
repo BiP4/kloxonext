@@ -117,7 +117,6 @@ class SslIpaddress extends Lxdb
 
 		return null;
 
-		return $alist;
 	}
 }
 

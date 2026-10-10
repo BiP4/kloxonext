@@ -291,7 +291,6 @@ class Sgbl
 	function isBlackBackground()
 	{
 		return false;
-		return $this->isDebug();
 	}
 
 	function isKloxo()

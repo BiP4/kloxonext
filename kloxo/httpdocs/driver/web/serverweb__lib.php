@@ -540,7 +540,6 @@ class serverweb__ extends lxDriverClass
 
 			if (file_exists($c)) {
 				throw new lxException($login->getThrow('other_install_process_still_running'), '', $this->main->syncserver);
-				return;
 			}
 
 			$list = explode(',', $i);

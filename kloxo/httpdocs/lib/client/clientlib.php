@@ -106,13 +106,6 @@ class Client extends ClientBase
 	{
 		return null;
 		
-		$clist = null;
-		
-		if ($subaction === null) {
-			$clist['domain'] = null;
-		}
-
-		return $clist;
 	}
 
 	function getQuickClass()

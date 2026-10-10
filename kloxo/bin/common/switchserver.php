@@ -38,19 +38,16 @@ function switchserver_main()
 
 		if ($object->dbaction === 'add') {
 			throw new lxException($login->getThrow("no_object"));
-			exit;
 		}
 
 		if (!$object->syncserver) {
 			print("No_synserver...\n");
 			throw new lxException($login->getThrow("no_syncserver"));
-			exit;
 		}
 
 		if ($param['syncserver'] === $object->syncserver) {
 			print("No Change...\n");
 			throw new lxException($login->getThrow("no_change"));
-			exit;
 		}
 
 

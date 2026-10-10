@@ -60,22 +60,6 @@ class Spam extends Lxdb
 
 		return null;
 
-		if ($this->getTrueParentO()->isClass('mailaccount') && !$this->getTrueParentO()->isLogin()) {
-			$this->getTrueParentO()->createShowPropertyList($alist);
-			
-			foreach($alist['property'] as &$__a) {
-				if (!$ghtml->is_special_url($__a)) {
-					$__a = strfrom($__a, "goback=2&");
-					$__a = "goback=3&$__a";
-				}
-			}
-		} else if ($this->getTrueParentO()->isClass('mmail')) {
-			$alist['property'][] = 'goback=2&a=show';
-			$alist['property'][] = 'goback=1&a=list&c=mailaccount';
-			$alist['property'][] = 'goback=2&a=show&sa=config';
-		} else {
-			$alist['property'][] = 'a=show';
-		}
 	}
 
 	function createShowAlist(&$alist, $subaction = null)

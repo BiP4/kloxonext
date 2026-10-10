@@ -95,7 +95,6 @@ class Ipaddress__Redhat extends LxDriverclass
 		if (ipaddress::checkIfBaseAddress($this->main->devname)) {
 			throw new lxException($login->getThrow("modifying_eth_not_permitted"), '', $this->main->devname);
 
-			return;
 		}
 	}
 

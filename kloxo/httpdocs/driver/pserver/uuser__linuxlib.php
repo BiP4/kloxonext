@@ -11,28 +11,6 @@ class Uuser__Linux  extends lxDriverClass
 
 		return;
 
-		$mn = $this->main;
-		$passwd = $mn->password;
-		lxfile_mkdir("__path_httpd_root/" .$mn->getParentName());
-		$cmd = "useradd";
-		$shell = fix_disabled($this->main->shell, $sgbl->__var_noaccess_shell);
-
-		$ret = lxshell_return($cmd, "-m", '-c', uuser::getUserDescription($this->main->getParentName()),
-			"-k","__path_program_root/file/user-skel/", "-d", "{$mn->getParentName()}/", "-s", $shell, "-p",
-			$passwd, $mn->nname);
-
-		if ($ret) {
-			// Error... Do a lot of stuff;
-			log_error($global_shell_out);
-			throw new lxException($login->getThrow('user_create'), '', $this->main->nname);
-		}
-
-	/*
-		if($mn->quota != "Unlimited"){
-			lxshell_return("setquota", "-ur", "-F", "vfsv0" , $mn->nname, "0", $mn->quota,"200", "0" ,"0", "-a" , "ext3"); 
-		}
-	*/
-		return 1;
 	}
 
 	function createShowAlist(&$alist, $subaction = null)

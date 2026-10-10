@@ -45,9 +45,6 @@ class Uuser extends Lxclient
 	{
 		return null;
 
-		$vlist['priv'] = null;
-
-		return $vlist;
 	}
 
 	static function add($parent, $class, $param)
@@ -134,15 +131,6 @@ class Uuser extends Lxclient
 		}
 
 		$this->driverApp->createShowAlist($alist);
-		return $alist;
-		$alist['__title_main'] =  $this->getTitleWithSync();
-		$alist[] = "a=show&l[class]=ffile&l[nname]=/";
-		$this->getToggleUrl($alist);
-	//	$this->getCPToggleUrl($alist);
-
-	//	$alist[] = "a=list&c=ticket";
-	//	$this->getListActions($alist, 'utmp');
-
 		return $alist;
 	}
 

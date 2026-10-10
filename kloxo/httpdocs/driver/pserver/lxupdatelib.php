@@ -52,9 +52,6 @@ class Lxupdate extends lxClass
 		return $alist;
 		
 		// MR -- still used?
-		if (checkIfLatest() && !if_demo()) {
-			return null;
-		}
 	}
 
 	function createShowUpdateform()

@@ -412,10 +412,6 @@ class resourceplan extends resourcecore
 	{
 		return null;
 
-		$vlist['owner_f'] = null;
-	//	$vlist['share_status'] = null;
-
-		return $vlist;
 	}
 
 	static function AddListForm($parent, $class)

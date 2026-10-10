@@ -1159,11 +1159,6 @@ class Ffile extends Lxclass
 	{
 		return ($this->ttype === 'directory' || $this->ttype === 'dirlink' || $this->ttype === 'trash');
 
-		if ($this->mode & S_IFDIR) {
-			return true;
-		}
-
-		return false;
 	}
 
 	function getPermissions(&$perm_number)

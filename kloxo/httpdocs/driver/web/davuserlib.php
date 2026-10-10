@@ -100,10 +100,5 @@ class davuser extends Lxclient
 	{
 		return null;
 		
-		$alist['__title_main'] = $this->getTitleWithSync();
-	//  $this->getCPToggleUrl($alist);
-		$alist[] = "a=show&l[class]=ffile&l[nname]=/";
-		
-		return $alist;
 	}
 }

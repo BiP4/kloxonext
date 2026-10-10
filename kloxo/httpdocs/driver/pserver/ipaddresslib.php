@@ -112,17 +112,6 @@ class Ipaddress extends Lxdb
 
 		return true;
 
-		if (!$sgbl->isKloxo()) {
-			return true;
-		}
-
-		$this->createGblIfNotExist();
-
-		if (array_search_bool($this->ipaddr, $gbl->__var_ip_domainlist)) {
-			return false;
-		}
-
-		return true;
 	}
 
 	function getOne()

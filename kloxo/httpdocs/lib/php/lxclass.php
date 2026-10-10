@@ -1208,36 +1208,6 @@ abstract class Lxclass
 
 		return true;
 
-		if (!$filter) {
-			return 1;
-		}
-
-		$class = lget_class($this);
-
-		$res = 1;
-
-		foreach ($filter as $key => $val) {
-			if (char_search_a($key, "_o_")) {
-				$var = substr($key, 0, strpos($key, "_o_"));
-				$op = substr($key, strpos($key, "_o_") + 3);
-			//	$op = $oplist[$op];
-
-				if (!isset($this->$var)) {
-					$oval = $a->display($var);
-				} else {
-					$oval = $this->$var;
-				}
-
-				$res &= self::filterFunc($op, $oval, $val);
-			} else {
-				$f = "__filter_{$key}_{$val}";
-				$string = get_real_class_variable($class, $f);
-				// KloxoNext - no code from class variables (and isDisplay() returns before this)
-				$res &= (bool)$string;
-			}
-		}
-
-		return $res;
 	}
 
 	static function isTreeForDelete()
@@ -2072,7 +2042,6 @@ abstract class Lxclass
 			exit;
 
 			return $this->getParentO();
-			return null;
 		}
 
 		list ($pclass, $pname) = getParentNameAndClass($this->parent_clname);
@@ -4354,11 +4323,6 @@ abstract class Lxclass
 
 		return;
 
-		if ($login->isAdmin()) {
-			if (check_if_many_server()) {
-				$alist[] = "n={$this->getClass()}&a=updateform&sa=switchserver";
-			}
-		}
 	}
 
 	static function fixListVariable($v)

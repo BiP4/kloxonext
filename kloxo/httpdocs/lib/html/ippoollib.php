@@ -32,7 +32,6 @@ class ippoolexceptionip_a extends Lxaclass
 	{
 		return ippoolextraip_a::createListAlist($parent, $class);
 		
-		return $alist;
 	}
 	static function createListAddForm($parent, $class) { return true;}
 }
@@ -47,7 +46,6 @@ class ippoolpingip_a extends Lxaclass
 	{
 		return ippoolextraip_a::createListAlist($parent, $class);
 		
-		return $alist;
 	}
 }
 

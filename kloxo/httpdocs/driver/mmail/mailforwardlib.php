@@ -69,7 +69,6 @@ class MailForward extends Lxdb
 		$vlist['forwardaddress'] = null;
 		return $vlist;
 
-		return null;
 	}
 
 	static function add($parent, $class, $param)

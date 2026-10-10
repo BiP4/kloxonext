@@ -39,15 +39,6 @@ function ip_blocked($client)
 
 	return false;
 
-	$bl = $gbl->getList("allowedip");
-
-	foreach((array) $bl as $b) {
-	//	Ipaddress::checkWhetherToBlock($_SERVER['REMOTE_ADDR']))
-		if (check_ip_network($b->nname, $_SERVER['REMOTE_ADDR']))
-			return true;
-	}
-
-	return false;
 }
 
 function checkAttempt()
@@ -210,24 +201,6 @@ function check_login_success($cgi_classname, $cgi_clientname, $cgi_password, $cg
 
 	return false;
 
-	if ($cgi_key) {
-		$list = lscandir_without_dot_or_underscore("../etc/publickey");
-		openssl_private_encrypt("string", $encstring, $cgi_key);
-
-		foreach($list as $k) {
-			$publickey = lfile_get_contents("../etc/publickey/$k");
-			openssl_public_decrypt($encstring, $rstring, $publickey);
-			if ($rstring === 'string') {
-				return true;
-			}
-		}
-
-		$ghtml->print_redirect("/login/?frm_emessage=login_error_key");
-
-		return false;
-	} 
-
-	return false;
 }
 
 function check_blocked_ip()

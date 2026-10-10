@@ -2298,14 +2298,6 @@ function main_system_lock()
 
 	return;
 
-	$lname = null;
-	$nlname = $login->getClName();
-
-	if ($nlname !== $lname && isModifyAction() && lx_core_lock($nlname)) {
-		$ghtml->print_redirect_back('system_is_locked_by_u', '');
-
-		exit;
-	}
 }
 
 function display_init()
