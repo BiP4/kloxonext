@@ -2,6 +2,17 @@
 
 class Mysqldb__mysql extends lxDriverClass
 {
+	// KloxoNext - the database name as a quoted identifier, values as escaped literals
+	function qdb()
+	{
+		return '`' . str_replace('`', '``', (string)$this->main->dbname) . '`';
+	}
+
+	function qs($v)
+	{
+		return kn_sql_escape($v);
+	}
+
 	function lx_mysql_connect($server, $dbadmin, $dbpass)
 	{
 		global $login;
@@ -25,7 +36,7 @@ class Mysqldb__mysql extends lxDriverClass
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
 		$rdb->query("use mysql");
-		$res = $rdb->query("select * from user where User = '{$this->main->username}'");
+		$res = $rdb->query("select * from user where User = '{$this->qs($this->main->username)}'");
 
 		$ret = null;
 
@@ -37,17 +48,17 @@ class Mysqldb__mysql extends lxDriverClass
 		//	throw new lxException($login->getThrow("database_user_already_exists"), '', $this->main->username);
 		}
 
-		$rdb->query("create database {$this->main->dbname};");
+		$rdb->query("create database {$this->qdb()};");
 		$this->log_error_messages();
 
-		$rdb->query("grant all on {$this->main->dbname}.* to '{$this->main->username}'@'%' identified by '{$this->main->dbpassword}';");
-		$rdb->query("grant all on {$this->main->dbname}.* to '{$this->main->username}'@'localhost' identified by '{$this->main->dbpassword}';");
+		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'%' identified by '{$this->qs($this->main->dbpassword)}';");
+		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'localhost' identified by '{$this->qs($this->main->dbpassword)}';");
 
 		if (isset($this->main->__var_primary_user)) {
 			$parentname = $this->main->__var_primary_user;
 
-			$rdb->query("grant all on {$this->main->dbname}.* to '{$parentname}'@'localhost';");
-			$rdb->query("grant all on {$this->main->dbname}.* to '{$parentname}'@'%';");
+			$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($parentname)}'@'localhost';");
+			$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($parentname)}'@'%';");
 		}
 
 		$this->log_error_messages(false);
@@ -59,15 +70,15 @@ class Mysqldb__mysql extends lxDriverClass
 	{
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
-		$rdb->query("revoke show databases on *.* from '{$this->main->username}'@'%' identified by '{$this->main->dbpassword}';");
+		$rdb->query("revoke show databases on *.* from '{$this->qs($this->main->username)}'@'%' identified by '{$this->qs($this->main->dbpassword)}';");
 
 		$this->log_error_messages(false);
 
-		$rdb->query("grant SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER on {$this->main->dbname}.* to '{$this->main->username}'@'localhost' identified by '{$this->main->dbpassword}';");
+		$rdb->query("grant SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'localhost' identified by '{$this->qs($this->main->dbpassword)}';");
 
 		$this->log_error_messages(false);
 
-		$rdb->query("revoke show databases on *.* from '{$this->main->username}'@'localhost' identified by '{$this->main->dbpassword}';");
+		$rdb->query("revoke show databases on *.* from '{$this->qs($this->main->username)}'@'localhost' identified by '{$this->qs($this->main->dbpassword)}';");
 
 		$this->log_error_messages(false);
 	}
@@ -76,14 +87,14 @@ class Mysqldb__mysql extends lxDriverClass
 	{
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
-		$rdb->query("drop database {$this->main->dbname};");
+		$rdb->query("drop database {$this->qdb()};");
 
 		$this->log_error_messages(false);
 
 		// MR -- fix delete database username
-	//	$rdb->query("delete from mysql.user where user = '{$this->main->username}';");
-		$rdb->query("drop user '{$this->main->username}'@'%';");
-		$rdb->query("drop user '{$this->main->username}'@'localhost';");
+	//	$rdb->query("delete from mysql.user where user = '{$this->qs($this->main->username)}';");
+		$rdb->query("drop user '{$this->qs($this->main->username)}'@'%';");
+		$rdb->query("drop user '{$this->qs($this->main->username)}'@'localhost';");
 
 		$this->log_error_messages(false);
 
@@ -94,7 +105,7 @@ class Mysqldb__mysql extends lxDriverClass
 	{
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
-		$rdb->query("update mysql.user set password = PASSWORD('{$this->main->dbpassword}') where user = '{$this->main->username}';");
+		$rdb->query("update mysql.user set password = PASSWORD('{$this->qs($this->main->dbpassword)}') where user = '{$this->qs($this->main->username)}';");
 
 		$this->log_error_messages();
 
@@ -144,8 +155,8 @@ class Mysqldb__mysql extends lxDriverClass
 		exec("exec $cmd > $docf", $output, $ret);
 	*/
 
-		$link = new mysqli('localhost', $dbadmin, $dbpass);
-		$result = $link->query("CREATE DATABASE IF NOT EXISTS {$dbname}");
+		$link = new mysqli('localhost', $dbuser, $dbpass);
+		$result = $link->query("CREATE DATABASE IF NOT EXISTS `" . str_replace("`", "``", $dbname) . "`");
 
 		try {
 			system("{$cmd} > " . escapeshellarg($docf));
@@ -158,14 +169,16 @@ class Mysqldb__mysql extends lxDriverClass
 	static function drop_all_table($dbname, $dbuser, $dbpass)
 	{
 		$con = new mysqli("localhost", $dbuser, $dbpass, $dbname);
-		$query = $con->query($con, "show tables");
+		// KloxoNext - query($con, ...) was a TypeError on PHP 8: restores stopped here
+		$query = $con->query("show tables");
+		$total = array();
 
-		while($res = $query->fetch_array(MYSQLI_ASSOC)) {
+		while ($query && ($res = $query->fetch_array(MYSQLI_ASSOC))) {
 			$total[] = getFirstFromList($res);
 		}
 
 		foreach($total as $k => $v) {
-			$con->query("drop table $v");
+			$con->query("drop table `" . str_replace("`", "``", $v) . "`");
 		}
 
 		$con->close();
@@ -235,7 +248,7 @@ class Mysqldb__mysql extends lxDriverClass
 		$cmd = implode(" ", $arg);
 
 		$link = new mysqli('localhost', $dbadmin, $dbpass);
-		$result = $link->query("CREATE DATABASE IF NOT EXISTS {$dbname}");
+		$result = $link->query("CREATE DATABASE IF NOT EXISTS `" . str_replace("`", "``", $dbname) . "`");
 
 		try {
 			// MR -- remove 'engine=' to make portable
@@ -260,8 +273,8 @@ class Mysqldb__mysql extends lxDriverClass
 	{
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
-		$rdb->query("grant all on {$this->main->dbname}.* to '{$this->main->username}'@'%'");
-		$rdb->query("grant all on {$this->main->dbname}.* to '{$this->main->username}'@'localhost'");
+		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'%'");
+		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'localhost'");
 	}
 
 	function do_restore($docd)
@@ -305,7 +318,7 @@ class Mysqldb__mysql extends lxDriverClass
 		$cmd = implode(" ", $arg);
 
 		$link = new mysqli('localhost', $dbadmin, $dbpass);
-		$result = $link->query("CREATE DATABASE IF NOT EXISTS {$dbname}");
+		$result = $link->query("CREATE DATABASE IF NOT EXISTS `" . str_replace("`", "``", $dbname) . "`");
 
 		try {
 			system("{$cmd} < " . escapeshellarg($docf));
