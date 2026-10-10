@@ -76,10 +76,8 @@ form {
 	color: #000000;
 	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	font-size: 9pt;
-	border: 1px solid #666666;
 	width: 190px;
 	padding: 2px 2px 3px 2px;
-	margin: 0px;
 	background: URL(/theme/login/user.gif) no-repeat;
 	background-position: 1px 1px;
 	background-color: #FFFFFF;
@@ -92,10 +90,8 @@ form {
 	color: #000000;
 	font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
 	font-size: 9pt;
-	border: 1px solid #666666;
 	width: 190px;
 	padding: 2px 2px 3px 2px;
-	margin: 0px;
 	background-position: 1px 1px;
 	background-color: #FFFFFF;
 	vertical-align: middle;
