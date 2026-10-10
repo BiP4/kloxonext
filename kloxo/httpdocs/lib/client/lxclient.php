@@ -518,7 +518,7 @@ abstract class Lxclient extends Lxdb
 	function checkTicketUnread()
 	{
 		$sql = new Sqlite($this->__masterserver, 'ticket');
-		$res = $sql->getRowsWhere("sent_to = '{$this->getClName()}' AND unread_flag = 'on'");
+		$res = $sql->getRowsWhere("sent_to = '" . kn_sql_escape($this->getClName()) . "' AND unread_flag = 'on'");
 		
 		return lx_count($res);
 	}
@@ -526,7 +526,7 @@ abstract class Lxclient extends Lxdb
 	function checkMessageUnread()
 	{
 		$sql = new Sqlite($this->__masterserver, 'smessage');
-		$res = $sql->getRowsWhere("text_sent_to_cmlist LIKE '%,{$this->getClName()},%' AND text_readby_cmlist NOT LIKE '%,{$this->getClName()},%'");
+		$res = $sql->getRowsWhere("text_sent_to_cmlist LIKE '%," . kn_sql_escape($this->getClName()) . ",%' AND text_readby_cmlist NOT LIKE '%," . kn_sql_escape($this->getClName()) . ",%'");
 
 		return lx_count($res);
 	}
@@ -676,7 +676,7 @@ abstract class Lxclient extends Lxdb
 		}
 
 		$sq = new Sqlite(null, $this->get__table());
-		$res = $sq->rawQuery("select * from {$this->get__table()} where nname = '$this->nname'");
+		$res = $sq->rawQuery("select * from {$this->get__table()} where nname = '" . kn_sql_escape($this->nname) . "'");
 		
 		if ($res) {
 			throw new lxException($login->getThrow('already_exists'), '', $this->nname);
@@ -821,7 +821,7 @@ abstract class Lxclient extends Lxdb
 	function getLastLogin(&$ilist)
 	{
 		$sq = new Sqlite(null, 'utmp');
-		$res = $sq->rawQuery("select * from utmp where parent_clname = '{$this->getClName()}' order by (logintime + 0) DESC limit 2");
+		$res = $sq->rawQuery("select * from utmp where parent_clname = '" . kn_sql_escape($this->getClName()) . "' order by (logintime + 0) DESC limit 2");
 
 	//	if (!$res) { return "Not Logged"; }
 

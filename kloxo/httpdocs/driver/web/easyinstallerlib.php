@@ -466,7 +466,7 @@ class easyinstaller extends Lxdb
 		$dom = $web->getParentO();
 		$client = $dom->getRealClientParentO();
 		$sq = new Sqlite($this->__masterserver, 'mysqldb');
-		$res = $sq->getRowsWhere("easyinstaller_app = '{$this->getClName()}'");
+		$res = $sq->getRowsWhere("easyinstaller_app = '" . kn_sql_escape($this->getClName()) . "'");
 
 		if (!$res) {
 			return;

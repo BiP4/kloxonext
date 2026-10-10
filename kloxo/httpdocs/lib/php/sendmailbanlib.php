@@ -89,7 +89,7 @@ class Sendmailban extends Lxdb
 	{
 		$parent = $this->getParentO();
 		$d = new Sqlite(null, "sendmailban");
-		$r = $d->getRowsWhere("syncserver = '$parent->syncserver'", array('target'));
+		$r = $d->getRowsWhere("syncserver = '" . kn_sql_escape($parent->syncserver) . "'", array('target'));
 
 		$s = '';
 

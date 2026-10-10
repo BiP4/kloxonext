@@ -422,7 +422,7 @@ class Domaind extends DomainBase
 		global $gbl, $sgbl, $login;
 
 		$db = new Sqlite($this->__masterserver, "domain");
-		$result = $db->getRowsWhere("parent_name = '$this->nname' and parent_class = 'domain'");
+		$result = $db->getRowsWhere("parent_name = '" . kn_sql_escape($this->nname) . "' and parent_class = 'domain'");
 
 		if ($result) {
 			$this->setListFromArray("ddatabase", $result );
@@ -438,7 +438,7 @@ class Domaind extends DomainBase
 
 		$db = new Sqlite($parent->__masterserver, "domain");
 		$class = $parent->getClass();
-		$result = $db->getRowsWhere("parent_name = '$parent->nname' and parent_class = '$class'");
+		$result = $db->getRowsWhere("parent_name = '" . kn_sql_escape($parent->nname) . "' and parent_class = '" . kn_sql_escape($class) . "'");
 
 	//	dprintr($result);
 
@@ -1078,7 +1078,7 @@ class Domaind extends DomainBase
 			$dname = substr($dname, 0, 15);
 		}
 		$sq = new Sqlite(null, 'uuser');
-		if (!$sq->getRowsWhere("nname = '$dname'")) {
+		if (!$sq->getRowsWhere("nname = '" . kn_sql_escape($dname) . "'")) {
 			return $dname;
 		}
 
@@ -1087,7 +1087,7 @@ class Domaind extends DomainBase
 		
 		while (true) {
 			$i++;
-			if ($sq->getRowsWhere("nname = '$dname'")) {
+			if ($sq->getRowsWhere("nname = '" . kn_sql_escape($dname) . "'")) {
 				$dname = $dnamebase . "$i";
 			} else {
 				break;

@@ -86,5 +86,5 @@ function switchserver_main()
 function write_to_object($object, $message, $syncserver)
 {
 	$sq = new Sqlite(null, $object->get__table());
-	$sq->rawQuery("update {$object->get__table()} set olddeleteflag = 'Switch to $syncserver failed due to $message' where nname = '{$object->nname}'");
+	$sq->rawQuery("update {$object->get__table()} set olddeleteflag = 'Switch to " . kn_sql_escape($syncserver) . " failed due to " . kn_sql_escape($message) . "' where nname = '" . kn_sql_escape($object->nname) . "'");
 }

@@ -1523,7 +1523,7 @@ STRIN;
 	function deleteSpecific()
 	{
 		$sq = new Sqlite(null, 'ipaddress');
-		$sq->rawQuery("delete from ipaddress where syncserver = '$this->nname'");
+		$sq->rawQuery("delete from ipaddress where syncserver = '" . kn_sql_escape($this->nname) . "'");
 
 	//	$this->fixDatabaseServers();
 	}

@@ -59,7 +59,7 @@ class all_easyinstaller extends Lxclass
 	function checkIfInstalled()
 	{
 		$sq = new Sqlite($this->__masterserver, 'installsoft');
-		$res = $sq->getRowsWhere("appname = '$this->appname' AND parent_clname = '{$this->getParentO()->getClName()}'");
+		$res = $sq->getRowsWhere("appname = '" . kn_sql_escape($this->appname) . "' AND parent_clname = '" . kn_sql_escape($this->getParentO()->getClName()) . "'");
 
 		if ($res) {
 			return 'on';

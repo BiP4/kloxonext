@@ -19,7 +19,7 @@ class SslIpaddress extends Lxdb
 	{
 		if ($var === 'ipaddr') {
 			$db = new Sqlite($this->__masterserver, 'ipaddress');
-			$res = $db->getRowsWhere("nname = '$this->nname'");
+			$res = $db->getRowsWhere("nname = '" . kn_sql_escape($this->nname) . "'");
 			return $res[0]['ipaddr'];
 		}
 

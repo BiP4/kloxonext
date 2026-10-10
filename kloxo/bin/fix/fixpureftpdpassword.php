@@ -14,6 +14,6 @@ foreach($list as $l) {
 	print("setting pass for {$l['nname']}\n");
 	$name = $l['nname'];
 	$pass = randomString(8);
-	$sq->rawQuery("update ftpuser set realpass = '$pass' where nname = '$name'");
+	$sq->rawQuery("update ftpuser set realpass = '" . kn_sql_escape($pass) . "' where nname = '" . kn_sql_escape($name) . "'");
 	lxshell_input("$pass\n$pass\n", "pure-pw", "passwd", $name, "-m");
 }

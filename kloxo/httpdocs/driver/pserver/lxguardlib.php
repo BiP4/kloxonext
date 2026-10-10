@@ -83,7 +83,7 @@ class lxguard extends lxdb
 
 		foreach($param['_accountselect'] as $ip) {
 			// MR -- fix because 'ipaddress=' not work and change to 'ipaddress like %%'
-			$sq->rawQuery("delete from lxguardhit where syncserver='{$server}' and ipaddress like '%{$ip}%'");
+			$sq->rawQuery("delete from lxguardhit where syncserver='" . kn_sql_escape($server) . "' and ipaddress like '%" . kn_sql_escape($ip) . "%'");
 		}
 
 		self::save_current_hitlist($server);

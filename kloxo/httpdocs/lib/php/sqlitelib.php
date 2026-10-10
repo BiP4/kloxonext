@@ -103,9 +103,36 @@ class Sqlite
 		return $ret;
 	}
 
+	// KloxoNext - escape a value for a quoted SQL string literal. Replacing ' by \'
+	// alone let a value ending in a backslash close the quote (SQL injection).
+	function escape($value)
+	{
+		global $gbl;
+
+		if ($value === null) {
+			return '';
+		}
+
+		if (is_bool($value)) {
+			return $value ? '1' : '';
+		}
+
+		if (!is_scalar($value)) {
+			return $value;
+		}
+
+		$fdbvar = "__fdb_{$this->__readserver}";
+
+		if (self::$__database === 'mysql' && isset($gbl->$fdbvar) && $gbl->$fdbvar instanceof mysqli) {
+			return $gbl->$fdbvar->real_escape_string((string)$value);
+		}
+
+		return kn_sql_escape($value);
+	}
+
 	function setPassword($newp)
 	{
-		return $this->rawQuery("set password=Password('$newp');");
+		return $this->rawQuery("set password=Password('{$this->escape($newp)}');");
 	}
 
 	function database_query($res, $string)
@@ -228,7 +255,7 @@ class Sqlite
 
 	function existInTable($var, $value)
 	{
-		$result = $this->getRowsWhere("$var = '$value'");
+		$result = $this->getRowsWhere("$var = '{$this->escape($value)}'");
 
 		if ($result) {
 			return true;
@@ -244,22 +271,22 @@ class Sqlite
 
 	function getRowsOr($field1, $value1, $field2, $value2)
 	{
-		return $this->getRowsWhere("$field1 = '$value1' or $field2 = '$value2'");
+		return $this->getRowsWhere("$field1 = '{$this->escape($value1)}' or $field2 = '{$this->escape($value2)}'");
 	}
 
 	function getRowAnd($field1, $value1, $field2, $value2)
 	{
-		return $this->getRowsWhere("$field1 = '$value1' and  $field2='$value2'");
+		return $this->getRowsWhere("$field1 = '{$this->escape($value1)}' and  $field2='{$this->escape($value2)}'");
 	}
 
 	function getRowsNot($field, $notval)
 	{
-		return $this->getRowsWhere("$field != '$notval'");
+		return $this->getRowsWhere("$field != '{$this->escape($notval)}'");
 	}
 
 	function getRows($field, $value)
 	{
-		return $this->getRowsWhere("$field = '$value'");
+		return $this->getRowsWhere("$field = '{$this->escape($value)}'");
 	}
 
 	function getTable($list = null)
@@ -420,7 +447,7 @@ class Sqlite
 					$ret[$key] = implode(",", $namelist);
 					dprint("in COma $key {$ret[$key]}<br> ");
 
-					$ret[$key] = ",$ret[$key],";
+					$ret[$key] = $this->escape(",$ret[$key],");
 				} else {
 					$ret[$key] = '';
 				}
@@ -453,13 +480,8 @@ class Sqlite
 					$object->$key = null;
 				}
 
-				if (csb($key, "text_")) {
-					$string = str_replace("\\", '\\\\', $object->$key);
-				} else {
-					$string = $object->$key;
-				}
-
-				$ret[$key] = str_replace("'", "\'", $string);
+				// real escaping (backslashes kept as typed, for every column)
+				$ret[$key] = $this->escape($object->$key);
 			}
 		}
 
@@ -493,7 +515,7 @@ class Sqlite
 
 		$string = $this->createQueryStringUpdate($array);
 
-		$update = "update $this->__sqtable set $string where $nname= '$value'";
+		$update = "update $this->__sqtable set $string where $nname= '{$this->escape($value)}'";
 
 		if ($array['nname'] === 'boxtrapper.com') {
 			//
@@ -551,7 +573,7 @@ class Sqlite
 
 		$fdbvar = "__fdb_" . $this->__readserver;
 
-		$delete = "delete from $this->__sqtable where $nname = '$value'";
+		$delete = "delete from $this->__sqtable where $nname = '{$this->escape($value)}'";
 
 		$delresult = $this->database_query($gbl->$fdbvar, $delete);
 

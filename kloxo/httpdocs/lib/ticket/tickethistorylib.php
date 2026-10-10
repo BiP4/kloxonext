@@ -180,7 +180,7 @@ class TicketHistory extends Lxdb
 
 		if ($obj->isClient() && !$obj->isAdmin()) {
 			$sq = new Sqlite(null, "ticket");
-			$tlist = $sq->getRowsWhere("made_by = 'client-$obj->nname' AND category LIKE '%TechnicalSupport%'");
+			$tlist = $sq->getRowsWhere("made_by = 'client-" . kn_sql_escape($obj->nname) . "' AND category LIKE '%TechnicalSupport%'");
 			$nticket = lx_count($tlist);
 		}
 

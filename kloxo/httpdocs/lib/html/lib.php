@@ -186,11 +186,11 @@ function db_get_value($table, $nname, $var)
 	$sql = new Sqlite(null, $table);
 
 	if (is_array($var)) {
-		$row = $sql->getRowsWhere("nname = '$nname'", $var);
+		$row = $sql->getRowsWhere("nname = '" . kn_sql_escape($nname) . "'", $var);
 
 		return $row[0];
 	} else {
-		$row = $sql->getRowsWhere("nname = '$nname'", array($var));
+		$row = $sql->getRowsWhere("nname = '" . kn_sql_escape($nname) . "'", array($var));
 
 		return $row[0][$var];
 	}
@@ -1460,7 +1460,7 @@ function getRealhostName($name)
 	}
 
 	$sq = new Sqlite(null, 'pserver');
-	$res = $sq->getRowsWhere("nname = '$name'", array('realhostname'));
+	$res = $sq->getRowsWhere("nname = '" . kn_sql_escape($name) . "'", array('realhostname'));
 
 	if (!$res[0]['realhostname']) {
 		return 'localhost';
@@ -1492,7 +1492,7 @@ function getInternalNetworkIp($v)
 {
 	$sql = new Sqlite(null, "pserver");
 
-	$server = $sql->rawQuery("select * from pserver where nname = '$v'");
+	$server = $sql->rawQuery("select * from pserver where nname = '" . kn_sql_escape($v) . "'");
 
 	$servername = trim($server[0]['internalnetworkip']);
 
@@ -1522,7 +1522,7 @@ function getFQDNforServer($v)
 {
 	$sql = new Sqlite(null, "pserver");
 
-	$server = $sql->rawQuery("select * from pserver where nname = '$v'");
+	$server = $sql->rawQuery("select * from pserver where nname = '" . kn_sql_escape($v) . "'");
 
 	$servername = trim($server[0]['realhostname']);
 
@@ -1536,7 +1536,7 @@ function getFQDNforServer($v)
 function getOneIPForServer($v)
 {
 	$sql = new Sqlite(null, "pserver");
-	$ipaddr = $sql->rawQuery("select * from ipaddress where syncserver = '$v'");
+	$ipaddr = $sql->rawQuery("select * from ipaddress where syncserver = '" . kn_sql_escape($v) . "'");
 
 	foreach ($ipaddr as $ip) {
 		if (!csb($ip['ipaddr'], "127") && !csb($ip['ipaddr'], "172") && !csb($ip['ipaddr'], "192.168")) {
@@ -3359,7 +3359,7 @@ function getIpaddressList($master, $servername)
 		$servername = 'localhost';
 	}
 
-	$list = $sql->getRowsWhere("syncserver = '$servername'");
+	$list = $sql->getRowsWhere("syncserver = '" . kn_sql_escape($servername) . "'");
 
 	foreach ($list as $l) {
 		$ret[] = $l['ipaddr'];
@@ -4001,8 +4001,8 @@ function db_set_default($table, $variable, $default, $extra = null)
 		$extra = "AND $extra";
 	}
 
-	$sq->rawQuery("update $table set $variable = '$default' where $variable = '' $extra");
-	$sq->rawQuery("update $table set $variable = '$default' where $variable is null $extra");
+	$sq->rawQuery("update $table set $variable = '" . kn_sql_escape($default) . "' where $variable = '' $extra");
+	$sq->rawQuery("update $table set $variable = '" . kn_sql_escape($default) . "' where $variable is null $extra");
 }
 
 function db_set_default_variable_diskusage($table, $variable, $default, $extra = null)
@@ -4185,7 +4185,7 @@ function getOsForServer($servername)
 
 	$sq = new Sqlite(null, 'pserver');
 
-	$res = $sq->getRowsWhere("nname = '$servername'", array('ostype'));
+	$res = $sq->getRowsWhere("nname = '" . kn_sql_escape($servername) . "'", array('ostype'));
 
 	return $res[0]['ostype'];
 }
@@ -4622,7 +4622,7 @@ function findServerTraffic()
 	$list = $login->getList('pserver');
 
 	foreach ($list as $l) {
-		$res = $sq->getRowsWhere("syncserver = '$l->nname'",
+		$res = $sq->getRowsWhere("syncserver = '" . kn_sql_escape($l->nname) . "'",
 			array('used_q_traffic_usage', 'used_q_traffic_last_usage'));
 		$tusage = 0;
 		$tlastusage = 0;
@@ -6886,7 +6886,7 @@ function fix_mysql_name_problem()
 		if (!csa($r['nname'], "___")) {
 			return;
 		}
-		$sq->rawQuery("update mysqldb set nname = '{$r['dbname']}' where dbname = '{$r['dbname']}'");
+		$sq->rawQuery("update mysqldb set nname = '" . kn_sql_escape($r['dbname']) . "' where dbname = '" . kn_sql_escape($r['dbname']) . "'");
 	}
 }
 
@@ -6900,7 +6900,7 @@ function fix_mysql_username_problem()
 			return;
 		}
 
-		$sq->rawQuery("update mysqldbuser set nname = '{$r['username']}' where username = '{$r['username']}'");
+		$sq->rawQuery("update mysqldbuser set nname = '" . kn_sql_escape($r['username']) . "' where username = '" . kn_sql_escape($r['username']) . "'");
 	}
 }
 

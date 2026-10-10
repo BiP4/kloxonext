@@ -192,7 +192,7 @@ function do_remote_exec($machine, $rmt, $cmdtype, $nname, $dbaction)
 			$password = $gbl->$var;
 		} else {
 			$ssm = new Sqlite(null, $table);
-			$res = $ssm->rawQuery("select realpass from $table where nname = '$machine'");
+			$res = $ssm->rawQuery("select realpass from $table where nname = '" . kn_sql_escape($machine) . "'");
 
 			if ($res) {
 				$password = $res[0]['realpass'];

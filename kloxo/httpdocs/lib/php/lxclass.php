@@ -2605,7 +2605,7 @@ abstract class Lxclass
 
 			$this->nname = implode($sgbl->__var_nname_impstr, $nnamelist);
 			$sql = new Sqlite(null, $this->get__table());
-			$res = $sql->getRowsWhere("nname = '{$this->nname}'");
+			$res = $sql->getRowsWhere("nname = '" . kn_sql_escape($this->nname) . "'");
 
 			if ($res) {
 				throw new lxException($login->getThrow("already_exists"), '', $this->nname);
@@ -2790,7 +2790,7 @@ abstract class Lxclass
 		global $gbl, $sgbl, $login, $ghtml;
 
 		$sql = new Sqlite(null, get_table_from_class($this->getParentClass()));
-		$res = $sql->getRowsWhere("nname = '{$this->getParentName()}'");
+		$res = $sql->getRowsWhere("nname = '" . kn_sql_escape($this->getParentName()) . "'");
 
 		if ($trulist && $this->__parent_o->dbaction !== 'add' && !$res) {
 			$this->AddMEssageOnlyIfClientDomain("(Parent {$this->getParentName()} Does Not Exist. Will be Not be Restored).");
@@ -2893,7 +2893,7 @@ abstract class Lxclass
 			$coreflag = false;
 
 			$sql = new Sqlite(null, $this->get__table());
-			$res = $sql->getRowsWhere("nname = '{$this->nname}'");
+			$res = $sql->getRowsWhere("nname = '" . kn_sql_escape($this->nname) . "'");
 			$this->consistencySwitchServer();
 
 			if ($res) {
@@ -3873,7 +3873,7 @@ abstract class Lxclass
 	{
 		$table = get_table_from_class($class);
 		$sq = new Sqlite(null, $table);
-		$count = $sq->getCountWhere("parent_clname = '{$this->getClName()}'");
+		$count = $sq->getCountWhere("parent_clname = '" . kn_sql_escape($this->getClName()) . "'");
 
 		if ($count == 1 && $this->isGte('customer')) {
 			$dlist = $this->getList($class);
@@ -4031,7 +4031,7 @@ abstract class Lxclass
 	{
 		$t = $this->get__table();
 		$sq = new Sqlite(null, 'custombutton');
-		$res = $sq->getRowsWhere("class = '{$this->get__table()}'");
+		$res = $sq->getRowsWhere("class = '" . kn_sql_escape($this->get__table()) . "'");
 
 		if (!$res) {
 			return;
@@ -5375,7 +5375,7 @@ abstract class Lxclass
 			$newthis->nname = implode($sgbl->__var_nname_impstr, $nnamelist);
 
 			$sql = new Sqlite($this->__masterserver, $this->get__table());
-			$res = $sql->getRowsWhere("nname = '{$newthis->nname}'");
+			$res = $sql->getRowsWhere("nname = '" . kn_sql_escape($newthis->nname) . "'");
 
 			if ($res) {
 				throw new lxException($login->getThrow("changed_name_already_exists"), '', $newthis->nname);

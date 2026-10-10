@@ -16,7 +16,7 @@ class watchdog extends lxdb
 	function createExtraVariables()
 	{
 		$sq = new Sqlite(null, 'watchdog');
-		$this->__var_watchlist = $sq->getRowsWhere("syncserver = '$this->syncserver'");
+		$this->__var_watchlist = $sq->getRowsWhere("syncserver = '" . kn_sql_escape($this->syncserver) . "'");
 	}
 
 	function createShowUpdateform()

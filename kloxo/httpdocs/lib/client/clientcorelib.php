@@ -804,7 +804,7 @@ abstract class ClientCore extends Resourcecore
 
 		if ($this->listpriv->ipaddress_list)  {
 			foreach($this->listpriv->ipaddress_list as $ip) {
-				$res = $sql->getRowsWhere("ipaddr = '$ip'", array('syncserver'));
+				$res = $sql->getRowsWhere("ipaddr = '" . kn_sql_escape($ip) . "'", array('syncserver'));
 
 				foreach($res as $a) {
 					$serv[] = $a['syncserver']? $a['syncserver']: 'localhost';

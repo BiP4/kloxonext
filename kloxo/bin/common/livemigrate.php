@@ -112,5 +112,5 @@ function write_to_object($object, $message, $syncserver)
 {
 	$sq = new Sqlite(null, $object->__table);
 	$message = str_replace("'", "", $message);
-	$sq->rawQuery("update {$object->__table} set olddeleteflag = 'Switch to $syncserver failed due to $message' where nname = '{$object->nname}'");
+	$sq->rawQuery("update {$object->__table} set olddeleteflag = 'Switch to " . kn_sql_escape($syncserver) . " failed due to " . kn_sql_escape($message) . "' where nname = '" . kn_sql_escape($object->nname) . "'");
 }

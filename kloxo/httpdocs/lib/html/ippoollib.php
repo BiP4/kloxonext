@@ -286,7 +286,7 @@ class ippool extends Lxdb
 		foreach($list as $l) {
 			$l = trim($l);
 
-			$p = $sq->getRowsWhere("nname = '$l'");
+			$p = $sq->getRowsWhere("nname = '" . kn_sql_escape($l) . "'");
 
 			if ($p) { continue; }
 
@@ -341,7 +341,7 @@ class ippool extends Lxdb
 	{
 		$sq = new Sqlite(null, 'tmpipassign');
 		$date = time();
-		$sq->rawQuery("insert into tmpipassign (nname, ddate) values ('$l', '$date');");
+		$sq->rawQuery("insert into tmpipassign (nname, ddate) values ('" . kn_sql_escape($l) . "', '" . kn_sql_escape($date) . "');");
 	}
 
 	function getIndividualIpList()
@@ -386,12 +386,12 @@ class ippool extends Lxdb
 	static function checkIfAlreadyAssigned($class, $ipaddr)
 	{
 		$sq = new Sqlite(null, 'ipaddress');
-		$res = $sq->getRowsWhere("ipaddr = '$ipaddr'", array('nname'));
+		$res = $sq->getRowsWhere("ipaddr = '" . kn_sql_escape($ipaddr) . "'", array('nname'));
 
 		if ($res) { return $res[0]['nname']; }
 
 		$sq = new Sqlite(null, 'vps');
-		$res = $sq->getRowsWhere("coma_vmipaddress_a LIKE '%,$ipaddr,%'", array('nname'));
+		$res = $sq->getRowsWhere("coma_vmipaddress_a LIKE '%," . kn_sql_escape($ipaddr) . ",%'", array('nname'));
 
 		if ($res) { return $res[0]['nname']; }
 		

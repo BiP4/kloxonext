@@ -39,7 +39,7 @@ foreach($res as $r) {
 
 	if ($ot > $oldtime) {
 		print("deleting $oldtime {$r['nname']}\n");
-		$sq->rawQuery("delete from {$class}traffic where nname = '{$r['nname']}'");
+		$sq->rawQuery("delete from {$class}traffic where nname = '" . kn_sql_escape($r['nname']) . "'");
 	} else {
 		//print("not deleting $oldtime {$r['nname']}\n");
 	}

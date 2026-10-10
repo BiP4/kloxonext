@@ -312,7 +312,7 @@ final class KnMail
 
 		if (($a['autorespond_status'] ?? '') === 'on' && !empty($a['autores_name'])) {
 			$db = new Sqlite(null, 'autoresponder');
-			$r = $db->getRowsWhere("nname = '" . str_replace("'", "\\'", $a['autores_name']) . "'");
+			$r = $db->getRowsWhere("nname = '" . kn_sql_escape($a['autores_name']) . "'");
 
 			if (!empty($r[0])) {
 				$req[] = 'vacation';

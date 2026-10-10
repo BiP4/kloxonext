@@ -178,7 +178,7 @@ class Service extends Lxdb
 			return;
 		}
 
-		$list = $sql->getRowsWhere("parent_clname = '{$parent->getClname()}'");
+		$list = $sql->getRowsWhere("parent_clname = '" . kn_sql_escape($parent->getClname()) . "'");
 		
 		foreach ($list as $l) {
 			$nlist[$l['servicename']] = $l;

@@ -156,13 +156,13 @@ if (!$cgi_forgotpwd) {
 
 	if ($name_ok && $mail_ok) {
 		$rawdb = new Sqlite(null, $classname);
-		$email = $rawdb->rawQuery("select contactemail from {$classname} where nname = '{$cgi_clientname}';");
+		$email = $rawdb->rawQuery("select contactemail from {$classname} where nname = '" . kn_sql_escape($cgi_clientname) . "';");
 
 		if ($email && hash_equals((string)$email[0]['contactemail'], $cgi_email)) {
 			$rndstring = randomString(12);
 			$pass = lx_password_hash($rndstring);
 
-			$rawdb->rawQuery("update {$classname} set password = '{$pass}' where nname = '{$cgi_clientname}'");
+			$rawdb->rawQuery("update {$classname} set password = '" . kn_sql_escape($pass) . "' where nname = '" . kn_sql_escape($cgi_clientname) . "'");
 
 			$subject = "{$cprogname} password reset";
 			$message = "\n\nYour {$cprogname} password has been reset.\n";

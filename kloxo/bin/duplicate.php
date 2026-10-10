@@ -10,7 +10,7 @@ $class = $argv[1];
 foreach($res as $r) {
 	if (isset($stored[$r['nname']])) {
 		print("duplicate found {$r['nname']}\n");
-		$db->rawQuery("delete from $class where nname = '{$r['nname']}'");
+		$db->rawQuery("delete from $class where nname = '" . kn_sql_escape($r['nname']) . "'");
 		$ob = new $class(null, null, $r['nname']);
 		$ob->create($r);
 		$ob->write();

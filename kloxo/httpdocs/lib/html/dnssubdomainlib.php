@@ -16,7 +16,7 @@ function kn_dns_get_subdomain_parent($nname)
 	}
 
 	$db = new Sqlite(null, 'domain');
-	$r = $db->getRowsWhere("nname = '{$nname}' AND dtype = 'subdomain'", array('subdomain_parent'));
+	$r = $db->getRowsWhere("nname = '" . kn_sql_escape($nname) . "' AND dtype = 'subdomain'", array('subdomain_parent'));
 
 	if (!empty($r[0]['subdomain_parent'])) {
 		return $r[0]['subdomain_parent'];
@@ -37,7 +37,7 @@ function kn_dns_get_subdomain_list($parent = null)
 			return array();
 		}
 
-		$r = $db->getRowsWhere("dtype = 'subdomain' AND subdomain_parent = '{$parent}'", array('nname'));
+		$r = $db->getRowsWhere("dtype = 'subdomain' AND subdomain_parent = '" . kn_sql_escape($parent) . "'", array('nname'));
 	}
 
 	$ret = array();
@@ -250,7 +250,7 @@ function kn_dns_remove_stray_rows()
 			continue;
 		}
 
-		$db->rawQuery("DELETE FROM dns WHERE nname = '{$r['nname']}'");
+		$db->rawQuery("DELETE FROM dns WHERE nname = '" . kn_sql_escape($r['nname']) . "'");
 		log_log("dns_stray", "removed DNS row '{$r['nname']}' (no domain)");
 	}
 }

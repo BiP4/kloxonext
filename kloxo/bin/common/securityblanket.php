@@ -24,10 +24,10 @@ function security_blanket_main()
 	call_user_func_array($rem->func, $rem->arglist);
 
 	$sq = new Sqlite(null, $rem->table);
-	$res = $sq->getRowsWhere("nname = '$rem->nname'", array($rem->flagvariable));
+	$res = $sq->getRowsWhere("nname = '" . kn_sql_escape($rem->nname) . "'", array($rem->flagvariable));
 
 	if ($res[0][$rem->flagvariable] === 'doing') {
-		$sq->rawQuery("update $rem->table set $rem->flagvariable = 'Program Got aborted in the midst. Please try again.' where nname = '$rem->nname'");
+		$sq->rawQuery("update $rem->table set $rem->flagvariable = 'Program Got aborted in the midst. Please try again.' where nname = '" . kn_sql_escape($rem->nname) . "'");
 	}
 
 

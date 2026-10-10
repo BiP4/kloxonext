@@ -51,7 +51,7 @@ $domain = strtilfirst($request, "/");
 // print("domain: " . $domain . "<br>");
 
 $sq = new Sqlite(null, 'web');
-$res = $sq->getRowsWhere("nname = '$domain'");
+$res = $sq->getRowsWhere("nname = '" . kn_sql_escape($domain) . "'");
 
 if (!$res) {
 	print("Domain Doesn't exist\n");

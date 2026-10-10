@@ -406,7 +406,7 @@ class databasecore extends Lxdb
 		
 		$db = new Sqlite($this->__masterserver, 'dbadmin');
 
-		$res = $db->getRowsWhere("dbtype = '$this->dbtype' AND syncserver = '$this->syncserver'");
+		$res = $db->getRowsWhere("dbtype = '" . kn_sql_escape($this->dbtype) . "' AND syncserver = '" . kn_sql_escape($this->syncserver) . "'");
 
 		if (!$res) {
 			dprintr("NO database admin entries... <br> ");
