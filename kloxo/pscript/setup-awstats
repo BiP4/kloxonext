@@ -18,6 +18,51 @@ command -v awstats.pl >/dev/null 2>&1 || [ -f /usr/share/awstats/wwwroot/cgi-bin
 	[ -f /usr/lib/cgi-bin/awstats.pl ] || pkg_install awstats
 [ -x /usr/sbin/fcgiwrap ] || pkg_install fcgiwrap
 
+# No package (AlmaLinux / Rocky 10: EPEL 10 has no awstats): the official release,
+# pinned and checksummed, laid out like the EL package in /usr/share/awstats
+AW_UPSTREAM_VER="8.0"
+AW_UPSTREAM_URL="https://github.com/eldy/AWStats/archive/refs/tags/AWSTATS_8_0.tar.gz"
+AW_UPSTREAM_SHA256="9cbd3600883a0e3a27b16fba8978b7e112cf991ef1317c0813aa8e76b306ef63"
+
+if [ ! -f /usr/share/awstats/wwwroot/cgi-bin/awstats.pl ] && [ ! -f /usr/lib/cgi-bin/awstats.pl ] ; then
+	command -v perl >/dev/null 2>&1 || pkg_install perl
+	# modules awstats.pl 8 loads (the package would pull them in)
+	pkg_install perl-Time-Local perl-Time-HiRes perl-Encode perl-Digest-MD5 perl-Socket perl-JSON-XS perl-Try-Tiny >/dev/null 2>&1
+
+	tmp="$(mktemp -d)"
+
+	if curl -fsSL --max-time 300 -o "${tmp}/awstats.tar.gz" "${AW_UPSTREAM_URL}" && \
+			echo "${AW_UPSTREAM_SHA256}  ${tmp}/awstats.tar.gz" | sha256sum -c --status - ; then
+		tar -xzf "${tmp}/awstats.tar.gz" -C "${tmp}"
+		src="$(find "${tmp}" -maxdepth 1 -type d -name 'AWStats-*' | head -1)"
+
+		if [ -n "${src}" ] && [ -f "${src}/wwwroot/cgi-bin/awstats.pl" ] ; then
+			mkdir -p /usr/share/awstats /etc/awstats
+			cp -a "${src}/wwwroot" "${src}/tools" /usr/share/awstats/
+
+			# awstats.pl falls back to /usr/share/awstats/{lib,lang,plugins}
+			for d in lib lang plugins ; do
+				ln -sfn "wwwroot/cgi-bin/${d}" "/usr/share/awstats/${d}"
+			done
+
+			chmod 755 /usr/share/awstats/wwwroot/cgi-bin/*.pl /usr/share/awstats/tools/*.pl 2>/dev/null
+			chown -R root:root /usr/share/awstats
+			echo "${AW_UPSTREAM_VER}" > /usr/share/awstats/.kloxonext-upstream
+			echo "- AWStats ${AW_UPSTREAM_VER} installed from the official release (no package for this OS)"
+		fi
+	else
+		echo "- AWStats download or checksum failed"
+	fi
+
+	rm -rf "${tmp:?}"
+fi
+
+# upstream copy: its Perl modules must be there (also on installs made before this check)
+if [ -f /usr/share/awstats/.kloxonext-upstream ] && ! perl -MJSON::XS -MTry::Tiny -e 1 2>/dev/null ; then
+	pkg_install perl-JSON-XS perl-Try-Tiny >/dev/null 2>&1
+	perl -MJSON::XS -MTry::Tiny -e 1 2>/dev/null || echo "- Perl modules JSON::XS / Try::Tiny missing (enable the CRB repository)"
+fi
+
 # awstats.pl: EL ships it in wwwroot/cgi-bin, Debian/Ubuntu in /usr/lib/cgi-bin
 for f in /usr/share/awstats/wwwroot/cgi-bin/awstats.pl /usr/lib/cgi-bin/awstats.pl ; do
 	[ -f "${f}" ] && { AWPL="${f}" ; break ; }
