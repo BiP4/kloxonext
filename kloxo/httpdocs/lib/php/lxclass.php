@@ -4420,7 +4420,8 @@ abstract class Lxclass
 		$val = 1 * $flag;
 
 		if ($qp->isQuotaVariable($cnum)) {
-			$qp->used->$cnum += $val;
+			// PHP 8: the stored counter may be '' or text, which cannot be added to
+			$qp->used->$cnum = kn_num($qp->used->$cnum ?? 0) + $val;
 			$doupdate = true;
 			dprint("IN change used ... quota variable specific {$qp->getClname()} {$class} {$this->nname}\n");
 		//	dprintr($qp->used);
@@ -4480,7 +4481,7 @@ abstract class Lxclass
 
 		foreach ((array)$qlist as $k => $v) {
 			if ($this->isHardQuota($k)) {
-				$this->getParentO()->used->$k -= $this->priv->$k;
+				$this->getParentO()->used->$k = kn_num($this->getParentO()->used->$k ?? 0) - kn_num($this->priv->$k);
 			}
 		}
 

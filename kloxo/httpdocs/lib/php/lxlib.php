@@ -2628,6 +2628,34 @@ function save_login()
 	return;
 }
 
+// KloxoNext - escape a value for a quoted SQL string literal (MySQL rules, works
+// without a connection); use it for every value put in a hand-written query
+// KloxoNext - PHP 8 arithmetic on stored values: '' / null / text count as 0
+function kn_num($v)
+{
+	if (is_int($v) || is_float($v)) {
+		return $v;
+	}
+
+	return is_numeric($v) ? $v + 0 : 0;
+}
+
+function kn_sql_escape($value)
+{
+	if ($value === null) {
+		return '';
+	}
+
+	if (!is_scalar($value)) {
+		return '';
+	}
+
+	return strtr((string)$value, array(
+		"\\" => "\\\\", "\0" => "\\0", "\n" => "\\n", "\r" => "\\r",
+		"'" => "\\'", '"' => '\\"', "\x1a" => "\\Z"
+	));
+}
+
 function isLocalhost($var)
 {
 	if (!$var || $var === "localhost") {
