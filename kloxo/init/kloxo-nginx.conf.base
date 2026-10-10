@@ -99,6 +99,9 @@ http {
 		# never expose internal data
 		location ~ /\.(?!well-known) { deny all; }
 		location ~* \.(inc|sql|log|bak|db|pass|ini)$ { deny all; }
+		# KloxoNext - keys and certificates are never web content; theme/filecore is read by the panel only
+		location ~* \.(pem|key|crt|csr|p12|pfx)$ { deny all; }
+		location ^~ /theme/filecore/ { deny all; }
 
 		location ~* \.(css|js|gif|ico|jpe?g|png|svg|webp|woff2?|ttf|otf|eot|map)$ {
 			expires 7d;

@@ -17,10 +17,10 @@ function redirect_no_frames($url)
 
 	if ($ghtml->iset("frm_nf")) {
 		if ($ghtml->frm_nf) {
-			setcookie("program-nf", "1");
+			kn_setcookie("program-nf", "1");
 			$ghtml->print_redirect($url);
 		} else {
-			setcookie("program-nf", "", time() - 345566);
+			kn_setcookie("program-nf", "", time() - 345566);
 			$ghtml->print_redirect("/");
 		}
 

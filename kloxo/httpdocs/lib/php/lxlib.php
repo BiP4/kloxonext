@@ -947,7 +947,7 @@ function kn_shell_arg($value, $q)
 	$value = (string)$value;
 
 	// a NUL byte ends a C string: the shell would see a different command
-	$value = str_replace(" ", '', $value);
+	$value = str_replace("\0", '', $value);
 
 	if ($q === "'") {
 		return str_replace("'", "'\''", $value);
@@ -2172,6 +2172,11 @@ function check_raw_password($class, $client, $pass)
 		return false;
 	}
 
+	// KloxoNext - the class is also the table name of the query below
+	if (!kn_login_class_ok($class)) {
+		return false;
+	}
+
 	// MR -- sanitize input
 	if ((stripos($class, "'") !== false) || 
 			(stripos($client, "'") !== false) || 
@@ -2467,7 +2472,7 @@ function clear_all_cookie()
 
 	foreach ($_COOKIE as $k => $v) {
 		if (csb($k, $search)) {
-			setcookie($k, "", time() - 360000000);
+			kn_setcookie($k, "", time() - 360000000);
 		}
 	}
 }
@@ -2512,9 +2517,9 @@ function initSession($object, $ssl_param, $consuming_parent)
 		$class = $object->getClass();
 	}
 
-	setcookie("$ckstart-clientname", $name, $cookietime, '/');
-	setcookie("$ckstart-classname", $class, $cookietime, '/');
-	setcookie("$ckstart-session-id", $session, $cookietime, '/');
+	kn_setcookie("$ckstart-clientname", $name, $cookietime);
+	kn_setcookie("$ckstart-classname", $class, $cookietime);
+	kn_setcookie("$ckstart-session-id", $session, $cookietime);
 
 	dprint("Set cookies<br/>");
 
@@ -2657,6 +2662,23 @@ function kn_num($v)
 	return is_numeric($v) ? $v + 0 : 0;
 }
 
+// KloxoNext - panel cookies: not readable by scripts (HttpOnly), not sent with other sites'
+// requests (SameSite=Lax), HTTPS-only when the panel is used over HTTPS
+function kn_setcookie($name, $value, $expires = 0)
+{
+	$https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+		|| (isset($_SERVER['HTTP_SCHEME']) && $_SERVER['HTTP_SCHEME'] === 'https');
+
+	return setcookie($name, (string)$value, array('expires' => (int)$expires, 'path' => '/',
+		'secure' => $https, 'httponly' => true, 'samesite' => 'Lax'));
+}
+
+// KloxoNext - classes an account can log in with (login form, cookies, web commands)
+function kn_login_class_ok($class)
+{
+	return in_array((string)$class, array('client', 'auxiliary', 'mailaccount', 'superclient', 'slave'), true);
+}
+
 function kn_sql_escape($value)
 {
 	if ($value === null) {
@@ -2749,7 +2771,8 @@ function get_login($classname, $clientname)
 {
 	global $gbl, $sgbl, $login, $ghtml;
 
-	if (!$classname) {
+	// KloxoNext - the class comes from the login cookie / form: only account classes
+	if (!$classname || !kn_login_class_ok($classname)) {
 		print("There is no class. Login Error\n");
 		exit;
 	}

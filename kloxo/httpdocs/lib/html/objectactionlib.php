@@ -72,7 +72,15 @@ function webcommandline_main()
 		}
 	}
 
-	$func = "__cmd_desc_{$opt['action']}";
+	// KloxoNext - only an existing web command (__cmd_desc_add, _update ...)
+	$action = isset($opt['action']) ? (string)$opt['action'] : '';
+	$func = "__cmd_desc_{$action}";
+
+	if (!preg_match('/^[a-z_]{1,40}$/', $action) || !function_exists($func)) {
+		json_print("error", $opt, "__error_unknown_action");
+
+		exit;
+	}
 
 	try {
 		$list = $func($opt);
