@@ -52,7 +52,7 @@ var validChars = '.0123456789';
            return false;
        if (chr == '.') {
            dots++;
-           eval('dot' + dots + ' = ' + i);
+           window['dot' + dots] = i;
        }
     }
 

@@ -2678,6 +2678,21 @@ function kn_setcookie($name, $value, $expires = 0)
 		'secure' => $https, 'httponly' => true, 'samesite' => 'Lax'));
 }
 
+// KloxoNext - the account object for a login class, created explicitly (the class
+// name from a cookie or form is never instantiated as given)
+function kn_new_account_object($class, $masterserver, $readserver, $name, $view = 'parent')
+{
+	switch ((string)$class) {
+		case 'client':      return new Client($masterserver, $readserver, $name, $view);
+		case 'auxiliary':   return new Auxiliary($masterserver, $readserver, $name, $view);
+		case 'mailaccount': return new Mailaccount($masterserver, $readserver, $name, $view);
+		case 'superclient': return new SuperClient($masterserver, $readserver, $name, $view);
+		case 'slave':       return new Slave($masterserver, $readserver, $name, $view);
+	}
+
+	return null;
+}
+
 // KloxoNext - classes an account can log in with (login form, cookies, web commands)
 function kn_login_class_ok($class)
 {
@@ -2782,7 +2797,7 @@ function get_login($classname, $clientname)
 		exit;
 	}
 
-	$object = new $classname(null, null, $clientname, 'login');
+	$object = kn_new_account_object($classname, null, null, $clientname, 'login');
 
 	$ret = $object->get();
 

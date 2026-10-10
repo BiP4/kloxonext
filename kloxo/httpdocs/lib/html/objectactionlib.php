@@ -35,7 +35,7 @@ function webcommandline_main()
 	}
 
 	$classname = $opt['login-class'];
-	$lobject = new $classname(null, 'localhost', $opt['login-name']);
+	$lobject = kn_new_account_object($classname, null, 'localhost', $opt['login-name']);
 	$lobject->get();
 
 	if ($lobject->dbaction === 'add') {

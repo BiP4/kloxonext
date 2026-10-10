@@ -237,23 +237,27 @@ function setFormVariableVlue(frm, varname, value)
 function checkBoxTextToggle(frmname, cname, tname,  cvalue, tvalue)
 {
 
-	frm = document.getElementById(frmname);
+	// KloxoNext - form fields by name, without eval
+	var frm = document.getElementById(frmname);
+	var c = frm[cname];
+	var t = frm[tname];
 
-	if(eval("frm." + cname + ".checked === true")) { 
-		eval('frm. ' + tname + '.disabled= true');
-		eval("frm. " + tname + ".className= 'textdisable'");
-		eval("frm. " + cname + ".value = cvalue"); 
-	} else { 
-		eval("frm." + tname + ".value = tvalue"); 
-		eval("frm." + tname + ".className = 'textenable'");
-		eval("frm." + tname + ".disabled = false");
-		eval("frm." + cname + ".value = cvalue");
+	if (c.checked === true) {
+		t.disabled = true;
+		t.className = 'textdisable';
+		c.value = cvalue;
+	} else {
+		t.value = tvalue;
+		t.className = 'textenable';
+		t.disabled = false;
+		c.value = cvalue;
 	}
 
-	if(eval("frm." + tname + ".name.disabled===true")) { 
-		eval("frm." + tname + ".value = '-' ; ");
-	} else { 
-		eval("frm." + tname + ".value = tvalue"); 
+	// (t.name is a string: it never has a 'disabled' property)
+	if (t.name.disabled === true) {
+		t.value = '-';
+	} else {
+		t.value = tvalue;
 	} 
 }
 

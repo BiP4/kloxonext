@@ -1821,16 +1821,8 @@ class HtmlLib
 
 		</div>
 <?php
-		$dragdivscroll_path = str_replace(getcwd(), "", getLinkCustomfile("/theme/js", "dragdivscroll.js"));
-
-		$this->print_jscript_source($dragdivscroll_path);
-?>
-		<script type='text/javascript'>
-
-			new DragDivScroll('show_page', 'mouseWheelX noStatus noXBarHide');
-
-		</script>
-<?php
+		// KloxoNext - no DragDivScroll (third-party script with an obfuscated "user
+		// protection" module that runs generated code); #show_page scrolls natively
 		}
 ?>
 
