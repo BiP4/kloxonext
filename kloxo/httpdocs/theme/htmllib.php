@@ -6519,6 +6519,8 @@ class HtmlLib
 					$x = "f67f";
 				} elseif ($a[0] === 'lxguard') {
 					$x = "f02e";
+				} elseif ($a[0] === 'firewall') {
+					$x = "f021";
 				} elseif ($a[0] === 'driver') {
 					$x = "f09a";
 				} elseif (strpos($a[0], 'server') !== false) {

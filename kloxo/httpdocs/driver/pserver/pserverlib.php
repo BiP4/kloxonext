@@ -378,6 +378,7 @@ class pserver extends pservercore {
 		$alist[] = "a=updateform&sa=poweroff";
 
 		$alist['__title_security'] = "Security";
+		$alist[] = "a=show&o=firewall";
 		$alist[] = "a=show&o=sshconfig";
 		$alist[] = "a=list&c=watchdog";
 		$alist[] = "a=show&o=lxguard";
