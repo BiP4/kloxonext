@@ -92,6 +92,7 @@ class databaseusercorelib extends lxdb
 
 	static function addform($parent, $class, $typetd = null)
 	{
+		$vlist = null;
 		$dbprefix = databasecore::fixDbname($parent->getParentName());
 
 		$vlist['nname'] = array('m', array('pretext' => $dbprefix));

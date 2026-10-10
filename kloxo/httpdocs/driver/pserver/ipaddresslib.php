@@ -191,6 +191,7 @@ class Ipaddress extends Lxdb
 
 	function updateRecord($result)
 	{
+		$resutl = null;
 		$this->devname = $result['devname'];
 		$this->netmask = $result['netmask'];
 		$this->status = $result['status'];

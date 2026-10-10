@@ -57,6 +57,7 @@ function createDnsTemplate()
 function create_default_template($dns)
 {
 	global $gbl, $sgbl, $login, $ghtml; 
+	$listpriv = null;
 
 	$temp = new Domaintemplate(null, null, "test");
 	$temp->initThisDef();

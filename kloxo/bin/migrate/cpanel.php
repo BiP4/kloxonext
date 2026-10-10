@@ -145,6 +145,7 @@ function get_mailaccount_password($mailaccount)
 function cpanel_old_main()
 {
 	global $argc, $argv;
+	$uuser = null;
 
 	initProgramlib('admin');
 	$v = tempnam("/tmp", "cpanel-backup");

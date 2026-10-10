@@ -1114,6 +1114,7 @@ function dprint_r($var, $type = 0)
 function debug_print($var, $note = null)
 {
 	global $sgbl;
+	$type = null;
 
 	if ($type <= $sgbl->dbg) {
 	if ($sgbl->__running_in_cli) {
@@ -3459,6 +3460,7 @@ function critical_change_db_pass()
 function change_db_pass()
 {
 	global $gbl, $sgbl, $login, $ghtml;
+	$last_error = null;
 
 	$pass = randomString(10);
 	$newp = client::createDbPass($pass);

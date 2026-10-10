@@ -19,6 +19,7 @@ setMysqlOptimize($select, $database);
 function setMysqlOptimize($select, $database = null)
 {
 	global $gbl, $sgbl, $login, $ghtml;
+	$dbname = null;
 
 	log_cleanup("Mysql Check/Repair/Optimize/Upgrade");
 

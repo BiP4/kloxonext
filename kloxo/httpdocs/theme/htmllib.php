@@ -2795,6 +2795,7 @@ class HtmlLib
 
 	function object_variable_htmltextarea($stuff, $variable, $value = null, $nonameflag = false)
 	{
+		$rvr = null;
 		$this->fix_stuff_or_class($stuff, $variable, $class, $nvalue);
 		$name = "frm_{$class}_c_{$variable}";
 /*
@@ -7089,6 +7090,8 @@ class HtmlLib
 	function print_fancy_select($class, $src, $dst)
 	{
 		global $gbl, $login;
+		$j = null;
+		$srcname = null;
 
 		$variablename = "frm_interface_template_c_{$class}_show_list";
 		$ts_name1 = "ts_{$variablename}1";
@@ -8977,6 +8980,7 @@ function uploadAbort(e) { // upload abort
 
 	function print_tree($treename, $tree, &$total, $level, $complex = true)
 	{
+		$imgstr = null;
 		$tlist = $tree->getList('tree');
 		$open = $tree->open ? $tree->open : 'false';
 		$open = 'false';
@@ -9955,6 +9959,7 @@ function uploadAbort(e) { // upload abort
 	function printTabForTabButton($key, $linkflag, $height, $imageheight, $sel, $imgbg, $formname, $name, $imagesrc, $descr, $check)
 	{
 		global $gbl, $sgbl, $login;
+		$url = null;
 
 		$help = $descr['help'];
 		$imgstr = null;
@@ -10028,6 +10033,14 @@ function uploadAbort(e) { // upload abort
 	function print_favorites()
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$__t_identity = null;
+		$_t_image = null;
+		$ac_descr = null;
+		$str = null;
+		$tag = null;
+		$target = null;
+		$ttype = null;
+		$url = null;
 
 		$back = $login->getSkinDir();
 		$list = $this->get_favorite("ndskshortcut");

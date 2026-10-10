@@ -31,6 +31,7 @@ static function getParams()
 
 function updateform($subaction, $param)
 {
+	$list = null;
 	
 	$vlist['lstclass_list'] = array('U', $list);
 	return $vlist;

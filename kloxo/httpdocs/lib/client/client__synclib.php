@@ -212,6 +212,7 @@ class client__sync extends lxDriverClass {
 	function changeAdminPass()
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$last_error = null;
 
 		$username = $sgbl->__var_program_name;
 

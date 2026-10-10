@@ -61,6 +61,8 @@ class SuperClient extends ClientBase
 	function changeAdminPass()
 	{
 		global $login;
+		$last_error = null;
+		$out = null;
 
 		if ($this->main->nname === 'admin') {
 			$newp = client::createDbPass($this->main->realpass);
@@ -89,6 +91,8 @@ class SuperClient extends ClientBase
 	function changeSuperAdminPass()
 	{
 		global $login;
+		$last_error = null;
+		$out = null;
 
 		if ($this->nname === 'superadmin') {
 			$oldpass = getAdminDbPass();

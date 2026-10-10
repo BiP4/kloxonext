@@ -249,6 +249,7 @@ class Servermail__Qmail  extends lxDriverClass
 	function deleteQueue()
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$list = null;
 
 		foreach($list as &$__l) {
 			$__l = "-d$__l";

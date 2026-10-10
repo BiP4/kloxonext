@@ -5058,6 +5058,7 @@ abstract class Lxclass
 	function getShowActions(&$alist, $class)
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$nl = null;
 
 		$object = $this->getObject($class);
 
@@ -5366,6 +5367,7 @@ abstract class Lxclass
 	function fix_syncserver_nname_problem()
 	{
 		global $login;
+		$newserver = null;
 
 		$rewrite = get_class_variable($this->get__table(), "__rewrite_nname_const");
 

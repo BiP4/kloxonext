@@ -191,6 +191,7 @@ class traceroute extends lxclass
 	*/
 	function _parseResultwindows()
 	{
+		$host = null;
 		$raw_data_len = lx_count($this->_raw_data);
 		$dataRow = 0;
 

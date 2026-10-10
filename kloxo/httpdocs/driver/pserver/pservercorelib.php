@@ -1198,6 +1198,7 @@ STRIN;
 
 	function fixInitialSsl($obj)
 	{
+		$row = null;
 		$sslipaddr = new SslIpaddress($this->__masterserver, $this->syncserver, $row['nname']);
 		$sslipaddr->get();
 
@@ -1232,6 +1233,7 @@ STRIN;
 
 	function updateform($subaction, $param)
 	{
+		$vlist = null;
 
 		global $gbl, $sgbl, $login, $ghtml;
 

@@ -90,6 +90,7 @@ function client_priv($priv, $val)
 function add_customer_reseller()
 {
 	global $gbl, $login, $ghtml;
+	$type = null;
 /*
 	$M[] = array("admin" => array("master", "adelia"),
 		"adelle" => array("agnes", "aileen", "ainsley"),

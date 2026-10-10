@@ -1848,6 +1848,7 @@ HTML);
 	static function getSelectList($parent, $var)
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$param = null;
 
 		switch ($var) {
 			case "ipaddress":

@@ -164,6 +164,7 @@ class Dns extends DnsBase
 	static function add($parent, $class, $param)
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$revc = null;
 
 	//	$revc = $login->getObject('general')->reversedns_b;
 		validate_domain_name($param['nname']);

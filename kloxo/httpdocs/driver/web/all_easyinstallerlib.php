@@ -124,6 +124,11 @@ class all_easyinstaller extends Lxclass
 	static function showDescription($object, $name)
 	{
 		global $gbl, $sgbl, $login, $ghtml; 
+		$pdesc = null;
+		$pdetail = null;
+		$plink = null;
+		$preq = null;
+		$pversion = null;
 
 		$col = $login->getSkinColor();
 

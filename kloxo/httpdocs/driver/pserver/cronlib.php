@@ -448,6 +448,7 @@ class Cron extends Lxdb
 	function checkIfNullVar($var)
 	{
 		global $login;
+		$ddate = null;
 
 		if (is_array($this->$var)) {
 		//	return;

@@ -143,6 +143,7 @@ function __ac_desc_updateshow($object)
 function print_customer_mode($object)
 {
 	global $gbl, $sgbl, $login, $ghtml;
+	$col = null;
 
 	$skin_color = $login->getSkinColor();
 
@@ -727,6 +728,7 @@ function check_for_license()
 function __ac_desc_list($object, $cname = null)
 {
 	global $gbl, $sgbl, $login, $ghtml;
+	$vlist = null;
 
 	if (!$cname) {
 		$cname = $ghtml->frm_o_cname;
@@ -2539,6 +2541,14 @@ function print_head_image()
 function print_favorites()
 {
 	global $gbl, $sgbl, $login, $ghtml;
+	$__t_identity = null;
+	$_t_image = null;
+	$ac_descr = null;
+	$str = null;
+	$tag = null;
+	$target = null;
+	$ttype = null;
+	$url = null;
 
 	$back = $login->getSkinDir();
 	$list = $ghtml->get_favorite("ndskshortcut");

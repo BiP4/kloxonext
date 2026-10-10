@@ -33,6 +33,7 @@ abstract class Lxdb extends Lxclass
 	static function initThisObjectRule($parent, $class, $name = null)
 	{
 		global $gbl, $sgbl, $login, $ghtml;
+		$objectame = null;
 
 		$objectname = $class . "_o";
 		$desc = get_classvar_description(get_class($parent),  $objectname);

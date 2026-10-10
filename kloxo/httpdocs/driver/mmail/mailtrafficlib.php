@@ -160,6 +160,7 @@ static function getTimeFromString($line)
 
 static function  getEachmailfileqouta($file, $domainname, $oldtime, $newtime) 
 {
+	$total = null;
 	dprint("Opening File name is :$file\n");
 
 	//error_reporting(0);

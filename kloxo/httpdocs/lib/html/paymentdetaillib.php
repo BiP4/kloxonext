@@ -108,6 +108,7 @@ static function checkIftransactionExists($transactionid)
 
 static function process_paypal($list)
 {
+	$p = null;
 	initProgram('admin');
 
 	$sq = new Sqlite(null, 'paymentdetail');

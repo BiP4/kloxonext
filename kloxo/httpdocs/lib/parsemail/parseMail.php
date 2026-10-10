@@ -32,6 +32,12 @@
 		
 		// decode a mail header
 		function __construct($text="") {
+			$content_type = null;
+			$date = null;
+			$from = null;
+			$received = null;
+			$subject = null;
+			$to = null;
 			$start=0;
 			$lastheader="";
 			$message_id = null;
@@ -94,6 +100,10 @@
 		}
 		// decode a multipart header 
 		function multipartHeaders($partid,$mailbody) {
+			$c_desc = null;
+			$c_disp = null;
+			$c_t = null;
+			$c_t_e = null;
 			$text=substr($mailbody,$this->part[$partid]['start'],
 			             $this->part[$partid]['ende']-$this->part[$partid]['start']);
 
