@@ -939,6 +939,23 @@ function remove_unnecessary_stat(&$stat)
 	}
 }
 
+// KloxoNext - put a value inside the quote character of getShellCommand().
+// Before, a ' inside an argument closed the quote and the rest ran as shell code
+// (command injection through any name or path the panel passes to lxshell_*).
+function kn_shell_arg($value, $q)
+{
+	$value = (string)$value;
+
+	// a NUL byte ends a C string: the shell would see a different command
+	$value = str_replace(" ", '', $value);
+
+	if ($q === "'") {
+		return str_replace("'", "'\''", $value);
+	}
+
+	return addcslashes($value, '\\"$`');
+}
+
 function getShellCommand($cmd, $arglist)
 {
 	global $gbl, $sgbl, $login, $ghtml;
@@ -946,7 +963,7 @@ function getShellCommand($cmd, $arglist)
 	$q = $sgbl->__var_quote_char;
 	$cmd = expand_real_root($cmd);
 	$cmd = str_replace(";", "", $cmd);
-	$cmd = "{$q}$cmd{$q}";
+	$cmd = "{$q}" . kn_shell_arg($cmd, $q) . "{$q}";
 
 	foreach ($arglist as $a) {
 		if ($a === "") {
@@ -955,11 +972,11 @@ function getShellCommand($cmd, $arglist)
 		if (is_array($a)) {
 			foreach ($a as $aa) {
 				$aa = str_replace(";", "", $aa);
-				$args .= " $q" . expand_real_root($aa) . "$q";
+				$args .= " $q" . kn_shell_arg(expand_real_root($aa), $q) . "$q";
 			}
 		} else {
 			$a = str_replace(";", "", $a);
-			$args .= " $q" . expand_real_root($a) . "$q";
+			$args .= " $q" . kn_shell_arg(expand_real_root($a), $q) . "$q";
 		}
 	}
 	$cmd .= " " . $args;

@@ -110,7 +110,7 @@ class cron__Linux extends lxDriverClass
 
 		try {
 		//	lxshell_return("/usr/bin/crontab", "-u", $this->main->username, $tfile);
-			exec("/usr/bin/crontab -u {$this->main->username} {$tfile}");
+			exec("/usr/bin/crontab -u " . escapeshellarg($this->main->username) . " " . escapeshellarg($tfile));
 		} catch (Exception $e) {
 			throw new lxException($e);
 		}

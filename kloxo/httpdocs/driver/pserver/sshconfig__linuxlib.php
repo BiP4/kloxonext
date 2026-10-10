@@ -53,7 +53,8 @@ class sshconfig__linux extends lxDriverClass
 			case "ssh_password":
 				validate_password($this->main->password);
 
-				exec("echo -e \"{$this->main->password}\n{$this->main->password}\n\" | passwd root");
+				// KloxoNext - the password goes through stdin, never through the shell line
+				lxshell_input($this->main->password . "\n" . $this->main->password . "\n", "passwd", "root");
 
 				break;
 		}

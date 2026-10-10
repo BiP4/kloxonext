@@ -56,16 +56,23 @@ class ffile__linux extends lxDriverClass
 				$perm = $this->main->newperm;
 				$perm = 0 . $perm;
 
+				// KloxoNext - only an octal mode; the path is passed as one quoted argument
+				if (!preg_match('/^0?[0-7]{3,4}$/', (string)$perm)) {
+					throw new lxException($login->getThrow('invalid_permission'), '', $perm);
+				}
+
+				$qpath = escapeshellarg($path);
+
 				if ($this->main->isOn('recursive_f')) {
 					if ($this->main->target_f === 'all') {
-						exec("chmod -R {$perm} {$path}");
+						exec("chmod -R {$perm} -- {$qpath}");
 					} elseif ($this->main->target_f === 'dir') {
-						exec("find {$path} -type d -exec chmod {$perm} \{\} \\;");
+						exec("find {$qpath} -type d -exec chmod {$perm} {} +");
 					} elseif ($this->main->target_f === 'file') {
-						exec("find {$path} -type f -name \"*.*\" -exec chmod {$perm} \{\} \\;");
+						exec("find {$qpath} -type f -name \"*.*\" -exec chmod {$perm} {} +");
 					}
 				} else {
-					exec("chmod {$perm} {$path}");
+					exec("chmod {$perm} -- {$qpath}");
 				}
 
 				break;
@@ -76,10 +83,19 @@ class ffile__linux extends lxDriverClass
 				$user = $this->main->user_f;
 				$group = $this->main->group_f;
 
+				// KloxoNext - account names only; the path is passed as one quoted argument
+				$namere = '/^[A-Za-z0-9_][A-Za-z0-9._-]*$/';
+
+				if (!preg_match($namere, (string)$user) || !preg_match($namere, (string)$group)) {
+					throw new lxException($login->getThrow('invalid_user_or_group'), '', "{$user}:{$group}");
+				}
+
+				$qpath = escapeshellarg($path);
+
 				if ($this->main->isOn('recursive_f')) {
-					exec("chown -R {$user}:{$group} {$path}");
+					exec("chown -R {$user}:{$group} -- {$qpath}");
 				} else {
-					exec("chown {$user}:{$group} {$path}");
+					exec("chown {$user}:{$group} -- {$qpath}");
 				}
 
 				break;

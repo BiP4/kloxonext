@@ -94,7 +94,7 @@ class ftpuser__pureftp extends lxDriverClass
 			lxshell_return("pure-pw", "usermod", $this->main->nname, "-N", $this->main->ftp_disk_usage, "-m");
 		} else {
 			// This is because the shell_return cannot send '' to the program.
-			$cmd = "pure-pw usermod {$this->main->nname} -N '' -m";
+			$cmd = "pure-pw usermod " . escapeshellarg($this->main->nname) . " -N '' -m";
 			log_log("shell_exec", $cmd);
 			exec($cmd);
 		}

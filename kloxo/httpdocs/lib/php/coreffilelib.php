@@ -60,7 +60,12 @@ class coreFfile
 
 		dprint("$rpath $root\n");
 		
-		if (!csb($rpath, $root)) {
+		// KloxoNext - compare resolved paths, on a directory boundary ('/home/ab' is not
+		// inside '/home/a'), so '..' and sibling-name prefixes cannot escape the root
+		$rpath = '/' . self::getRealpath(str_replace("\0", '', (string)$rpath));
+		$rroot = '/' . self::getRealpath(str_replace("\0", '', (string)$root));
+
+		if ($rroot !== '/' && $rpath !== $rroot && strpos($rpath, $rroot . '/') !== 0) {
 			throw new lxException($login->getThrow("trying_to_go_outside_root"), '', $rpath);
 		}
 	}

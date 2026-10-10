@@ -890,6 +890,12 @@ function validate_docroot($docroot)
 {
 	global $login;
 
+	// KloxoNext - the document root ends up in shell commands (rm, chown ...) and in
+	// web server configs: plain path characters only, relative to the client's home
+	if (!preg_match('#^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*/?$#', (string)$docroot)) {
+		throw new lxException($login->getThrow("invalid_document_root"), '', $docroot);
+	}
+
 	///#656 When adding a subdomain, the Document Root field is not being validated
 	if (csa($docroot, " /")) {
 		throw new lxException($login->getThrow("document_root_may_not_contain_spaces"), '', $docroot);
@@ -923,7 +929,7 @@ function validate_filename($filename)
 {
 	global $login;
 
-	if (!preg_match('/[^a-zA-Z0-9-_\.]$/', $filename)) {
+	if (!preg_match('/^[a-zA-Z0-9_.-]+$/', (string)$filename) || strpos($filename, '..') !== false) {
 		throw new lxException($login->getThrow('invalid_filename'), '', $filename);
 	}
 

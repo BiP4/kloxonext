@@ -127,11 +127,11 @@ class Mysqldb__mysql extends lxDriverClass
 		$arg[0] = $sgbl->__path_mysqldump_path;
 		$arg[1] = "--add-drop-table";
 		$arg[2] = "-u";
-		$arg[3] = $dbuser;
-		$arg[4] = $dbname;
+		$arg[3] = escapeshellarg($dbuser);
+		$arg[4] = escapeshellarg($dbname);
 
 		if ($dbpass) {
-			$arg[5] = "-p'{$dbpass}'";
+			$arg[5] = "-p" . escapeshellarg($dbpass);
 		} else {
 			$arg[5] = "";
 		}
@@ -148,7 +148,7 @@ class Mysqldb__mysql extends lxDriverClass
 		$result = $link->query("CREATE DATABASE IF NOT EXISTS {$dbname}");
 
 		try {
-			system("{$cmd} > {$docf}");
+			system("{$cmd} > " . escapeshellarg($docf));
 		} catch (Exception $e) {
 			throw new lxException('Error: ' . $e->getMessage(), $dbname);
 		}
@@ -181,23 +181,23 @@ class Mysqldb__mysql extends lxDriverClass
 
 		$arg[0] = $sgbl->__path_mysqlclient_path;
 		$arg[1] = "-u";
-		$arg[2] = $dbuser;
+		$arg[2] = escapeshellarg($dbuser);
 
 		if ($dbpass) {
-			$arg[3] = "-p'{$dbpass}'";
+			$arg[3] = "-p" . escapeshellarg($dbpass);
 		} else {
 			$arg[3] = "";
 		}
 
-		$arg[4] = $dbname;
+		$arg[4] = escapeshellarg($dbname);
 
 		// MR -- missing this!
 		$cmd = implode(" ", $arg);
 
 		try {
 			// MR -- remove 'engine=' to make portable
-			system("sed -i 's/engine=\([a-zA-z0-9]*\) //gi' {$docf}");
-			system("{$cmd} < {$docf}");
+			system("sed -i 's/engine=\([a-zA-z0-9]*\) //gi' " . escapeshellarg($docf));
+			system("{$cmd} < " . escapeshellarg($docf));
 		} catch (Exception $e) {
 			throw new lxException('Error: ' . $e->getMessage(), $dbname);
 		}
@@ -222,15 +222,15 @@ class Mysqldb__mysql extends lxDriverClass
 		$arg[0] = $sgbl->__path_mysqldump_path;
 		$arg[1] = "--add-drop-table";
 		$arg[2] = "-u";
-		$arg[3] = $dbadmin;
+		$arg[3] = escapeshellarg($dbadmin);
 
 		if ($dbpass) {
-			$arg[4] = "-p'{$dbpass}'";
+			$arg[4] = "-p" . escapeshellarg($dbpass);
 		} else {
 			$arg[4] = "";
 		}
 
-		$arg[5] = $this->main->dbname;
+		$arg[5] = escapeshellarg($this->main->dbname);
 
 		$cmd = implode(" ", $arg);
 
@@ -239,8 +239,8 @@ class Mysqldb__mysql extends lxDriverClass
 
 		try {
 			// MR -- remove 'engine=' to make portable
-			system("{$cmd} > {$docf}");
-			system("sed -i 's/engine=\([a-zA-z0-9]*\) //gi' {$docf}");
+			system("{$cmd} > " . escapeshellarg($docf));
+			system("sed -i 's/engine=\([a-zA-z0-9]*\) //gi' " . escapeshellarg($docf));
 		} catch (Exception $e) {
 			lxfile_tmp_rm_rec($vd);
 
@@ -292,15 +292,15 @@ class Mysqldb__mysql extends lxDriverClass
 
 		$arg[0] = $sgbl->__path_mysqlclient_path;
 		$arg[1] = "-u";
-		$arg[2] = $dbadmin;
+		$arg[2] = escapeshellarg($dbadmin);
 
 		if ($dbpass) {
-			$arg[3] = "-p'{$dbpass}'";
+			$arg[3] = "-p" . escapeshellarg($dbpass);
 		} else {
 			$arg[3] = "";
 		}
 
-		$arg[4] = $dbname;
+		$arg[4] = escapeshellarg($dbname);
 
 		$cmd = implode(" ", $arg);
 
@@ -308,7 +308,7 @@ class Mysqldb__mysql extends lxDriverClass
 		$result = $link->query("CREATE DATABASE IF NOT EXISTS {$dbname}");
 
 		try {
-			system("{$cmd} < {$docf}");
+			system("{$cmd} < " . escapeshellarg($docf));
 
 			lunlink($docf);
 			lxfile_tmp_rm_rec($vd);

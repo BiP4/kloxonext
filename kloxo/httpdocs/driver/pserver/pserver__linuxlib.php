@@ -15,14 +15,21 @@ class pserver__Linux extends lxDriverClass
 	static function mysqlPasswordReset($pass)
 	{
 	//	lxshell_return("lxphp.exe", "../bin/common/misc/reset-mysql-root-password.php", $pass);
-		exec("sh /script/reset-mysql-root-password {$pass}");
+		exec("sh /script/reset-mysql-root-password " . escapeshellarg($pass));
 	}
 
 	function setTimeZone()
 	{
 	//	lxfile_cp("/usr/share/zoneinfo/{$this->main->timezone}", "/etc/localtime");
 
-		$s = "/usr/share/zoneinfo/{$this->main->timezone}";
+		// KloxoNext - a zone name only (Area/City), never a path outside zoneinfo
+		$tz = (string)$this->main->timezone;
+
+		if (!preg_match('#^[A-Za-z0-9_+-]+(/[A-Za-z0-9_+-]+){0,2}$#', $tz) || !is_file("/usr/share/zoneinfo/{$tz}")) {
+			return;
+		}
+
+		$s = escapeshellarg("/usr/share/zoneinfo/{$tz}");
 		$t = "/etc/localtime";
 
 		if (is_file("/etc/localtime")) {

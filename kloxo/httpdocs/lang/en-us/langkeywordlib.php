@@ -377,6 +377,9 @@ $__throw["trying_to_go_outside_root"] = "Trying to go outside root";
 $__throw["monitoring_port_exceeded"] = "Monitoring port exceeded";
 
 $__throw["traceroute_failed"] = "Traceroute failed";
+$__throw["invalid_permission"] = "Invalid permission (use an octal mode such as 755)";
+$__throw["invalid_document_root"] = "Invalid document root (letters, digits, dot, dash, underscore and / only)";
+$__throw["invalid_user_or_group"] = "Invalid user or group name";
 
 $__throw["machine_does_not_exist_in_db"] = "Machine does not exist in DB";
 $__throw["could_not_connect_to_server"] = "Could not connect to server";
