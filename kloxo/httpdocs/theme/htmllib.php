@@ -2153,10 +2153,10 @@ class HtmlLib
 		$post['frm_o_o'] = $this->__http_vars['frm_o_o'];
 		$this->print_input_vars($post);
 ?>
-			<input type="hidden" id="frm_ffile_c_recursive_f" name="frm_ffile_c_recursive_f" value="Off">
+			<input type="hidden" name="frm_ffile_c_recursive_f" value="Off">
 			<input type="hidden" id="frm_ffile_c_target_f" name="frm_ffile_c_target_f" value="all">
-			<input type="hidden" id="frm_action" name="frm_action" value="update">
-			<input type="hidden" id="frm_subaction" name="frm_subaction" value="perm">
+			<input type="hidden" name="frm_action" value="update">
+			<input type="hidden" name="frm_subaction" value="perm">
 		</form>
 
 <div style="padding:0px; border:1px solid #eee; background-color: #def; width: 330px; margin: 0 auto;">
@@ -2299,9 +2299,9 @@ class HtmlLib
 ?>
 			<input type="hidden" id="frm_ffile_c_user_f" name="frm_ffile_c_user_f" value="">
 			<input type="hidden" id="frm_ffile_c_group_f" name="frm_ffile_c_group_f" value="">
-			<input type="hidden" id="frm_ffile_c_recursive_f" name="frm_ffile_c_recursive_f" value="Off">
-			<input type="hidden" id="frm_action" name="frm_action" value="update">
-			<input type="hidden" id="frm_subaction" name="frm_subaction" value="own">
+			<input type="hidden" name="frm_ffile_c_recursive_f" value="Off">
+			<input type="hidden" name="frm_action" value="update">
+			<input type="hidden" name="frm_subaction" value="own">
 		</form>
 
 <div style="padding:0px; border:1px solid #eee; background-color: #def; width: 330px; margin: 0 auto;">
@@ -5929,7 +5929,7 @@ class HtmlLib
 		$subactionstr = null;
 
 		if ($this->frm_subaction) {
-			$subactionstr = "<input type='hidden' id='frm_subaction' name='frm_subaction' value='{$this->frm_subaction}'>";
+			$subactionstr = "<input type='hidden' name='frm_subaction' value='{$this->frm_subaction}'>";
 		}
 
 		$cnamestr = null;
@@ -5975,7 +5975,7 @@ class HtmlLib
 		}
 ?>
 
-						<input type='hidden' id='frm_action' name='frm_action' value='<?= $frm_action ?>'>
+						<input type='hidden' name='frm_action' value='<?= $frm_action ?>'>
 						<?= $subactionstr ?>
 						<?= $cnamestr ?>
 						<?= $dttypestr ?>
@@ -6046,7 +6046,7 @@ class HtmlLib
 		$subactionstr = null;
 
 		if ($this->frm_subaction) {
-			$subactionstr = "<input type='hidden' id='frm_subaction' name='frm_subaction' value='{$this->frm_subaction}'>\n";
+			$subactionstr = "<input type='hidden' name='frm_subaction' value='{$this->frm_subaction}'>\n";
 		}
 
 		if ($this->frm_consumedlogin) {
@@ -6114,7 +6114,7 @@ class HtmlLib
 		}
 ?>
 
-					<input type="hidden" id="frm_action" name="frm_action" value="<?= $frm_action ?>"/>
+					<input type="hidden" name="frm_action" value="<?= $frm_action ?>"/>
 					<?= $subactionstr ?>
 
 					<?= $cnamestr ?>
@@ -7064,8 +7064,8 @@ class HtmlLib
 								<td><b><?=$login->getKeywordUc('selected');?></b></td>
 							</tr>
 							<tr height='20' valign='middle'>
-								<input type='hidden' id='frm_action' name='frm_action' value="update">
-								<input type='hidden' id='frm_subaction' name='frm_subaction' value="update">
+								<input type='hidden' name='frm_action' value="update">
+								<input type='hidden' name='frm_subaction' value="update">
 								<?= $this->html_variable_inherit("frm_o_o") ?>
 								<input type='hidden' id="<?= trim($variablename) ?>" name="<?= trim($variablename) ?>" value="">
 								<td class='col' width='100%' align='center' valign='middle'>
