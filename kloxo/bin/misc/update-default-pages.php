@@ -1,18 +1,19 @@
 <?php
 // KloxoNext - the placeholder page of existing domains gets the new design
 //
-//   update-default-pages.php           once per server (flag etc/flag/default-pages-v2.flg)
+//   update-default-pages.php           once per server (flag etc/flag/default-pages-v3.flg)
 //   update-default-pages.php --force   again
 //
 // Only an index.html that is still the untouched old default page (KloxoNG "Default
 // Page for ...") is replaced; a site the owner uploaded is never changed. The file is
 // written as the owner of the domain (lxuser_put_contents).
+// A page made from the first KloxoNext version loses its "Account: <name>" line.
 
 include_once "lib/html/include.php";
 
 initProgram('admin');
 
-$flag = "../etc/flag/default-pages-v2.flg";
+$flag = "../etc/flag/default-pages-v3.flg";
 $force = in_array('--force', (array)$argv, true);
 
 if (!$force && file_exists($flag)) {
@@ -55,6 +56,18 @@ foreach ((array)$sq->getTable(array('nname')) as $r) {
 		}
 
 		$old = (string)file_get_contents($file, false, null, 0, 65536);
+
+		// KloxoNext page: only drop the account name (never shown any more)
+		if (strpos($old, 'kloxonext-default-page') !== false) {
+			$new = preg_replace('#<p class="note">Account: <b>[^<]*</b>\.\s*#', "<p class=\"note\">\n\t\t\t\t", $old);
+
+			if ($new !== null && $new !== $old) {
+				lxuser_put_contents($w->username, $file, $new);
+				$done++;
+			}
+
+			continue;
+		}
 
 		if (strpos($old, 'Default Page for') === false || strpos($old, 'Kloxo') === false) {
 			continue;
