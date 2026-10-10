@@ -9,7 +9,7 @@ class reversedns__bind extends Lxdriverclass
 
 		$ddate = date("Ymd");
 
-		$v = rand(0, 99);
+		$v = random_int(0, 99);
 
 		if ($v < 10) {
 			$v = "0$v";

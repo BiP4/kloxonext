@@ -6644,7 +6644,7 @@ class HtmlLib
 			'#f39c12', '#d35400', '#c0392b', '#bdc3c7', '#7f8c8d');
 
 		$i = lx_count($c) - 1;
-		$r = rand(0, $i);
+		$r = random_int(0, $i);
 		$b = $c[$r];
 
 		$ret[0] = $b;

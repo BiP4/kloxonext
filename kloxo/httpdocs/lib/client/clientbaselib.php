@@ -250,12 +250,11 @@ class ClientBase extends ClientCore
 		$gbl->setSessionV('__v_error_not_first_time', 1);
 	}
 
-	static function createDbPass($pass)
+	// KloxoNext - password of the panel's own MySQL account: random (96 bits), not
+	// 10 hex characters derived from the admin password; every caller stores it
+	static function createDbPass($pass = null)
 	{
-		$newp = md5($pass);
-		$newp = substr($newp, 0, 10);
-		
-		return $newp;
+		return bin2hex(random_bytes(12));
 	}
 
 	function createShowNote()

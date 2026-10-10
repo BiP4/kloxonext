@@ -31,8 +31,10 @@ function create_mysql_db($type, $opt, $admin_pass)
 	$pguser = $sgbl->__var_admin_user;
 
 	if ($sgbl->__var_database_type === 'mysql') {
-		$req->query("create database $dbname");
-		$req->query("grant all on $dbname.* to '$pguser'@'localhost' identified by '$dbadminpass';");
+		// KloxoNext - identifiers quoted, values escaped
+		$qdb = '`' . str_replace('`', '``', $dbname) . '`';
+		$req->query("create database {$qdb}");
+		$req->query("grant all on {$qdb}.* to '" . $req->real_escape_string($pguser) . "'@'localhost' identified by '" . $req->real_escape_string($dbadminpass) . "';");
 	}
 
 	lfile_put_contents("__path_admin_pass", $dbadminpass);

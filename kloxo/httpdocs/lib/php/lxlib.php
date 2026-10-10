@@ -1802,9 +1802,11 @@ function randomString($length)
 	$key = '';
 
 	$keys = array_merge(range(0, 9), range('a', 'z'), range('A', 'Z'));
+	$max = count($keys) - 1;
 
+	// KloxoNext - session ids and passwords: a cryptographic generator (array_rand is not)
 	for ($i = 0; $i < $length; $i++) {
-			$key .= $keys[array_rand($keys)];
+		$key .= $keys[random_int(0, $max)];
 	}
 
 	return $key;

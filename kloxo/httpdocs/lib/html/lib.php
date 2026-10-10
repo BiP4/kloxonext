@@ -541,7 +541,7 @@ function PreparePowerdnsDb($nolog = null)
 	log_cleanup("- Generate password", $nolog);
 	$pass = randomString(8);
 
-	$link->query("GRANT ALL ON powerdns.* TO powerdns@localhost IDENTIFIED BY '{$pass}'");
+	$link->query("GRANT ALL ON powerdns.* TO powerdns@localhost IDENTIFIED BY '" . $link->real_escape_string($pass) . "'");
 	$link->query("flush privileges");
 
 	$content = str_replace("gmysql-password=powerdns", "gmysql-password={$pass}", $content);
@@ -587,7 +587,7 @@ function PrepareMyDnsDb($nolog = null)
 	log_cleanup("- Generate password", $nolog);
 	$pass = randomString(8);
 
-	$link->query("GRANT ALL ON mydns.* TO mydns@localhost IDENTIFIED BY '{$pass}'");
+	$link->query("GRANT ALL ON mydns.* TO mydns@localhost IDENTIFIED BY '" . $link->real_escape_string($pass) . "'");
 	$link->query("flush privileges");
 
 	$content = str_replace("db-password = mydns", "db-password = {$pass}", $content);
@@ -1669,7 +1669,7 @@ function cp_fileserv($file)
 
 	$basebase = basename($file);
 	$base = basename(ltempnam($sgbl->__path_serverfile, $basebase));
-	$pass = md5($file . time());
+	$pass = bin2hex(random_bytes(16));
 	$ar = array('filename' => $file, 'password' => $pass);
 	lfile_put_serialize("{$path}/$base", $ar);
 	lxfile_generic_chown("{$path}/$base", "lxlabs");
@@ -8917,7 +8917,7 @@ function safefilerewrite($fileName, $dataToSave)
 
 			if (!$canWrite) {
 				// If lock not obtained sleep for 0 - 100 milliseconds, to avoid collision and CPU load
-				usleep(round(rand(0, 100)*1000));
+				usleep(random_int(0, 100) * 1000);
 			}
 		} while ((!$canWrite)and((microtime(TRUE)-$startTime) < 5));
 
