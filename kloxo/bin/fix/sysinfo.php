@@ -269,7 +269,7 @@ $out = null;
 
 $spamapp = slave_get_driver('spam');
 
-if ($spamapp === 'spamassassin') { $spamapp === 'spamassassin-toaster'; }
+// (the old spamassassin-toaster package name was never applied here)
 
 exec("rpm -qa {$spamapp}", $out);
 

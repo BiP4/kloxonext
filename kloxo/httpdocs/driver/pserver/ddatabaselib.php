@@ -60,7 +60,7 @@ class databasecore extends Lxdb
 		global $gbl, $sgbl, $login, $ghtml;
 
 		if ($parent->isAdmin()) {
-			$param['nname'] = $param['nname'];
+			// the administrator's databases keep the name as typed
 		} else {
 			if ($param['clientname_as_prefix'] === 'on') {
 				$param['nname'] = substr($parent->nname, 0, 15) . "_" . $param['nname'];

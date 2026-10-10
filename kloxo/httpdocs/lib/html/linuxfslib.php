@@ -456,8 +456,81 @@ function lxshell_unzip_numeric($dir, $file, $filelist = null)
 	return $ret;
 }
 
+// KloxoNext - archive type from the file signature (the 'file' command is not installed
+// everywhere: on Ubuntu every restore failed with could_not_unzip_file)
+function kn_zip_type_by_magic($file)
+{
+	$fp = @fopen($file, 'rb');
+
+	if (!$fp) {
+		return null;
+	}
+
+	$head = (string)fread($fp, 512);
+	fclose($fp);
+
+	// tar header: "ustar" at offset 257 of the first (uncompressed) block
+	$is_tar = function ($block) {
+		return strlen($block) >= 262 && substr($block, 257, 5) === 'ustar';
+	};
+
+	if (strncmp($head, "\x1f\x8b", 2) === 0) {
+		$gz = @gzopen($file, 'rb');
+		$block = $gz ? (string)gzread($gz, 512) : '';
+
+		if ($gz) {
+			gzclose($gz);
+		}
+
+		return $is_tar($block) ? 'tgz' : 'gz';
+	}
+
+	if (strncmp($head, 'BZh', 3) === 0) {
+		$block = '';
+
+		if (function_exists('bzopen') && ($bz = @bzopen($file, 'r'))) {
+			$block = (string)bzread($bz, 512);
+			bzclose($bz);
+		} else {
+			$block = (string)shell_exec('bzip2 -dc ' . escapeshellarg($file) . ' 2>/dev/null | head -c 512');
+		}
+
+		return $is_tar($block) ? 'tbz2' : 'bz2';
+	}
+
+	if (strncmp($head, "\xfd7zXZ\x00", 6) === 0) {
+		$block = (string)shell_exec('xz -dc ' . escapeshellarg($file) . ' 2>/dev/null | head -c 512');
+
+		return $is_tar($block) ? 'txz' : 'xz';
+	}
+
+	if (strncmp($head, "PK\x03\x04", 4) === 0 || strncmp($head, "PK\x05\x06", 4) === 0) {
+		return 'zip';
+	}
+
+	if (strncmp($head, "7z\xbc\xaf\x27\x1c", 6) === 0) {
+		return 'p7z';
+	}
+
+	if (strncmp($head, 'Rar!', 4) === 0) {
+		return 'rar';
+	}
+
+	if ($is_tar($head)) {
+		return 'tar';
+	}
+
+	return null;
+}
+
 function os_getZipType($file)
 {
+	$t = kn_zip_type_by_magic($file);
+
+	if ($t !== null) {
+		return $t;
+	}
+
 	$out = lxshell_output("file", "-b", $file);
 
 	switch (true) {

@@ -160,7 +160,7 @@ function os_get_allips()
 	// MR -- change spec from substitution to complementary
 	// and then remove duplicate array value
 
-	array_unique($iplist);
+	$iplist = array_values(array_unique((array)$iplist));
 
 	return $iplist;
 }

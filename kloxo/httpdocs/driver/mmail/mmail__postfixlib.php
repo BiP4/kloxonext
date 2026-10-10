@@ -25,6 +25,42 @@ class Mmail__Postfix extends lxDriverClass
 		KnMail::scheduleRebuild();
 	}
 
+	// Panel backup / restore of the mailboxes (the qmail driver had these; without them
+	// a backup stopped at the first domain with mail): <vmail>/<domain>/<user>/Maildir
+	function do_backup()
+	{
+		$dir = self::getDir($this->main->nname);
+
+		if (!is_dir($dir)) {
+			lxfile_mkdir($dir);
+			lxfile_unix_chown($dir, 'vmail:vmail');
+		}
+
+		$list = array();
+
+		foreach ((array)$this->main->__var_accountlist as $ac) {
+			if ($ac !== '' && is_dir("{$dir}/{$ac}/Maildir")) {
+				$list[] = "{$ac}/Maildir";
+			}
+		}
+
+		return array($dir, $list, 'backup');
+	}
+
+	function do_restore($docd)
+	{
+		$dir = self::getDir($this->main->nname);
+
+		if (!is_dir($dir)) {
+			lxfile_mkdir($dir);
+		}
+
+		lxshell_unzip('__system__', $dir, $docd);
+		lxfile_unix_chown_rec($dir, 'vmail:vmail');
+
+		KnMail::scheduleRebuild();
+	}
+
 	static function getDir($domain)
 	{
 		return KnMail::VMAIL_HOME . "/{$domain}";

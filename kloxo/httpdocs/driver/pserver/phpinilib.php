@@ -303,7 +303,7 @@ class phpini extends lxdb
 
 			$list = array_merge($this->getInheritedList(), $this->getLocalList(), $this->getExtraList());
 
-			array_unique($list);
+			$list = array_values(array_unique((array)$list));
 
 			foreach ($list as $k => $v) {
 				if ($v === 'session_save_path_flag') {

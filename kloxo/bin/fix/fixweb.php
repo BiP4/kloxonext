@@ -73,7 +73,7 @@ foreach($list as $c) {
 			}
 
 			$slist[] = $web->syncserver;
-			array_unique($slist);
+			$slist = array_values(array_unique((array)$slist));
 		}
 
 		if (($target === 'all') || ($target === 'domains')) {

@@ -1017,6 +1017,7 @@ class Ffile extends Lxclass
 			foreach ($alist['property'] as &$__a) {
 				$__a = "goback=1&$__a";
 			}
+			unset($__a);
 
 			return $alist;
 		}

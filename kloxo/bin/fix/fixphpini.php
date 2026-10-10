@@ -64,7 +64,7 @@ foreach($plist as $s) {
 				$php->was();
 
 				$clist[] = $c->nname;
-				array_unique($clist);
+				$clist = array_values(array_unique((array)$clist));
 			}
 
 			$web->was();

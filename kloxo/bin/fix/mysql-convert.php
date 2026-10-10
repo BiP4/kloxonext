@@ -45,6 +45,7 @@ function setMysqlConvert($engine, $database, $table, $config, $utf8)
 			@exec("sed -i 's/^skip/\;###123###skip/g' {$mycnf}");
 		}
 	}
+	unset($mycnf);
 
 	exec("sh /script/restart-mysql");
 
@@ -132,6 +133,7 @@ function setMysqlConvert($engine, $database, $table, $config, $utf8)
 			@exec("sed -i 's/^\;###123###skip/skip/g' {$mycnf}");
 		}
 	}
+	unset($mycnf);
 
 	exec("sh /script/restart-mysql");
 

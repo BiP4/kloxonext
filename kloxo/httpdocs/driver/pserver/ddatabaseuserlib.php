@@ -94,7 +94,6 @@ class databaseusercorelib extends lxdb
 	{
 		$dbprefix = databasecore::fixDbname($parent->getParentName());
 
-		$vlist['dbtype'] === 'mysql';
 		$vlist['nname'] = array('m', array('pretext' => $dbprefix));
 		$vlist['dbpassword'] = null;
 

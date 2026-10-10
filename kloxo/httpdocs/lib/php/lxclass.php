@@ -2890,7 +2890,8 @@ abstract class Lxclass
 
 		if ($this->isCoreBackup() && $trulist && ($trulist[0] !== 'all') && !array_search_bool($this->getClName(), $trulist)) {
 			$this->AddMEssageOnlyIfClientDomain("Not Selected");
-			$this->dbaction == 'clean';
+			// not selected for this restore: nothing to write (it was a comparison)
+			$this->dbaction = 'clean';
 			$coreflag = true;
 			$return = true;
 		} else {
@@ -3416,7 +3417,7 @@ abstract class Lxclass
 		}
 
 		if (isset($obj->sp_specialplay_o)) {
-			$obj->sp_specialplay_o == null;
+			$obj->sp_specialplay_o = null;
 		}
 
 		if (isset($obj->sp_childSpecialPlay)) {
@@ -5784,7 +5785,7 @@ abstract class Lxclass
 
 		try {
 			// MR - use getRpmBranchList for the trick find out array
-			$unbackuper = getRpmBranchList(unbackup);
+			$unbackuper = getRpmBranchList('unbackup');
 
 			foreach ((array)$gbl->__var_objectbackuplist as $d) {
 				$e = true;

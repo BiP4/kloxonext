@@ -2627,10 +2627,10 @@ function getLastFromList(&$list)
 		return null;
 	}
 
-	foreach ($list as &$l) {
-	}
+	// the last element (it was taken from a by-reference foreach left bound to it)
+	$k = array_key_last($list);
 
-	return $l;
+	return ($k === null) ? null : $list[$k];
 }
 
 function getFirstKeyFromList(&$list)
@@ -5768,6 +5768,7 @@ function setPhpModuleInactive($module, $ininamelist = null)
 			lxfile_mv("{$trgtpath}/{$i}.ini", "{$trgtpath}/{$i}.nonini");
 		}
 	}
+	unset($i);
 }
 
 function setInitialAllDnsConfigs($nolog = null)
@@ -6158,7 +6159,7 @@ function setFixChownChmodWebPerUser($select, $user, $nolog = null)
 
 		$docrootlist[] = "{$cdir}/{$docroot}";
 
-		array_unique($docrootlist);
+		$docrootlist = array_values(array_unique((array)$docrootlist));
 	}
 }
 

@@ -25,12 +25,13 @@ class Service__Linux extends Lxlclass
 			exec("systemctl list-unit-files --type=service|awk '{print $1}'|sed 's/\.service//g'", $val2);
 		}
 
-		$val = lx_array_merge($val1, $val2);
+		// KloxoNext - lx_array_merge() takes ONE list of lists: the systemd units were dropped
+		$val = lx_array_merge(array($val1, $val2));
 
 		$nval = self::getMainServiceList();
 		$nval = lx_array_merge(array($nval, $val));
 
-		array_unique($nval);
+		$nval = array_values(array_unique((array)$nval));
 		
 		return $nval;
 	}
