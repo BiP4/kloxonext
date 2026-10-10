@@ -129,6 +129,12 @@ installed (pinned and checksummed).
 * **Firewall** – *Admin > Security > Firewall*: CSF when installed, otherwise firewalld/ufw.
   Open ports (with *Close* / *Open*), allow and deny lists with comments; every change is applied
   at once. SSH and the panel ports can never be closed (no lock-out).
+* **CSF settings** – when CSF is installed, *Firewall > CSF Settings* edits every option of
+  `csf.conf` (grouped by section, with the help text of the file, searchable), the csf lists
+  (allow, deny, ignore, pignore, dyndns, blocklists ...) and offers the usual tools (restart,
+  enable/disable, search an IP, allow/block, temporary bans, rules, lfd log), like the csf
+  module of Webmin. Every change keeps a backup; if csf does not restart with it, the previous
+  file is put back.
 * **Jailed shell for clients** – SSH/SFTP access for a client is locked into a jail containing
   only its home directory and read-only system programs (`sh /script/kn-jail enable|disable|status <user>`).
   Jail mounts are private and never reach the host's mount table.

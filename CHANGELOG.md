@@ -2,6 +2,16 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-10 (later)
+
+- Firewall > CSF Settings: every csf.conf option, the csf lists and the csf/lfd tools from the
+  panel (backup and automatic rollback, SSH/panel ports always kept open).
+- Server page: Firewall button in the Security group.
+- nexus is the skin of every account (clients, domains, mail accounts).
+- Security hardening: SQL escaping everywhere, shell argument quoting, file manager kept inside
+  its root, stricter document root validation.
+- Adding a domain to a client: usage counters no longer break on PHP 8.
+
 ## 2026-10-10
 
 ### Installation

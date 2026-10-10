@@ -38,6 +38,9 @@ class Firewall extends lxClass
 	// open ports, read live from the firewall (driver/pserver/fwportlib.php)
 	static $__desc_fwport_l = array("v", "", "virtual");
 
+	// every CSF setting (driver/pserver/csfconfiglib.php)
+	static $__desc_csfconfig_o = array('', '', '', '');
+
 	function get() {}
 	function write() {}
 
@@ -50,6 +53,10 @@ class Firewall extends lxClass
 	{
 		$alist['property'][] = 'a=show';
 		$alist['property'][] = 'a=list&c=fwport';
+
+		if (csfconfig::installed()) {
+			$alist['property'][] = 'a=show&o=csfconfig';
+		}
 	}
 
 	// the open ports list is shown under the forms

@@ -82,6 +82,7 @@ $gl_class_array["fwport"] = "driver/pserver/fwportlib.php";
 $gl_class_array["releasenote"] = "driver/pserver/releasenotelib.php";
 $gl_class_array["anonftpipaddress"] = "driver/ftp/anonftpipaddresslib.php";
 $gl_class_array["firewall"] = "driver/pserver/firewalllib.php";
+$gl_class_array["csfconfig"] = "driver/pserver/csfconfiglib.php";
 $gl_class_array["proxyacl"] = "driver/pserver/proxyacllib.php";
 $gl_class_array["proxy"] = "driver/pserver/proxylib.php";
 $gl_class_array["ipaddress"] = "driver/pserver/ipaddresslib.php";
