@@ -6531,6 +6531,13 @@ function setInstallMailserver($nolog = null)
 		log_cleanup("- Install /etc/lxrestricted file (lxjailshell commands restrictions)", $nolog);
 		lxfile_cp("../file/lxjailshell/lxrestricted", "/etc/lxrestricted");
 	}
+
+	// KloxoNext - servers updated from before the spam filter: wire it in once
+	// (afterwards Mail > Spam Filter / sh /script/setup-spam manage it)
+	if (is_dir("/etc/postfix/kloxo") && !file_exists("/etc/dovecot/kloxo/spam/spam.conf")) {
+		log_cleanup("- Set up the spam filter (sh /script/setup-spam)", $nolog);
+		exec("sh /script/setup-spam apply >/dev/null 2>&1");
+	}
 }
 
 function setInitialServer($nolog = null)
