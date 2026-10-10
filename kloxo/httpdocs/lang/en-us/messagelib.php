@@ -977,3 +977,11 @@ $__information['dnscustom_updateform_zones_pre'] = "<p>Hand-written reverse zone
 	"Pick a zone and press Update to edit it, or choose <b>-- new zone --</b>. Requires BIND as DNS server.</p>";
 $__information['dnscustom_updateform_edit_pre'] = "<p>Paste the complete zone file (\$ORIGIN, \$TTL, SOA, NS, PTR, \$GENERATE ...). " .
 	"It is checked with <b>named-checkzone</b> before it is saved; increase the SOA serial when secondary servers transfer the zone.</p>";
+
+$__information['cfaccount_updateform_connect_pre'] = "<p>Connect your Cloudflare account to manage the DNS of your domains through Cloudflare (DNS and proxy protection). " .
+	"In Cloudflare: <b>My Profile &gt; API Tokens &gt; Create Token</b>, template <b>Edit zone DNS</b>, with the permissions <b>Zone - DNS - Edit</b> and <b>Zone - Zone - Read</b> " .
+	"(add <b>Zone - Zone - Edit</b> to let the panel create new zones). The token is kept on the server only and is never shown again.</p>";
+$__information['cfdomain_updateform_service_pre'] = "<p>With Cloudflare the records of the DNS page of this domain (and of its subdomains) are kept in sync with the Cloudflare zone automatically. " .
+	"Only records created by the panel are changed; records you add yourself in Cloudflare are left alone. " .
+	"Proxy (orange cloud) only web host names: mail, ftp, cp and webmail must stay DNS only.</p>";
+$__information['cfdomain_updateform_sync_pre'] = "<p>Set the Cloudflare nameservers below at your domain registrar. Press Update to synchronise now.</p>";

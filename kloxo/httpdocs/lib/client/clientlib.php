@@ -546,6 +546,8 @@ class Client extends ClientBase
 			
 		//	if ($this->getList('ipaddress')) {
 				$alist[] = "a=list&c=sslcert";
+				// KloxoNext - Cloudflare account (API token) of this client
+				$alist[] = "a=show&o=cfaccount";
 		//	}
 
 			if ($this->isCustomer()) {

@@ -19,6 +19,7 @@ include_once "$dir/lib/php/common.inc";
 include_once "$dir/lib/html/remotelib.php";
 include_once "$dir/lib/html/dnssubdomainlib.php";
 include_once "$dir/lib/html/pmassolib.php";
+include_once "$dir/lib/html/cloudflarelib.php";
 include_once "$dir/lib/php/lxdb.php";
 include_once "$dir/lib/define.php";
 include_once "$dir/lib/driver_define.php";

@@ -542,3 +542,4 @@ $__throw["firewall_error"] = "Firewall";
 $__throw["firewall_csf_install_started"] = "CSF installation started in background (a few minutes). Reload this page later; log: /usr/local/lxlabs/kloxo/log/csf-install.log";
 $__keyword['dnscustom'] = "Reverse DNS (custom zones)";
 $__throw["dnscustom_error"] = "DNS zone";
+$__throw["cloudflare_error"] = "Cloudflare";

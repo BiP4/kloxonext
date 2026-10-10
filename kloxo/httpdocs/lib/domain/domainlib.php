@@ -74,6 +74,7 @@ class Domaind extends DomainBase
 	// Objects
 	static $__desc_web_o = array('qdtb', '', '', '');
 	static $__desc_dns_o = array('qdb', '', '', '');
+	static $__desc_cfdomain_o = array('', '', '', '');
 	static $__desc_mmail_o = array('qdtb', '', '', '');
 //	static $__desc_lxbackup_o = array('d', '', '', '');
 
@@ -1334,6 +1335,7 @@ class Domaind extends DomainBase
 	*/
 		if ($login->isLteAdmin() || $login->priv->isOn('dns_manage_flag')) {
 			$alist[] = 'a=show&o=dns';
+			$alist[] = 'a=show&o=cfdomain';
 		}
 
 	//	$alist['__title_web'] = $this->getTitleWithSync('web');
@@ -1570,6 +1572,7 @@ class Domaind extends DomainBase
 
 		if ($login->isAdmin() || $login->priv->isON('can_manage_dns')) {
 			$alist[] = 'a=show&o=dns';
+			$alist[] = 'a=show&o=cfdomain';
 		}
 
 	//	$alist['__title_web'] = $this->getTitleWithSync('web');

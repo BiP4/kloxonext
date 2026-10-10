@@ -187,6 +187,7 @@ function kn_nav_curate($sections)
 		'DNS' => array('dns', array(
 			array('DNS Templates', array('c' => 'dnstemplate')),
 			array('Reverse DNS (custom zones)', array('o1' => 'dnscustom')),
+			array('Cloudflare Account', array('o0' => 'cfaccount')),
 		)),
 		'Server' => array('server', array(
 			array('Services', array('c' => 'service')),

@@ -1511,3 +1511,19 @@ $__description["firewall_port_kind"] = array("Opened by");
 $__description["firewall_port_program"] = array("Listening program");
 $__description["firewall_close_port"] = array("Close");
 $__description["firewall_open_port"] = array("Open");
+
+// KloxoNext - Cloudflare
+$__description["cloudflare_account"] = array("Cloudflare");
+$__description["cloudflare_status"] = array("Status");
+$__description["cloudflare_api_token"] = array("API token (empty keeps the saved one)");
+$__description["cloudflare_account_id"] = array("Account ID (optional, needed to create zones with account tokens)");
+$__description["cloudflare_disconnect"] = array("Disconnect this Cloudflare account");
+$__description["cloudflare_connect"] = array("Cloudflare Account");
+$__description["cloudflare_dns"] = array("Cloudflare DNS");
+$__description["cloudflare_use"] = array("Use Cloudflare as DNS service for this domain");
+$__description["cloudflare_proxied"] = array("Proxied host names (orange cloud), one per line: @ = the domain");
+$__description["cloudflare_zone"] = array("Cloudflare zone");
+$__description["cloudflare_nameservers"] = array("Cloudflare nameservers");
+$__description["cloudflare_last_sync"] = array("Last synchronisation");
+$__description["cloudflare_dns_service"] = array("DNS Service");
+$__description["cloudflare_sync"] = array("Cloudflare Status");

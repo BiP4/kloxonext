@@ -433,6 +433,7 @@ if (strpos($loginas, "@") !== false) {
 					<div class="dropmenu">
 						&#x00bb;&nbsp;<a href="/display.php?frm_action=list&frm_o_cname=dnstemplate"><?=$ghtml->getTitleOnly("a=list&c=dnstemplate");?></a><br/>
 						&#x00bb;&nbsp;<a href="/display.php?frm_action=show&frm_o_o[0][class]=pserver&frm_o_o[0][nname]=localhost&frm_o_o[1][class]=dnscustom"><?=$login->getKeywordUc('dnscustom');?></a><br/>
+						&#x00bb;&nbsp;<a href="/display.php?frm_action=show&frm_o_o[0][class]=cfaccount">Cloudflare Account</a><br/>
 
 <?php
 		if ($clientquery !== "") {

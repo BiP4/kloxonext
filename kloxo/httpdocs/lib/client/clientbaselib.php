@@ -73,6 +73,7 @@ class ClientBase extends ClientCore
 	static $__desc_lxbackup_o = array("bqd", "", "");
 	static $__desc_license_o = array("", "", "");
 	static $__desc_sshclient_o = array("", "", "");
+	static $__desc_cfaccount_o = array("", "", "");
 	static $__desc_interface_template_l = array("", "", "");
 	static $__desc_interface_template_o = array("", "", "");
 

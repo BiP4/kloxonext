@@ -78,6 +78,11 @@ class Dns extends DnsBase
 		$this->__var_subdomain_parent = null;
 		$dom = $this->getParentO();
 
+		// KloxoNext - DNS service Cloudflare: push the records once this request has saved them
+		if (kn_cf_uses_cloudflare($this->nname)) {
+			kn_cf_schedule_sync_after_request($this->nname);
+		}
+
 		if (is_object($dom) && isset($dom->dtype) && ($dom->dtype === 'subdomain') && !empty($dom->subdomain_parent)) {
 			$this->__var_subdomain_parent = $dom->subdomain_parent;
 			kn_dns_schedule_parent_refresh($dom->subdomain_parent);
