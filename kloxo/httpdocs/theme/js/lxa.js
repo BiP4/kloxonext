@@ -269,8 +269,6 @@ function checkBoxTextToggle(frmname, cname, tname,  cvalue, tvalue)
 function my_alert(message)
 {
 	return;
-	var elem = document.getElementById('j_message');
-	elem.innerHTML = message;
 }
 
 expandMess = 'Click to Expand Navigation Bar';
@@ -312,7 +310,7 @@ var selFolderObj
 function selectFolder(obj, rootFolder, url){
 	var windowFolderSel;
 	selFolderObj=obj;
-	windowFolderSel=window.open(url,'FolderSel','toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,titlebar=no,width=500,height=400,top='+ parseInt((window.screen.height-185) / 2) +',left='+ parseInt((window.screen.width-210) / 2));
+	windowFolderSel=window.open(url,'FolderSel','toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,titlebar=no,width=500,height=400,top='+ Number.parseInt((window.screen.height-185) / 2) +',left='+ Number.parseInt((window.screen.width-210) / 2));
     windowFolderSel.focus();
     
 }
@@ -339,16 +337,11 @@ function onMouseOverLinkButton(obj, help)
 {
 	changeContent('help', help)
 	return;
-	obj.style.cursor='pointer';
-	obj.style.textDecoration='underline';
 }
 function onMouseOutLinkButton(obj)
 {
 	changeContent('help','helparea')
 	return;
-	obj.style.cursor='pointer';
-	obj.style.cursor='normal';
-	obj.style.textDecoration='none';
 }
 function histToggleHistory()
 {
@@ -364,16 +357,6 @@ function histToggleHistory()
 	}
 
 	return;
-	/// Old Code...
-
-	if (window.activeMenus && window.activeMenus.length != 0) {
-		//hideMenu(event);
-		alert('hello');
-	} else {
-		showMenu(menu, x, y, child);
-	}
-
-
 }
 
 
@@ -466,12 +449,12 @@ function shiftOptionUp(form, variable, element)
 	option = element.selectedIndex;
 	if (typeof element == 'string') { element = document.getElementById(element); }
 
-	//if (isNaN(option)) option = findOption(element, option);
+	//if (Number.isNaN(Number(option))) option = findOption(element, option);
 
 	// Only move it up if it's not the first option and it's not
 	// below another selected option
 
-	if (!isNaN(option) && option > 0 && option < element.options.length) {
+	if (!Number.isNaN(Number(option)) && option > 0 && option < element.options.length) {
 		swapOptions(element, option, option - 1);
 	}
 
@@ -503,12 +486,12 @@ function shiftOptionDown (form, variable, element)
 	if (typeof element == 'string') { element = document.getElementById(element); }
 
 
-	 //if (isNaN(option)) option = findOption(element, option);
+	 //if (Number.isNaN(Number(option))) option = findOption(element, option);
 
      // Only move it up if it's not the first option and it's not
      // Only move it up if it's not the first option and it's not
      // below another selected option
-     if (!isNaN(option) && option >= 0 && option < (element.options.length - 1)) {
+     if (!Number.isNaN(Number(option)) && option >= 0 && option < (element.options.length - 1)) {
 		 swapOptions(element, option, option + 1);
      }
 
@@ -896,13 +879,6 @@ function change_notify(element)
 function encode_url(form)
 {
 	return;
-	for (var i=0; i < form.elements.length; i++) {
-		if (form.elements[i].type != 'text' && form.elements[i].type != 'password') {
-			continue;
-		}
-		form.elements[i].value = encodeURIComponent(form.elements[i].value);
-		//alert(form.elements[i].value);
-	}
 }
 
 function uplevel(num)
@@ -1040,9 +1016,9 @@ if(mode=='group') {  txt=frmname.group; ckall=frmname.groupall; }
 if(mode=='other') {  txt=frmname.other; ckall=frmname.otherall; } 
 
 if(element.checked == true) {
- txt.value = parseInt(txt.value) + val;
+ txt.value = Number.parseInt(txt.value) + val;
 } else {
- txt.value = parseInt(txt.value) - val;
+ txt.value = Number.parseInt(txt.value) - val;
  
  if(ckall.checked == true)
 	 ckall.checked = false;

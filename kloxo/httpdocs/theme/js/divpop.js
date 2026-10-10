@@ -72,8 +72,8 @@ if (firedobj.id=="dragbar"){
 offsetx=ie4? event.clientX : e.clientX
 offsety=ie4? event.clientY : e.clientY
 
-tempx=parseInt(crossobj.style.left)
-tempy=parseInt(crossobj.style.top)
+tempx=Number.parseInt(crossobj.style.left)
+tempy=Number.parseInt(crossobj.style.top)
 
 dragapproved=true
 document.onmousemove=drag_drop

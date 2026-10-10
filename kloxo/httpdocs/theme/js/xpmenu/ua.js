@@ -96,12 +96,12 @@ function detectBrowser()
 		i = ua.indexOf('opera');
 		navigator.family	= 'opera';
 		navigator.org		= 'opera';
-		navigator.version	= parseFloat('0' + ua.substr(i+6), 10);
+		navigator.version	= Number.parseFloat('0' + ua.substr(i+6), 10);
 	}
 	else if ((i = ua.indexOf('msie')) != -1)
 	{
 		navigator.org		= 'microsoft';
-		navigator.version	= parseFloat('0' + ua.substr(i+5), 10);
+		navigator.version	= Number.parseFloat('0' + ua.substr(i+5), 10);
 		if (navigator.version < 4)
 			navigator.family = 'ie3';
 		else
@@ -111,7 +111,7 @@ function detectBrowser()
 			typeof(window.locationbar) != 'undefined')
 	{
 		i = ua.lastIndexOf('/')
-		navigator.version = parseFloat('0' + ua.substr(i+1), 10);
+		navigator.version = Number.parseFloat('0' + ua.substr(i+1), 10);
 		navigator.family = 'gecko';
 
 		if (ua.indexOf('netscape') != -1)
@@ -125,24 +125,24 @@ function detectBrowser()
 			(ua.indexOf('compatible') == -1) && (ua.indexOf('opera')==-1) && 
 			(ua.indexOf('webtv')==-1) && (ua.indexOf('hotjava')==-1))
 	{
-	    var is_major = parseFloat(navigator.appVersion);
+	    var is_major = Number.parseFloat(navigator.appVersion);
     
 		if (is_major < 4)
 			navigator.version = is_major;
 		else
 		{
 			i = ua.lastIndexOf('/')
-			navigator.version = parseFloat('0' + ua.substr(i+1), 10);
+			navigator.version = Number.parseFloat('0' + ua.substr(i+1), 10);
 		}
 		navigator.org = 'netscape';
-		navigator.family = 'nn' + parseInt(navigator.appVersion);
+		navigator.family = 'nn' + Number.parseInt(navigator.appVersion);
 	}
 	else if ((i = ua.indexOf('aol')) != -1 )
 	{
 		// aol
 		navigator.family	= 'aol';
 		navigator.org		= 'aol';
-		navigator.version	= parseFloat('0' + ua.substr(i+4), 10);
+		navigator.version	= Number.parseFloat('0' + ua.substr(i+4), 10);
 	}
 
 	navigator.DOMCORE1	= (typeof(document.getElementsByTagName) != 'undefined' && typeof(document.createElement) != 'undefined');

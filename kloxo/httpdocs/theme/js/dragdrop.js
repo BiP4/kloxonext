@@ -2675,8 +2675,8 @@ YAHOO.util.DragDrop.prototype = {
      * should move iTickSize pixels at a time.
      */
     setXConstraint: function(iLeft, iRight, iTickSize) {
-        this.leftConstraint = parseInt(iLeft, 10);
-        this.rightConstraint = parseInt(iRight, 10);
+        this.leftConstraint = Number.parseInt(iLeft, 10);
+        this.rightConstraint = Number.parseInt(iRight, 10);
 
         this.minX = this.initPageX - this.leftConstraint;
         this.maxX = this.initPageX + this.rightConstraint;
@@ -2718,8 +2718,8 @@ YAHOO.util.DragDrop.prototype = {
      * element should move iTickSize pixels at a time.
      */
     setYConstraint: function(iUp, iDown, iTickSize) {
-        this.topConstraint = parseInt(iUp, 10);
-        this.bottomConstraint = parseInt(iDown, 10);
+        this.topConstraint = Number.parseInt(iUp, 10);
+        this.bottomConstraint = Number.parseInt(iDown, 10);
 
         this.minY = this.initPageY - this.topConstraint;
         this.maxY = this.initPageY + this.bottomConstraint;
@@ -2992,8 +2992,8 @@ YAHOO.extend(YAHOO.util.DD, YAHOO.util.DragDrop, {
             var aCoord = [oCoord.x, oCoord.y];
             YAHOO.util.Dom.setXY(el, aCoord);
 
-            var newLeft = parseInt( YAHOO.util.Dom.getStyle(el, "left"), 10 );
-            var newTop  = parseInt( YAHOO.util.Dom.getStyle(el, "top" ), 10 );
+            var newLeft = Number.parseInt( YAHOO.util.Dom.getStyle(el, "left"), 10 );
+            var newTop  = Number.parseInt( YAHOO.util.Dom.getStyle(el, "top" ), 10 );
 
             this.deltaSetXY = [ newLeft - oCoord.x, newTop - oCoord.y ];
         } else {
@@ -3393,8 +3393,8 @@ YAHOO.extend(YAHOO.util.DDProxy, YAHOO.util.DD, {
         this._resizeProxy();
 
         if (this.centerFrame) {
-            this.setDelta( Math.round(parseInt(s.width,  10)/2), 
-                           Math.round(parseInt(s.height, 10)/2) );
+            this.setDelta( Math.round(Number.parseInt(s.width,  10)/2), 
+                           Math.round(Number.parseInt(s.height, 10)/2) );
         }
 
         this.setDragElPos(iPageX, iPageY);
@@ -3414,15 +3414,15 @@ YAHOO.extend(YAHOO.util.DDProxy, YAHOO.util.DD, {
             var el     = this.getEl();
             var dragEl = this.getDragEl();
 
-            var bt = parseInt( DOM.getStyle(dragEl, "borderTopWidth"    ), 10);
-            var br = parseInt( DOM.getStyle(dragEl, "borderRightWidth"  ), 10);
-            var bb = parseInt( DOM.getStyle(dragEl, "borderBottomWidth" ), 10);
-            var bl = parseInt( DOM.getStyle(dragEl, "borderLeftWidth"   ), 10);
+            var bt = Number.parseInt( DOM.getStyle(dragEl, "borderTopWidth"    ), 10);
+            var br = Number.parseInt( DOM.getStyle(dragEl, "borderRightWidth"  ), 10);
+            var bb = Number.parseInt( DOM.getStyle(dragEl, "borderBottomWidth" ), 10);
+            var bl = Number.parseInt( DOM.getStyle(dragEl, "borderLeftWidth"   ), 10);
 
-            if (isNaN(bt)) { bt = 0; }
-            if (isNaN(br)) { br = 0; }
-            if (isNaN(bb)) { bb = 0; }
-            if (isNaN(bl)) { bl = 0; }
+            if (Number.isNaN(Number(bt))) { bt = 0; }
+            if (Number.isNaN(Number(br))) { br = 0; }
+            if (Number.isNaN(Number(bb))) { bb = 0; }
+            if (Number.isNaN(Number(bl))) { bl = 0; }
 
 
             var newWidth  = Math.max(0, el.offsetWidth  - br - bl);                                                                                           
