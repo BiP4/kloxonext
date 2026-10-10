@@ -175,6 +175,7 @@ function kn_nav_curate($sections)
 			array('All Mail Forwards', array('c' => 'all_mailforward')),
 			array('All Mailing Lists', array('c' => 'all_mailinglist')),
 			array('Mail Server Settings', array('o1' => 'servermail', 'sa' => 'update')),
+			array('Spam Filter', array('o1' => 'spamfilter')),
 			array('Mail Queue', array('c' => 'mailqueue')),
 			array('Whitelist IPs', array('c' => 'mail_graylist_wlist_a')),
 		)),

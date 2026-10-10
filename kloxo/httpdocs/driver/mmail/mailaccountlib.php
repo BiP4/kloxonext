@@ -193,8 +193,9 @@ class Mailaccount extends Lxclient
 				return $vlist;
 
 			case 'filter':
-				$this->setDefaultValue('filter_spam_status', 'mailbox');
-				$vlist['filter_spam_status'] = array('s', array('spambox', 'mailbox', 'delete'));
+				// KloxoNext - the spam filter files spam into Junk unless chosen otherwise
+				$this->setDefaultValue('filter_spam_status', 'spambox');
+				$vlist['filter_spam_status'] = array('A', Spam::actionList());
 				$vlist['__v_updateall_button'] = array();
 
 				return $vlist;

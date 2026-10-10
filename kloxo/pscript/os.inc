@@ -121,7 +121,7 @@ pkg_map() {
 			postfix)         echo "postfix postfix-mysql" ;;
 			dovecot)         echo "dovecot-core dovecot-imapd dovecot-pop3d dovecot-lmtpd dovecot-mysql dovecot-sieve dovecot-managesieved" ;;
 			opendkim)        echo "opendkim opendkim-tools" ;;
-			spamassassin)    echo "spamassassin spamc" ;;
+			spamassassin)    echo "spamassassin spamc spamd" ;;
 			clamav)          echo "clamav clamav-daemon clamav-freshclam" ;;
 			cron)            echo "cron anacron" ;;
 			quota)           echo "quota" ;;
@@ -324,6 +324,7 @@ svc_name() {
 			cron)     echo "cron" ;;
 			named)    echo "named" ;;
 			clamd)    echo "clamav-daemon" ;;
+			spamassassin) echo "spamd" ;;
 			*)        echo "$1" ;;
 		esac
 	fi

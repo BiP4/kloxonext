@@ -149,6 +149,11 @@ if ! doveconf -n >/dev/null 2>/tmp/doveconf.err ; then
 	cat /tmp/doveconf.err
 fi
 
+# --------------------------------------------------------------- spam filter
+
+# SpamAssassin / Bogofilter / none, as chosen in the panel (Mail > Spam Filter)
+sh /script/setup-spam apply
+
 # --------------------------------------------------------------- maps + services
 
 (cd "${K}/httpdocs" && lxphp.exe ../bin/misc/set-mail-hostname.php && lxphp.exe ../bin/misc/mail-rebuild.php)

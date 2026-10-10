@@ -13,6 +13,7 @@
  *   /etc/postfix/kloxo/virtual_aliases     forwards, catch-all, alias domains
  *   /etc/dovecot/kloxo/users               passwd-file: password hash + quota
  *   /home/vmail/<domain>/<user>/           Maildir + sieve (autoresponder, spam)
+ *   /home/vmail/<domain>/<user>/.kloxo-spam   present: spam filter on (see /script/setup-spam)
  *
  * Delivery: Postfix -> Dovecot LMTP (sieve, quota). Authentication for IMAP,
  * POP3 and SMTP submission (SASL) is done by Dovecot.
@@ -24,6 +25,7 @@ final class KnMail
 	const VMAIL_GID = 5000;
 	const PF_DIR = '/etc/postfix/kloxo';
 	const DC_USERS = '/etc/dovecot/kloxo/users';
+	const SPAM_CONF = '/etc/dovecot/kloxo/spam/spam.conf';
 
 	private static $scheduled = false;
 
@@ -55,6 +57,12 @@ final class KnMail
 		$domains = self::rows('mmail');
 		$accounts = self::rows('mailaccount');
 		$forwards = self::rows('mailforward');
+
+		$spamRows = array();
+
+		foreach (self::rows('spam') as $s) {
+			$spamRows[strtolower(trim((string)$s['nname']))] = $s;
+		}
 
 		$vdomains = array();
 		$vmailboxes = array();
@@ -155,7 +163,7 @@ final class KnMail
 			$dcusers[] = "{$addr}:{CRYPT}{$hash}:" . self::VMAIL_UID . ':' . self::VMAIL_GID
 				. '::' . self::VMAIL_HOME . "/{$dom}/{$user}::{$extra}";
 
-			self::writeSieve($dom, $user, $a);
+			self::writeSieve($dom, $user, $a, $spamRows[$addr] ?? null);
 		}
 
 		// standalone forwards (Mail Forwards page)
@@ -295,19 +303,149 @@ final class KnMail
 		return max(0, (int)$v);
 	}
 
+	/** Spam engine in use: spamassassin, bogofilter or none (/script/setup-spam). */
+	public static function spamEngine()
+	{
+		static $e = null;
+
+		if ($e === null) {
+			$e = 'none';
+
+			foreach ((array)@file(self::SPAM_CONF, FILE_IGNORE_NEW_LINES) as $l) {
+				if (preg_match('/^ENGINE=(spamassassin|bogofilter|none)$/', trim($l), $m)) {
+					$e = $m[1];
+				}
+			}
+		}
+
+		return $e;
+	}
+
+	/** Addresses / domains of a white or black list (ser_wlist_a / ser_blist_a). */
+	public static function spamList($ser)
+	{
+		$out = array();
+
+		class_exists('Spam');   // defines Wlist_a / Blist_a, needed to unserialize the list
+
+		foreach (self::forwardList($ser) as $v) {
+			$v = strtolower(trim($v));
+
+			// user@domain.com, @domain.com or domain.com; '*' and '?' as wildcards
+			if ($v !== '' && preg_match('/^[a-z0-9._%+*?@-]+$/', $v)) {
+				$out[] = $v;
+			}
+		}
+
+		return array_values(array_unique($out));
+	}
+
+	private static function sieveStrings($list)
+	{
+		return '["' . implode('", "', $list) . '"]';
+	}
+
+	/**
+	 * Spam rules of an account. Delivery adds the headers (X-Spam-Level: one star
+	 * per point of the SpamAssassin score; X-Bogosity), the account decides here.
+	 */
+	private static function spamRules($a, $sp, &$req)
+	{
+		$action = $a['filter_spam_status'] ?? '';
+
+		// not chosen yet: the Junk folder
+		if (!in_array($action, array('spambox', 'mailbox', 'delete'), true)) {
+			$action = 'spambox';
+		}
+
+		if (self::spamEngine() === 'spamassassin') {
+			$hit = (int)round((float)($sp['spam_hit'] ?? 5));
+			$hit = ($hit < 1) ? 5 : min(30, $hit);
+			$isSpam = 'header :contains "X-Spam-Level" "' . str_repeat('*', $hit) . '"';
+		} else {
+			$isSpam = 'header :matches "X-Bogosity" "Spam,*"';
+		}
+
+		$tests = array();
+
+		foreach (array('white' => 'ser_wlist_a', 'black' => 'ser_blist_a') as $k => $field) {
+			$addr = array();
+			$doms = array();
+
+			foreach (self::spamList($sp[$field] ?? '') as $v) {
+				if (strpos($v, '@') === false) {
+					$doms[] = $v;
+				} elseif ($v[0] === '@') {
+					$doms[] = substr($v, 1);
+				} else {
+					$addr[] = $v;
+				}
+			}
+
+			$tests[$k] = array();
+
+			if ($addr) {
+				$tests[$k][] = 'address :all :matches "from" ' . self::sieveStrings($addr);
+			}
+
+			if ($doms) {
+				$tests[$k][] = 'address :domain :matches "from" ' . self::sieveStrings($doms);
+			}
+		}
+
+		$todo = array();
+		$tag = trim(str_replace(array('"', '\\', "\r", "\n", '$'), '', (string)($sp['subject_tag'] ?? '')));
+
+		if ($tag !== '' && $action !== 'delete') {
+			$req[] = 'editheader';
+			$req[] = 'variables';
+			$todo[] = '  if header :matches "Subject" "*" {' . "\n"
+				. '    set "subject" "${1}";' . "\n"
+				. '  }' . "\n"
+				. '  deleteheader "Subject";' . "\n"
+				. '  addheader :last "Subject" "' . $tag . ' ${subject}";';
+		}
+
+		if ($action === 'spambox') {
+			$todo[] = "  fileinto \"Junk\";\n  stop;";
+		} elseif ($action === 'delete') {
+			$todo[] = "  discard;\n  stop;";
+		}
+
+		if (!$todo) {
+			$todo[] = '  keep;';
+		}
+
+		$cond = $tests['black'] ? 'anyof (' . $isSpam . ', ' . implode(', ', $tests['black']) . ')' : $isSpam;
+		$rule = "if {$cond} {\n" . implode("\n", $todo) . "\n}";
+
+		if ($tests['white']) {
+			$w = (count($tests['white']) > 1) ? 'anyof (' . implode(', ', $tests['white']) . ')' : $tests['white'][0];
+			$rule = "if not {$w} {\n" . preg_replace('/^/m', '  ', $rule) . "\n}";
+		}
+
+		return '# spam filter (' . self::spamEngine() . ", spam: {$action})\n" . $rule;
+	}
+
 	/** Sieve script: autoresponder (vacation) and spam filing. */
-	private static function writeSieve($dom, $user, $a)
+	private static function writeSieve($dom, $user, $a, $sp = null)
 	{
 		$home = self::mailboxDir($dom, $user);
 		$rules = array();
 		$req = array('fileinto');
 
-		$spam = $a['filter_spam_status'] ?? 'mailbox';
+		// spam filter: on for the account and an engine on the server
+		$flag = "{$home}/.kloxo-spam";
+		$spamOn = $sp && (($sp['status'] ?? 'on') !== 'off') && (self::spamEngine() !== 'none');
 
-		if ($spam === 'spambox') {
-			$rules[] = "if anyof (header :contains \"X-Spam-Flag\" \"YES\", header :contains \"X-Bogosity\" \"Spam\") {\n  fileinto \"Junk\";\n  stop;\n}";
-		} elseif ($spam === 'delete') {
-			$rules[] = "if anyof (header :contains \"X-Spam-Flag\" \"YES\", header :contains \"X-Bogosity\" \"Spam\") {\n  discard;\n  stop;\n}";
+		if ($spamOn) {
+			$rules[] = self::spamRules($a, $sp, $req);
+
+			if (!file_exists($flag)) {
+				self::writeFile($flag, "on\n", 0600, self::VMAIL_UID, self::VMAIL_GID);
+			}
+		} elseif (file_exists($flag)) {
+			@unlink($flag);
 		}
 
 		if (($a['autorespond_status'] ?? '') === 'on' && !empty($a['autores_name'])) {

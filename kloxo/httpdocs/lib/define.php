@@ -46,6 +46,8 @@ $gl_class_array["mmail"] = "driver/mmail/mmaillib.php";
 
 $gl_class_array["clientmail"] = "lib/domain/clientmail.php";
 $gl_class_array["spam"] = "driver/mmail/spamlib.php";
+$gl_class_array["wlist_a"] = "driver/mmail/spamlib.php";
+$gl_class_array["blist_a"] = "driver/mmail/spamlib.php";
 
 $gl_class_array["webmimetype"] = "driver/web/mimehandlerlib.php";
 $gl_class_array["webhandler"] = "driver/web/mimehandlerlib.php";

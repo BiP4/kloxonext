@@ -1504,6 +1504,27 @@ $__description["firewall_port_program"] = array("Listening program");
 $__description["firewall_close_port"] = array("Close");
 $__description["firewall_open_port"] = array("Open");
 
+// KloxoNext - spam filter
+$__description["spam_filter"] = array("Spam Filter");
+$__description["spam_engine"] = array("Spam filter engine");
+$__description["spam_engine_use"] = array("Use");
+$__description["spam_delivery"] = array("Mail delivery");
+$__description["spam_service"] = array("Program");
+$__description["spam_rules"] = array("SpamAssassin rules");
+$__description["spam_accounts_on"] = array("Mail accounts with the filter on");
+$__description["spam_learn_from_junk"] = array("Learn from the Junk folder (moved in = spam, moved out = not spam)");
+$__description["spam_max_kb"] = array("Largest message checked (KB)");
+$__description["spam_sa_network"] = array("SpamAssassin - DNS block lists and network tests");
+$__description["spam_sa_autolearn"] = array("SpamAssassin - Bayes auto-learn from clear spam / ham");
+$__description["spam_sa_autoupdate"] = array("SpamAssassin - update the rules daily (sa-update)");
+$__description["spam_bogo_spam_cutoff"] = array("Bogofilter - spam above (0 - 1)");
+$__description["spam_bogo_ham_cutoff"] = array("Bogofilter - not spam below (0 - 1, in between is Unsure)");
+$__description["spam_tool"] = array("Run");
+$__description["spam_tool_result"] = array("Last result");
+$__description["spam_filter_status"] = array("Status");
+$__description["spam_filter_settings"] = array("Settings");
+$__description["spam_filter_tools"] = array("Tools");
+
 // KloxoNext - Cloudflare
 $__description["cloudflare_account"] = array("Cloudflare");
 $__description["cloudflare_status"] = array("Status");

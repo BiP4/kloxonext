@@ -2,6 +2,32 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-11
+
+### Mail - spam filter
+- SpamAssassin and Bogofilter are now wired into the Postfix + Dovecot mail: every delivered
+  message is checked (global Sieve filter at delivery), the account's Sieve script applies its
+  settings - on/off, score, subject tag, white / black list, Junk folder / keep / delete.
+- New page *Mail > Spam Filter*: engine (SpamAssassin / Bogofilter / none, same as
+  *Switch Programs*), status (service, rule date, how much was learned, accounts with the
+  filter on), settings (largest message, DNS block lists, Bayes auto-learn, daily rule
+  updates, Bogofilter cutoffs, learning from Junk) and tools (GTUBE test, update rules now).
+- Learning: moving a message into / out of *Junk* in any mail program trains the filter
+  (IMAPSieve); *Train as spam / ham* in the panel runs as the mail user (it ran as root and
+  could leave the Bayes database unreadable for delivery).
+- A mail account's *Spam* page: what to do with spam, links to its white and black lists
+  (addresses or domains, validated). Spam goes to *Junk* unless chosen otherwise.
+- `sh /script/setup-spam` configures everything (called by `setup-mail`); Dovecot 2.3 (EL)
+  and 2.4 (Ubuntu 26.04); the panel adds the subject tag, so SpamAssassin's own `[SPAM]`
+  rewrite of AlmaLinux is turned off.
+- The panel's message list for training also reads the Dovecot 2.4 Inbox (`.INBOX`).
+
+### Security
+- An object name that is not below the current parent in a panel URL (for example another
+  client's mail account) is refused. The panel used to build an empty stand-in for it, and
+  saving or deleting that stand-in overwrote or deleted the real record (and its files) of the
+  other owner.
+
 ## 2026-10-10 (later)
 
 - Firewall > CSF Settings: every csf.conf option, the csf lists and the csf/lfd tools from the

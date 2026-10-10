@@ -57,17 +57,24 @@ class Mailaccount__Postfix extends lxDriverClass
 	function trainAsSpam()
 	{
 		$listname = "{$this->main->subaction}_list";
-		$flag = cse($this->main->subaction, '_spam') ? '--spam' : '--ham';
+		$kind = cse($this->main->subaction, '_spam') ? 'spam' : 'ham';
+
+		// KloxoNext - the engine chosen in Mail > Spam Filter, as the mail user (the
+		// Bayes database / word list belong to 'vmail', see /script/setup-spam)
+		$learn = '/etc/dovecot/kloxo/spam/bin/kn-spam-learn';
+		list($user, $domain) = explode('@', $this->main->nname, 2);
+		$home = realpath(KnMail::mailboxDir($domain, $user));
 
 		foreach ((array)$this->main->$listname as $f) {
 			$file = str_replace(array("_s_coma_s_", "_s_colon_s_"), array(",", ":"), $f);
+			$real = realpath($file);
 
-			if (file_exists('/usr/bin/sa-learn')) {
-				exec("/usr/bin/sa-learn {$flag} " . escapeshellarg($file) . " >/dev/null 2>&1");
-			} elseif (file_exists('/usr/bin/bogofilter')) {
-				$b = ($flag === '--spam') ? '-s' : '-n';
-				exec("bogofilter -d /var/lib/bogofilter {$b} < " . escapeshellarg($file) . " >/dev/null 2>&1");
+			// only messages of this mailbox
+			if (!is_executable($learn) || !$home || ($real === false) || (strpos($real, $home . '/') !== 0)) {
+				continue;
 			}
+
+			exec("runuser -u vmail -- {$learn} {$kind} < " . escapeshellarg($real) . " >/dev/null 2>&1");
 		}
 	}
 }

@@ -106,6 +106,23 @@ Every change made in the panel regenerates `/etc/postfix/kloxo/*` and `/etc/dove
 from the Kloxo database (see `httpdocs/lib/php/mailmapslib.php`). `sh /script/setup-mail`
 re-applies the whole configuration; it adapts to Dovecot 2.3 (EL) and 2.4 (Ubuntu 26.04).
 
+### Spam filter
+
+*Mail > Spam Filter* chooses the engine: **SpamAssassin** (spamd: rules, DNS block lists,
+Bayes; rules updated daily), **Bogofilter** (statistical, learns only from training, very light)
+or none. Every message is checked while Dovecot delivers it (a global Sieve script passes it
+through `spamc` / `bogofilter`, which only add headers); the mail account's own Sieve script
+then applies its *Spam* page: on/off, score (SpamAssassin), subject tag, white / black list
+(addresses or whole domains) and what to do with spam - Junk folder (default), keep in the
+Inbox, or delete. Training: moving a message into *Junk* teaches "spam", moving it out teaches
+"not spam" (IMAPSieve); *Train as spam / ham* in the panel does the same. One Bayes database /
+word list for the server, owned by `vmail` (`/var/lib/kloxo-spam`).
+
+The page also has the server-wide settings (largest message checked, DNS block lists, Bayes
+auto-learn, daily rule updates, Bogofilter cutoffs) and tools (GTUBE test, update the rules now).
+`sh /script/setup-spam [apply [spamassassin|bogofilter|none] | set KEY=VALUE | status | test]`
+does the same from the shell.
+
 ## Web servers
 
 | Driver        | AlmaLinux / Rocky | Ubuntu 26.04 |
@@ -181,8 +198,7 @@ creates on it are handled locally.
 | 4b    | Apache/lighttpd web drivers on Ubuntu (RHEL paths)                     | done          |
 | 5     | Firewall, custom/reverse DNS zones, Cloudflare DNS, jailed shell, web terminal | done  |
 
-Not done yet: Hiawatha on Ubuntu; wiring a content filter (SpamAssassin/Bogofilter) into
-Postfix — Sieve already files messages they flag into *Junk*.
+Not done yet: Hiawatha on Ubuntu.
 
 ## Changes
 
@@ -192,6 +208,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 
 `tests/container-phase1.sh` – smoke test run inside fresh AlmaLinux 9, AlmaLinux 10 and Ubuntu 26.04 containers.
 `tests/e2e-install.sh <container>` – full install in a systemd container, then domains with per-domain PHP and mail (`tests/mailtest.sh`).
+`tests/spamtest.sh <account@domain>` – spam filter end to end in such a container (both engines, Junk, IMAP learning).
 
 Example (smoke test in a fresh container):
 

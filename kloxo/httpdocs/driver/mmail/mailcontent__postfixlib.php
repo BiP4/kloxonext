@@ -12,7 +12,8 @@ class mailcontent__postfix extends mailcontent__qmail
 		$path = KnMail::mailboxDir($dom, $user) . "/Maildir";
 		$ret = null;
 
-		foreach (array("new", "cur", ".Junk/new", ".Junk/cur", ".Spam/new", ".Spam/cur") as $d) {
+		// .INBOX: the Inbox of the Dovecot 2.4 layout
+		foreach (array("new", "cur", ".INBOX/new", ".INBOX/cur", ".Junk/new", ".Junk/cur", ".Spam/new", ".Spam/cur") as $d) {
 			self::parseDir($ret, "{$path}/{$d}");
 		}
 

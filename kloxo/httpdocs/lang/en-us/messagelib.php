@@ -482,10 +482,10 @@ $__information['domaintemplate_addform__pre'] = "<p><b>Note:</b></p>".
 	"<p>The Max Value on the right shows your current quota limit.</p>".
 	"<p>You can create a Template with values more than your quota, but you won't be able to use them to create Domains/Clients.</p>";
 
-$__information['spam_updateform_update_pre'] = "<p>The 'score'--which can be 1-10--is the value at which a mail is marked as SPAM.</p>".
-	"<p>So if you set it to lower values, more mail will be marked as spam.</p>".
-	"<p>Too low values might lead to genuine mails getting classified as spam. ".
-	"Too high values will lead to high amount of spam getting through the filter.</p>";
+$__information['spam_updateform_update_pre'] = "<p>The <b>score</b> (SpamAssassin, 1-30, default 5) is the value at which a mail is marked as spam: " .
+	"lower values catch more spam but also more good mail. Bogofilter ignores the score (see Mail &gt; Spam Filter).</p>" .
+	"<p>The <b>White List</b> / <b>Black List</b> (links above) take addresses (user@example.com) or whole domains (example.com); " .
+	"white listed senders are never treated as spam, black listed ones always are.</p>";
 
 $__information['web_updateform_enable_frontpage_flag_pre'] = "<p>The front page password will be the same as that of the system user (main ftp user).</p>";
 
@@ -964,6 +964,14 @@ $__information['sendmailban_addform__pre'] = "<p>Add 'Target' directory to ban P
 $__information['lxupdate_updateform_autoupdate_pre'] = "<p>When enabled, the server checks the git repository (GitHub) once a day " .
 	"and, if a newer commit exists, installs it and runs <b>'sh /script/cleanup'</b>. Your 'custom.*' files and settings are kept.</p>" .
 	"<p>Without this permission the panel is only updated when you press 'Update Now' or run <b>'sh /script/kloxonext-update --apply'</b>.</p>";
+
+$__information['spamfilter_updateform_status_pre'] = "<p>Every message delivered to a mail account is checked by <b>SpamAssassin</b> (rules, DNS block lists, Bayes) " .
+	"or <b>Bogofilter</b> (statistical, learns only from training). The filter adds headers; each account decides on its <b>Spam</b> page " .
+	"(on/off, score, subject tag, white / black list, Junk folder / keep / delete). Switching the engine takes effect immediately.</p>";
+$__information['spamfilter_updateform_settings_pre'] = "<p>Training: in the webmail or mail program move missed spam <b>into Junk</b> and good mail <b>out of Junk</b>. " .
+	"SpamAssassin uses its Bayes database after 200 spam and 200 good messages; Bogofilter marks nothing as spam before it has been trained.</p>";
+$__information['spamfilter_updateform_tools_pre'] = "<p><b>Test</b> passes the standard GTUBE test message through the filter and shows the headers it adds. " .
+	"<b>Update the rules</b> downloads the newest SpamAssassin rules (sa-update, needs internet).</p>";
 
 $__information['firewall_updateform_state_pre'] = "<p>The panel manages <b>ConfigServer Security &amp; Firewall (CSF)</b> when it is installed, otherwise <b>firewalld</b> (AlmaLinux) or <b>ufw</b> (Ubuntu). " .
 	"SSH and the panel ports are always kept open, so changes here cannot lock you out.</p>";
