@@ -3,9 +3,10 @@
 chdir("../../");
 include_once "lib/html/displayinclude.php";
 
-$info = unserialize(base64_decode($ghtml->frm_info));
+// KloxoNext - request data: only the Remote envelope of the file server, no other object
+$info = unserialize(base64_decode((string)$ghtml->frm_info), array('allowed_classes' => array('Remote')));
 
-if (!$info) {
+if (!($info instanceof Remote) || !isset($info->filepass) || !is_array($info->filepass)) {
 	print("No info");
 	exit;
 }

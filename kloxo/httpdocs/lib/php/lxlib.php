@@ -2363,7 +2363,8 @@ function initProgramlib($ctype = null)
 
 	if (!$sessobj || $sessobj->dbaction === 'add') {
 		if ($ghtml->frm_ssl) {
-			$ssl = unserialize(base64_decode($ghtml->frm_ssl));
+			// KloxoNext - request data: plain values only, never objects
+			$ssl = unserialize(base64_decode((string)$ghtml->frm_ssl), array('allowed_classes' => false));
 			$string = $ssl['string'];
 			$ssl_param = $ssl['ssl_param'];
 			$encrypted_string = base64_decode($ssl['encrypted_string']);
@@ -2571,7 +2572,8 @@ function do_login($classname, $cgi_clientname, $ssl_param = null)
 	addToUtmp($sessobj, 'add');
 
 	if ($ghtml->frm_extra_var) {
-		$extra = unserialize(base64_decode($ghtml->frm_extra_var));
+		// KloxoNext - request data: plain values only, never objects
+		$extra = unserialize(base64_decode((string)$ghtml->frm_extra_var), array('allowed_classes' => false));
 		$gbl->setSessionV('extra_var', $extra);
 	}
 	//This is not the way. You have to periodically scan the utmp and delete eveyrthing that had expired.
