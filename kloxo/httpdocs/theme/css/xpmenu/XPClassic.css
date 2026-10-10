@@ -1,6 +1,6 @@
 body
 {
-	FONT-Family: Arial, Verdana, Tahoma ;
+	FONT-Family: Arial, Verdana, Tahoma, sans-serif ;
 	font-size: 8pt;
 	font-weight: normal;
 	
@@ -15,7 +15,7 @@ body
 
 .menuHeaderExpanded
 {
-	font-family: Verdana, Tahoma, Arial;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
 	font-size: 8pt;
 	font-weight: bold;
 	color: #ffffff;
@@ -42,7 +42,7 @@ body
 
 .menuHeaderCollapsed
 {
-	font-family: Verdana, Tahoma, Arial;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
 	font-size: 8pt;
 	font-weight: bold;
 	color: #000000;
@@ -63,7 +63,7 @@ body
 
 .menuItems
 {
-	font-family: Verdana, Tahoma, Arial;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
 	font-size: 8pt;
 	background-color:#ffffff;
 	color: #000000;

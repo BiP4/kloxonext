@@ -339,7 +339,7 @@ q:before,q:after{
 	cursor:pointer;
 }
 .x-tabs-strip .x-tabs-text {
-	font:bold 11px tahoma,arial,helvetica;
+	font:bold 11px tahoma,arial,helvetica, sans-serif;
 	color:#666;
 	overflow:hidden;
 	white-space: nowrap;
@@ -836,14 +836,14 @@ q:before,q:after{
 	background:transparent url(/theme/extjs/default/form/exclamation.gif) no-repeat 0 2px;
 }
 .x-btn{
-	font:normal 11px tahoma, verdana, helvetica;
+	font:normal 11px tahoma, verdana, helvetica, sans-serif;
 	cursor:pointer;
 	white-space: nowrap;
 }
 .x-btn button{
 	border:0 none;
 	background:transparent;
-	font:normal 11px tahoma,verdana,helvetica;
+	font:normal 11px tahoma,verdana,helvetica, sans-serif;
 	padding-left:3px;
 	padding-right:3px;
 	cursor:pointer;
@@ -1654,7 +1654,7 @@ q:before,q:after{
 	position:relative;
 }
 .x-layout-panel-hd-text{
-	font:normal 11px tahoma, verdana, helvetica;
+	font:normal 11px tahoma, verdana, helvetica, sans-serif;
 	padding: 4px;
 	padding-left: 4px;
 	display:block;
@@ -1856,7 +1856,7 @@ body.x-body-masked .x-dlg select {
 	background: url(/theme/extjs/default/basic-dialog/hd-sprite.gif) repeat-x 0 -82px;
 	background-color:navy;
 	color:#FFF;
-	font:bold 12px "sans serif", tahoma, verdana, helvetica;
+	font:bold 12px "sans serif", tahoma, verdana, helvetica, sans-serif;
 	overflow:hidden;
 	padding:5px;
 	white-space: nowrap;
@@ -2482,7 +2482,7 @@ input.x-tree-node-cb {
 .x-date-middle,.x-date-left,.x-date-right {
 	background: url(/theme/extjs/default/basic-dialog/hd-sprite.gif) repeat-x 0 -83px;
 	color:#FFF;
-	font:bold 11px "sans serif", tahoma, verdana, helvetica;
+	font:bold 11px "sans serif", tahoma, verdana, helvetica, sans-serif;
 	overflow:hidden;
 }
 
@@ -2914,7 +2914,7 @@ td.x-date-mp-sep {
 	color:#222297;
 	font-size:12px;
 	padding-top:2px;
-	font-family:"courier","courier new";
+	font-family:"courier","courier new", monospace;
 	line-height:18px;
 }
 
@@ -2957,7 +2957,7 @@ td.x-date-mp-sep {
 #x-debug-console textarea {
 	border: 0 none;
 	font-size:12px;
-	font-family:"courier","courier new";
+	font-family:"courier","courier new", monospace;
 	padding-top:4px;
 	padding-left:4px;
 }
