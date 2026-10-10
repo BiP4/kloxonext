@@ -2545,14 +2545,18 @@ function print_favorites()
 	$back = $login->getSkinDir();
 	$list = $ghtml->get_favorite("ndskshortcut");
 
-	$vvar_list = array('ttype', '_t_image', 'url', 'target', '__t_identity', 'ac_descr', 'str', 'tag');
 
 	$res = null;
 
 	foreach ((array)$list as $l) {
-		foreach ($vvar_list as $vvar) {
-			$$vvar = isset($l[$vvar]) ? $l[$vvar] : '';
-		}
+		$ttype = isset($l['ttype']) ? $l['ttype'] : '';
+		$_t_image = isset($l['_t_image']) ? $l['_t_image'] : '';
+		$url = isset($l['url']) ? $l['url'] : '';
+		$target = isset($l['target']) ? $l['target'] : '';
+		$__t_identity = isset($l['__t_identity']) ? $l['__t_identity'] : '';
+		$ac_descr = isset($l['ac_descr']) ? $l['ac_descr'] : '';
+		$str = isset($l['str']) ? $l['str'] : '';
+		$tag = isset($l['tag']) ? $l['tag'] : '';
 
 		if ($ttype == 'separator') {
 			$res .= "<tr valign='top' style=\"border-width:1px; background:url($back/a.gif);\"> <td ></td> </tr>";

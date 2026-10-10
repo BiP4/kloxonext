@@ -98,14 +98,14 @@ function cron_exec($hour, $minute, $func)
 
 function timed_exec($time, $func)
 {
-	$v = "global_v$func";
-	global $$v;
+	// KloxoNext - the last run of each function, for the life of the backend process
+	// (it was a global variable named after the function); the first call runs it
+	static $last = array();
 
 	$ct = time();
 
-	if (($ct - $$v) >= $time * 30) {
-	//	dprint("Executing at $ct {$$v} rd time $func\n");
-		$$v = $ct;
+	if (($ct - (isset($last[$func]) ? $last[$func] : 0)) >= $time * 30) {
+		$last[$func] = $ct;
 		$func();
 	}
 }

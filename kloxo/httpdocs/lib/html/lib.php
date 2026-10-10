@@ -4632,7 +4632,7 @@ function findServerTraffic()
 
 function createMultipLeVps($param)
 {
-	global $$sgbl;
+	global $sgbl;
 
 	$adminpass = $param['vps_admin_password_f'];
 	$template = $param['vps_template_name_f'];
