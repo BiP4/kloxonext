@@ -841,9 +841,8 @@ function lxshell_background($cmd)
 	$start = 1;
 	$transforming_func = null;
 
-	if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-		eval($sgbl->arg_getting_string);
-	} else {
+	// KloxoNext - PHP 8 only (the PHP < 5.3 branch evaluated code)
+	{
 	//	$arglist = get_function_arglist($start, $transforming_func);
 
 		$arglist = array();

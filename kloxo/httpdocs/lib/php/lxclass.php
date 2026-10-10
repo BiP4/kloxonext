@@ -1186,12 +1186,15 @@ abstract class Lxclass
 
 	static function filterFunc($op, $oval, $val)
 	{
-		static $oplist = array('gt' => '>', 'lt' => '<', 'eq' => '===', 'ne' => '!=');
+		// KloxoNext - the comparison is done here, not built as code from the values
+		$a = (string)$oval;
+		$b = (string)$val;
 
-		if (isset($oplist[$op])) {
-			$string = "('{$oval}' {$oplist[$op]} '{$val}')";
-
-			return eval("return {$string} ;");
+		switch ($op) {
+			case 'gt': return $a > $b;
+			case 'lt': return $a < $b;
+			case 'eq': return $a === $b;
+			case 'ne': return $a != $b;
 		}
 
 		if ($op === 'cont') {
@@ -1229,7 +1232,8 @@ abstract class Lxclass
 			} else {
 				$f = "__filter_{$key}_{$val}";
 				$string = get_real_class_variable($class, $f);
-				$res &= eval("return {$string};");
+				// KloxoNext - no code from class variables (and isDisplay() returns before this)
+				$res &= (bool)$string;
 			}
 		}
 

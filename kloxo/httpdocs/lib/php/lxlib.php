@@ -1169,7 +1169,7 @@ function debug_print($var, $note = null)
 function get_debug_print($var, $note = null)
 {
 	ob_start();
-	eval(debug_print($var));
+	debug_print($var);
 	$x = ob_get_contents();
 	ob_end_clean();
 
@@ -2918,8 +2918,21 @@ function get_real_class_variable($class, $var)
 		return null;
 	}
 
-	$variable = "$rclass::\$" . $var;
-	return eval(" if (isset($variable)) { return $variable ; }  ");
+	return kn_static_get($rclass, $var);
+}
+
+// KloxoNext - static class properties by name, without eval (names are checked)
+function kn_static_get($class, $var)
+{
+	if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)$class) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)$var)) {
+		return null;
+	}
+
+	if (!class_exists($class)) {
+		return null;
+	}
+
+	return isset($class::${$var}) ? $class::${$var} : null;
 }
 
 function get_class_variable($class, $var)
@@ -2936,16 +2949,20 @@ function get_class_variable($class, $var)
 	 }
  */
 
-	$variable = "$class::\$" . $var;
-	return eval(" if (isset($variable)) { return $variable ; }  ");
+	return kn_static_get($class, $var);
 }
 
 function set_class_variable($class, $var, $val)
 {
 	$var = fix_nname_to_be_variable($var);
 	$class = ucfirst($class);
-	$variable = "$class::\$" . $var;
-	return eval(" $variable = \$val ; ");
+	if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)$class) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)$var)) {
+		return null;
+	}
+
+	$class::${$var} = $val;
+
+	return null;
 }
 
 function createZeroString($n)
