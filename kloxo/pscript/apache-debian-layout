@@ -1,0 +1,101 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+#
+#    KloxoNext - Apache on Debian/Ubuntu with the Red Hat layout the panel uses
+#
+#    The Apache driver, its templates and the panel write to /etc/httpd (conf,
+#    conf.d, conf.modules.d) and expect modules/ logs/ run/ next to them. On
+#    Ubuntu the apache2 package lives in /etc/apache2, so this script builds
+#    the same tree and makes the apache2 service run on it:
+#
+#      /etc/httpd/conf/httpd.conf        (written by the panel, httpd24.conf)
+#      /etc/httpd/conf.modules.d/*.conf  (module list, Red Hat style)
+#      /etc/httpd/modules -> /usr/lib/apache2/modules
+#      /etc/httpd/logs    -> /var/log/httpd,  run -> /run/httpd
+#      apache2.service.d/kloxonext-layout.conf (apache2 -d /etc/httpd ...)
+#
+#      apache-debian-layout setup     build the tree + service override (cleanup)
+#      apache-debian-layout modules   keep only the LoadModule lines whose .so exists
+#                                     (ExecStartPre of apache2: the panel rewrites them)
+#
+
+. /script/os.inc
+
+KLOXO_PATH=/usr/local/lxlabs/kloxo
+H=/etc/httpd
+MODDIR=/usr/lib/apache2/modules
+
+os_is_debian || exit 0
+[ -x /usr/sbin/apache2 ] || exit 0
+
+# Debian builds log_config, logio, unixd, version, watchdog and systemd into the
+# binary: their LoadModule lines point to files that do not exist. Comment them
+# (and any other missing module) out; restore the ones that appeared since.
+cmd_modules() {
+	local f
+	for f in "${H}"/conf.modules.d/*.conf ; do
+		[ -f "${f}" ] || continue
+		awk -v moddir="${MODDIR}" '
+			function present(path,   so) { so = path; sub(/^modules\//, "", so); return (system("test -f \"" moddir "/" so "\"") == 0) }
+			/^#kn-missing[ \t]+LoadModule[ \t]/ {
+				line = $0; sub(/^#kn-missing[ \t]+/, "", line); split(line, w, /[ \t]+/)
+				if (present(w[3])) { print line; next }
+				print; next
+			}
+			/^[ \t]*LoadModule[ \t]/ {
+				split($0, w, /[ \t]+/); i = (w[1] == "") ? 2 : 1
+				if (!present(w[i + 2])) { print "#kn-missing " $0; next }
+			}
+			{ print }
+		' "${f}" > "${f}.kn" && cat "${f}.kn" > "${f}" && rm -f "${f}.kn"
+	done
+}
+
+cmd_setup() {
+	local f
+
+	mkdir -p "${H}/conf" "${H}/conf.d" "${H}/conf.modules.d" /var/log/httpd /var/lib/httpd
+	chmod 700 /var/log/httpd
+
+	ln -sfn "${MODDIR}" "${H}/modules"
+	ln -sfn ../../var/log/httpd "${H}/logs"
+	ln -sfn /run/httpd "${H}/run"
+	ln -sfn ../../var/lib/httpd "${H}/state"
+
+	[ -f "${H}/conf/magic" ] || cp -f /etc/apache2/magic "${H}/conf/magic" 2>/dev/null
+
+	# Red Hat module list (once; the panel keeps its own files in there up to date)
+	for f in "${KLOXO_PATH}"/file/apache/debian/conf.modules.d/*.conf ; do
+		[ -f "${H}/conf.modules.d/$(basename "${f}")" ] || cp -f "${f}" "${H}/conf.modules.d/"
+	done
+
+	[ -f "${H}/conf/httpd.conf" ] || cp -f "${KLOXO_PATH}/file/apache/etc/conf/httpd24.conf" "${H}/conf/httpd.conf"
+
+	cmd_modules
+
+	# the apache2 unit runs 'apachectl' on /etc/apache2: run the same binary on /etc/httpd
+	mkdir -p /etc/systemd/system/apache2.service.d
+	cat > /etc/systemd/system/apache2.service.d/kloxonext-layout.conf <<-EOF
+	# KloxoNext - Apache on the /etc/httpd tree written by the panel (see /script/apache-debian-layout)
+	[Service]
+	RuntimeDirectory=httpd
+	ReadWritePaths=/var/log/httpd /var/lib/httpd
+	# "+": outside the unit sandbox (ProtectSystem=full keeps /etc read-only)
+	ExecStartPre=+/bin/bash ${KLOXO_PATH}/pscript/apache-debian-layout modules
+	ExecStart=
+	ExecStart=/usr/sbin/apache2 -d ${H} -f ${H}/conf/httpd.conf -C "PidFile /run/httpd/httpd.pid" -D FOREGROUND
+	ExecReload=
+	ExecReload=/bin/kill -USR1 \$MAINPID
+	ExecStop=
+	EOF
+	chmod 644 /etc/systemd/system/apache2.service.d/kloxonext-layout.conf
+	systemctl daemon-reload
+
+	echo "OK=Apache uses ${H} on this server"
+}
+
+case "$1" in
+	setup)   cmd_setup ;;
+	modules) cmd_modules ;;
+	*)       echo "usage: $0 setup|modules" ; exit 2 ;;
+esac

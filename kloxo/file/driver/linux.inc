@@ -29,10 +29,12 @@ $driver['sshconfig'] = 'linux';
 
 $driver['phpmodule'] = "linux";
 
-// KloxoNext - on Debian/Ubuntu only the drivers adapted to its paths are offered
-// (apache/lighttpd/hiawatha templates write to RHEL locations such as /etc/httpd)
+// KloxoNext - on Debian/Ubuntu only the drivers adapted to its paths are offered:
+// nginx, Apache through the Red Hat layout built by /script/apache-debian-layout
+// (also behind nginx as proxy) and lighttpd (/script/lighttpd-modules); hiawatha
+// still writes to RHEL-only places
 if (class_exists('OsPlatform') && OsPlatform::isDebian()) {
-	$driver['web'] = array("none", "nginx");
+	$driver['web'] = array("none", "nginx", "apache", "nginxproxy", "lighttpd");
 	$driver['webcache'] = array("none", "varnish");
 	$driver['dns'] = array("none", "bind");
 }

@@ -75,9 +75,13 @@ fi
 
 mkdir -p "${WR}/cgi-bin" "${AW}/dirdata"
 
-# script + helpers (awstats.pl falls back to /usr/share/awstats/{lib,lang,plugins})
+# script + helpers (awstats.pl falls back to /usr/share/awstats/{lib,lang,plugins}).
+# Copies, not symlinks: lighttpd/hiawatha serve the stats host with symlinks
+# disabled (403). Every cleanup copies them again, so package updates arrive.
 for f in $(dirname "${AWPL}")/aw*.pl ; do
-	[ -f "${f}" ] && ln -sfn "${f}" "${WR}/cgi-bin/$(basename "${f}")"
+	[ -f "${f}" ] || continue
+	rm -f "${WR}/cgi-bin/$(basename "${f}")"
+	install -m 0755 -o root -g root "${f}" "${WR}/cgi-bin/$(basename "${f}")"
 done
 
 cp -f "$(ls ${KLOXO_PATH}/file/stats/custom.awstats_index.php 2>/dev/null || echo ${KLOXO_PATH}/file/stats/awstats_index.php)" \

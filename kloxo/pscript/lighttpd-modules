@@ -1,0 +1,58 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+#
+#    KloxoNext - lighttpd: load only the modules this lighttpd build can load
+#
+#    The panel's lighttpd.conf lists modules of the RHEL build (mod_evasive ...).
+#    Run before every start (lighttpd.service.d/kloxonext-modules.conf, installed by
+#    'lighttpd-modules setup'): lighttpd itself tests the configuration, and every
+#    module it reports as impossible to load is commented out (#kn-missing).
+#    Modules compiled into lighttpd (no .so file on recent versions) stay listed.
+#
+
+CONF=/etc/lighttpd/lighttpd.conf
+
+cmd_modules() {
+	local i out m
+
+	[ -f "${CONF}" ] || return 0
+	command -v lighttpd >/dev/null 2>&1 || return 0
+
+	# start from the full list (a module may have been installed since)
+	sed -i 's/^#kn-missing //' "${CONF}"
+
+	for i in $(seq 1 30) ; do
+		out="$(lighttpd -tt -f "${CONF}" 2>&1)"
+		m="$(echo "${out}" | grep -o 'dlopen() failed for: [^ ]*/mod_[a-z0-9_]*\.so' | head -1 | sed 's#.*/##; s#\.so$##')"
+		[ -z "${m}" ] && break
+		sed -i "/^[[:space:]]*\"${m}\"/ s/^/#kn-missing /" "${CONF}"
+		grep -q "^#kn-missing[[:space:]]*\"${m}\"" "${CONF}" || break
+	done
+}
+
+cmd_setup() {
+	mkdir -p /etc/systemd/system/lighttpd.service.d
+	cat > /etc/systemd/system/lighttpd.service.d/kloxonext-modules.conf <<-'EOF'
+	# KloxoNext - only the modules this lighttpd build has (see /script/lighttpd-modules);
+	# websites and their logs live in /home (Ubuntu's unit protects it)
+	[Service]
+	ProtectHome=no
+	# the module filter first: the unit's own config test would fail before it
+	ExecStartPre=
+	ExecStartPre=+/bin/bash /usr/local/lxlabs/kloxo/pscript/lighttpd-modules modules
+	ExecStartPre=/usr/sbin/lighttpd -tt -f /etc/lighttpd/lighttpd.conf
+	ExecReload=
+	ExecReload=+/bin/bash /usr/local/lxlabs/kloxo/pscript/lighttpd-modules modules
+	ExecReload=/usr/sbin/lighttpd -tt -f /etc/lighttpd/lighttpd.conf
+	ExecReload=/bin/kill -USR1 $MAINPID
+	EOF
+	chmod 644 /etc/systemd/system/lighttpd.service.d/kloxonext-modules.conf
+	systemctl daemon-reload
+	cmd_modules
+}
+
+case "$1" in
+	setup)   cmd_setup ;;
+	modules) cmd_modules ;;
+	*)       echo "usage: $0 setup|modules" ; exit 2 ;;
+esac

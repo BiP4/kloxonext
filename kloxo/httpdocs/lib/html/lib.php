@@ -8541,6 +8541,23 @@ function setAllWebServerInstall($nolog = null)
 		$confpath = "/opt/configs/{$v}/etc/conf";
 
 		if ($v === 'apache') {
+			// KloxoNext - Debian/Ubuntu: /etc/httpd tree + apache2 service override
+			if (OsPlatform::isDebian()) {
+				if (!isRpmInstalled('apache2')) {
+					OsPlatform::install('httpd httpd-tools mod_fcgid');
+				}
+
+				exec("sh /script/apache-debian-layout setup >/dev/null 2>&1");
+
+				// the Apache main include (Listen, vhosts) and the PHP handler are set up by
+				// the php_type of the web server, which a former nginx install never had
+				if (!file_exists('/etc/httpd/conf.d/~lxcenter.conf')) {
+					lxfile_cp(getLinkCustomfile('../file/apache/etc/conf.d', '~lxcenter.conf'), '/etc/httpd/conf.d/~lxcenter.conf');
+				}
+
+				exec("lxphp.exe ../bin/misc/set-default-phptype.php >/dev/null 2>&1");
+			}
+
 			$a24mpath = "/etc/httpd/conf.modules.d";
 // httpd 24 is now the default			
 
@@ -8570,6 +8587,12 @@ function setAllWebServerInstall($nolog = null)
 			} else {
 				OsPlatform::install($t);
 				log_cleanup("- Install '{$v}'", $nolog);
+			}
+
+			// KloxoNext - lighttpd: load only the modules this build has (mod_evasive is
+			// RHEL-only) and let the service reach /home (Ubuntu's unit protects it)
+			if ($v === 'lighttpd') {
+				exec("sh /script/lighttpd-modules setup >/dev/null 2>&1");
 			}
 		}
 	}

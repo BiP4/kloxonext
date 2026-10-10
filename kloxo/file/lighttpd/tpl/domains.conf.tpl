@@ -265,6 +265,7 @@ if ($enablestats) {
 		if ($statsprotect) {
 ?>
 
+	var.stats_domain = "<?=$domainname;?>"
 	include "<?=$globalspath;?>/dirprotect_stats.conf"
 <?php
 		}
