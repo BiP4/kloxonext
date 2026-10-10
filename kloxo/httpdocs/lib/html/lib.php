@@ -5327,6 +5327,35 @@ function installEasyinstaller($nolog = null)
 	}
 }
 
+// KloxoNext - images/ for the logo, and no leftover skeleton index.html (old KloxoNG page or
+// the new-domain page with its placeholders) next to the index.php of a system page
+function kn_page_dir_without_skeleton($dir)
+{
+	if (!is_dir("{$dir}/images")) {
+		lxfile_mkdir("{$dir}/images");
+	}
+
+	$idx = "{$dir}/index.html";
+
+	if (is_file($idx)) {
+		$c = (string)@file_get_contents($idx, false, null, 0, 4096);
+
+		if (strpos($c, 'Default Page for') !== false || strpos($c, 'kloxonext-default-page') !== false) {
+			@unlink($idx);
+		}
+	}
+
+	// the KloxoNG skeleton images (exact copies only)
+	$old = array('logo.png' => 'eb59c3a7f21f28caddd88396523069d0', 'kloxong.png' => 'b44266bfe1c3ce77d44e4caa0287a508',
+		'kloxong_big.png' => '5e2a0e5a28a64f113615e0d9d37f1be2', 'abstract.jpg' => '0d1c791310019dff059bdfaaf3d7e462');
+
+	foreach ($old as $f => $md5) {
+		if (is_file("{$dir}/images/{$f}") && md5_file("{$dir}/images/{$f}") === $md5) {
+			@unlink("{$dir}/images/{$f}");
+		}
+	}
+}
+
 function setDefaultPages($nolog = null)
 {
 	log_cleanup("Initialize some skeletons", $nolog);
@@ -5363,10 +5392,11 @@ function setDefaultPages($nolog = null)
 			lxfile_cp(getLinkCustomfile($filepath, "default_index.php"), "{$httpdpath}/{$p}/index.php");
 		}
 
-		// KloxoNext - the error pages are self-contained (no skeleton, its index.html would replace /error/)
+		// KloxoNext - these pages are index.php + inc.php; from the skeleton they only need images/
+		// (the skeleton's index.html is the page of a new domain, with <%domainname%> placeholders)
 		if ($p !== 'error') {
-			log_cleanup("- Skeleton for {$p} web page", $nolog);
-			lxshell_unzip("__system__", "{$httpdpath}/{$p}/", $targetzip);
+			log_cleanup("- Images folder for {$p} web page", $nolog);
+			kn_page_dir_without_skeleton("{$httpdpath}/{$p}");
 		}
 
 		log_cleanup("- robots.txt for {$p} web page", $nolog);
@@ -5395,11 +5425,9 @@ function setDefaultPages($nolog = null)
 	lxfile_unix_chown("{$hdocspath}/login/inc2.php", "lxlabs:lxlabs");
 	lxfile_unix_chmod("{$hdocspath}/login/inc2.php", "0644");
 
-	log_cleanup("- Skeleton for panel login web page", $nolog);
-	lxshell_unzip("__system__", "{$hdocspath}/login", $sourcezip);
-
-	log_cleanup("- Skeleton for panel root web page", $nolog);
-	lxshell_unzip("__system__", "{$hdocspath}", $sourcezip);
+	log_cleanup("- Images folder for panel login and root web page", $nolog);
+	kn_page_dir_without_skeleton("{$hdocspath}/login");
+	kn_page_dir_without_skeleton("{$hdocspath}");
 
 	log_cleanup("- Files for error web pages", $nolog);
 	lxfile_unix_chown("{$hdocspath}/error", "lxlabs:lxlabs");

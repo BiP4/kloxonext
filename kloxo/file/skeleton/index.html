@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!-- kloxonext-default-page: replace or delete this file when you upload your site -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<meta name="robots" content="noindex, nofollow">
+	<title><%domainname%> · Website ready</title>
+<style>
+:root {
+	--bg: #f4f6fb; --surface: #fff; --surface-2: #f8fafc; --border: #e3e8f0; --text: #0f172a; --text-2: #475569; --text-3: #64748b;
+	--primary: #2563eb; --primary-hover: #1d4ed8; --on-primary: #fff; --primary-soft: #e8efff;
+	--success: #15803d; --success-soft: #e7f6ec;
+	--font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0b1120; --surface: #111a2e; --surface-2: #0f1729; --border: #1f2a44; --text: #e2e8f0; --text-2: #b6c2d6; --text-3: #8a97ad;
+		--primary: #60a5fa; --primary-hover: #93c5fd; --on-primary: #0b1120; --primary-soft: rgba(96, 165, 250, .14);
+		--success: #4ade80; --success-soft: rgba(74, 222, 128, .12);
+	}
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+	font-family: var(--font); font-size: 15px; line-height: 1.55; color: var(--text);
+	background:
+		radial-gradient(1200px 600px at 10% -10%, rgba(59, 130, 246, .16), transparent 60%),
+		radial-gradient(900px 500px at 110% 110%, rgba(139, 92, 246, .14), transparent 60%),
+		var(--bg);
+	min-height: 100vh; display: flex; flex-direction: column;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-hover); text-decoration: underline; }
+code { font-family: var(--mono); font-size: 13px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; word-break: break-all; }
+.page-head { display: flex; align-items: center; padding: 20px 28px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 600; font-size: 18px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; font-weight: 800; }
+.brand b { color: var(--primary); }
+.brand img { height: 36px; width: auto; }
+.page-main { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 8px 16px 24px; }
+.card { width: 100%; max-width: 760px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 20px 50px rgba(15, 23, 42, .12); padding: 32px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--success); background: var(--success-soft); padding: 4px 10px; border-radius: 999px; }
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+h1 { font-size: 26px; margin: 14px 0 6px; word-break: break-word; }
+.sub { margin: 0 0 24px; color: var(--text-2); }
+h2 { font-size: 15px; margin: 26px 0 10px; }
+.links { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.link { display: block; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
+.link:hover { border-color: var(--primary); text-decoration: none; color: var(--text); }
+.link strong { display: block; color: var(--primary); }
+.link span { display: block; font-size: 12.5px; color: var(--text-3); word-break: break-all; }
+ol, ul { margin: 0; padding-left: 20px; }
+li { margin: 6px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+th { color: var(--text-2); font-weight: 600; width: 34%; }
+.note { margin-top: 24px; padding: 12px 14px; border-radius: 10px; background: var(--primary-soft); color: var(--text-2); font-size: 13.5px; }
+.page-foot { text-align: center; padding: 18px; color: var(--text-3); font-size: 12px; }
+@media (max-width: 520px) { .card { padding: 24px 18px; } .page-head { padding: 16px; } h1 { font-size: 22px; } th { width: 42%; } }
+</style>
+</head>
+<body>
+	<header class="page-head">
+		<span class="brand" id="brand">
+			<span class="brand-mark" aria-hidden="true">K</span>
+			<span>Kloxo<b>Next</b></span>
+		</span>
+	</header>
+
+	<main class="page-main">
+		<section class="card">
+			<span class="badge">Website is online</span>
+			<h1><%domainname%></h1>
+			<p class="sub">The domain is set up on this server and answers on the web. This is a placeholder page:
+				upload your website to replace it.</p>
+
+			<h2>Quick links</h2>
+			<div class="links">
+				<a class="link" href="https://cp.<%domainname%>/"><strong>Control panel</strong><span>cp.<%domainname%></span></a>
+				<a class="link" href="https://webmail.<%domainname%>/"><strong>Webmail</strong><span>webmail.<%domainname%></span></a>
+				<a class="link" href="https://stats.<%domainname%>/"><strong>Statistics</strong><span>stats.<%domainname%> (password protected)</span></a>
+			</div>
+
+			<h2>Publish your website</h2>
+			<ol>
+				<li>Upload your files with the <b>File Manager</b> of the control panel, or over <b>FTP / SFTP</b>
+					to <code>ftp.<%domainname%></code> with the FTP account of the domain.</li>
+				<li>Put them in the document root of the domain, the folder that contains this page.</li>
+				<li>Delete this <code>index.html</code> (it would be shown before an <code>index.php</code>).</li>
+				<li>For a CMS (WordPress, Joomla, ...) create a MySQL database in the control panel first.</li>
+			</ol>
+
+			<h2>Email settings</h2>
+			<table>
+				<tr><th>Incoming (IMAP)</th><td><code>mail.<%domainname%></code> port 993, SSL/TLS</td></tr>
+				<tr><th>Incoming (POP3)</th><td><code>mail.<%domainname%></code> port 995, SSL/TLS</td></tr>
+				<tr><th>Outgoing (SMTP)</th><td><code>mail.<%domainname%></code> port 465 SSL/TLS or 587 STARTTLS, with authentication</td></tr>
+				<tr><th>User name</th><td>the full address, for example <code>info@<%domainname%></code></td></tr>
+			</table>
+
+			<p class="note">Account: <b><%clientname%></b>.
+				<span id="kn-contact">Questions about this hosting account: <a href="mailto:<%contactemail%>"><%contactemail%></a>.</span>
+				HTTPS: a free certificate (Let's Encrypt) can be issued from the control panel, under SSL.</p>
+		</section>
+	</main>
+
+	<footer class="page-foot">Hosted with KloxoNext</footer>
+
+	<script>
+	/* no contact address on the account: no empty mail link */
+	(function () {
+		var c = document.getElementById('kn-contact');
+		var a = c ? c.querySelector('a') : null;
+		if (a && a.textContent.replace(/\s+/g, '').indexOf('@') === -1) { c.parentNode.removeChild(c); }
+	})();
+
+	/* the provider's logo, when the panel has one (images/logo.png) */
+	(function () {
+		var img = new Image();
+		img.onload = function () {
+			if (img.naturalWidth > 1) {
+				var b = document.getElementById('brand');
+				b.innerHTML = '';
+				img.alt = '';
+				b.appendChild(img);
+			}
+		};
+		img.src = './images/logo.png';
+	})();
+	</script>
+</body>
+</html>

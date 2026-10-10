@@ -52,6 +52,9 @@ fi
 # KloxoNext - nexus for every account, once per server (flag in etc/flag)
 lxphp.exe ../bin/misc/skin-default-nexus.php
 
+# KloxoNext - new design for the untouched placeholder page of existing domains, once
+lxphp.exe ../bin/misc/update-default-pages.php
+
 echo
 echo "*** Restart services - BEGIN ***"
 if [ "${1}" == "nokloxorestart" ] ; then

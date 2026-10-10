@@ -11,6 +11,10 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 - Security hardening: SQL escaping everywhere, shell argument quoting, file manager kept inside
   its root, stricter document root validation.
 - Adding a domain to a client: usage counters no longer break on PHP 8.
+- New design for the page of a new domain (quick links, publishing steps, mail settings),
+  the "account suspended" page and the "site not configured" page; existing domains still
+  showing the untouched KloxoNG placeholder get the new page once.
+- LxGuard: no TypeError on PHP 8, no qmail commands on Postfix servers.
 
 ## 2026-10-10
 
