@@ -1551,7 +1551,7 @@ class HtmlLib
 		if (strpos($path, '/display.php') !== false) {
 ?>
 			<a <?= $target ?> href="<?= $path ?>?<?= $this->get_get_from_post(null, $post) ?>">
-				<?= $this->print_div_for_divbutton($key, $imgflag, $linkflag, $form_name, $name, $image, $descr) ?>
+				<?php $this->print_div_for_divbutton($key, $imgflag, $linkflag, $form_name, $name, $image, $descr); ?>
 			</a>
 <?php
 		} else {
@@ -1565,13 +1565,13 @@ class HtmlLib
 <?php
 				}
 ?>
-				<?= $this->print_div_for_divbutton($key, $imgflag, $linkflag, $form_name, $name, $image, $descr) ?>
+				<?php $this->print_div_for_divbutton($key, $imgflag, $linkflag, $form_name, $name, $image, $descr); ?>
 			</form>
 <?php
 			} else {
 ?>
 			<a <?= $target ?> href="<?= $path ?>?<?= $this->get_get_from_post(null, $post) ?>">
-				<?= $this->print_div_for_divbutton($key, $imgflag, $linkflag, $form_name, $name, $image, $descr) ?>
+				<?php $this->print_div_for_divbutton($key, $imgflag, $linkflag, $form_name, $name, $image, $descr); ?>
 			</a>
 <?php
 
@@ -4153,7 +4153,7 @@ class HtmlLib
 		<br/>
 
 		<div id="listaddform_<?= $unique_name ?>" style="<?= $visiblity ?>;" class="div_showhide">
-			<div><?= do_addform($parent, $class, null, true) ?></div> 
+			<div><?php do_addform($parent, $class, null, true); ?></div> 
 		</div>
 <?php
 	}
@@ -4575,7 +4575,7 @@ class HtmlLib
 		<div class="div_showhide">
 			<table width="100%" cellpadding="0" cellspacing="0" border="0" style="<?= $backgroundstring ?>  border: 1px solid #<?= $col ?>; padding: 10px;">
 				<tr>
-					<td><?= $this->print_list_submit($class, $blist, $unique_name) ?></td>
+					<td><?php $this->print_list_submit($class, $blist, $unique_name); ?></td>
 					<td><?= $this->print_search($parent, $class) ?></td>
 				</tr>
 			</table>
@@ -5979,7 +5979,7 @@ class HtmlLib
 						<?= $subactionstr ?>
 						<?= $cnamestr ?>
 						<?= $dttypestr ?>
-						<?= $this->print_input_vars($filter) ?>
+						<?php $this->print_input_vars($filter); ?>
 						Period
 						<select class='textbox' onChange='document.graphselectjump.submit()' name='frm_c_graph_time'>
 <?php
@@ -6121,7 +6121,7 @@ class HtmlLib
 
 					<?= $dttypestr ?>
 
-					<?= $this->print_input_vars($filter) ?>
+					<?php $this->print_input_vars($filter); ?>
 
 					<?= $filteropacitystringspan ?>
 
@@ -9775,7 +9775,7 @@ function uploadAbort(e) { // upload abort
 ?>
 
 		<form name="<?= $formname ?>" method="get" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
-			<?= $this->print_current_input_vars(array('frm_hpfilter')) ?>
+			<?php $this->print_current_input_vars(array('frm_hpfilter')); ?>
 
 			<input type="hidden" id="frm_hpfilter[<?= $filtername ?>][sortby]" name="frm_hpfilter[<?= $filtername ?>][sortby]" value="<?= $sortby ?>">
 			<input type="hidden" id="frm_hpfilter[<?= $filtername ?>][sortdir]" name="frm_hpfilter[<?= $filtername ?>][sortdir]" value="<?= $sortdir ?>">
@@ -9839,7 +9839,7 @@ function uploadAbort(e) { // upload abort
 												<input type='hidden' name='frm_token' value='<?= getCSRFToken(); ?>'>
 												<?= $this->print_current_input_var_unset_filter($filtername, array('sortby', 'sortdir', 'pagenum')) ?>
 
-												<?= $this->print_current_input_vars(array("frm_hpfilter")) ?>
+												<?php $this->print_current_input_vars(array("frm_hpfilter")); ?>
 
 												<input <?= $blackstyle ?> type="text" name="frm_hpfilter[<?= $filtername ?>][searchstring]" value="<?= $value ?>" class='searchbox' size="18">
 											</form>
@@ -9850,7 +9850,7 @@ function uploadAbort(e) { // upload abort
 										<td width="70">
 											<form name="lpform_showall" method="post" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
 												<input type='hidden' name='frm_token' value='<?= getCSRFToken(); ?>'>
-												<?= $this->print_current_input_vars(array("frm_hpfilter")) ?>
+												<?php $this->print_current_input_vars(array("frm_hpfilter")); ?>
 
 												<input type="hidden" id="frm_clear_filter" name="frm_clear_filter" value="true">
 												<table cellpadding="0" cellspacing="0" border="0" width="100%">

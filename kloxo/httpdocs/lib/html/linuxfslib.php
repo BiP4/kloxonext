@@ -706,9 +706,14 @@ function lxfile_generic_chmod_rec($file, $mod)
 	lxfile_unix_chmod_rec($file, $mod);
 }
 
+// KloxoNext - returns the result (lxuser_cp/lxuser_mv tested it: without a return value
+// every copy was deleted and every move undone - "lxuser_cp does not work", issue #650);
+// a link that is left alone on purpose counts as success
 function lxfile_generic_chown($file, $mod)
 {
-	lxfile_unix_chown($file, $mod);
+	$r = lxfile_unix_chown($file, $mod);
+
+	return ($r === null) ? true : (bool)$r;
 }
 
 function lxfile_generic_chown_rec($file, $mod)
