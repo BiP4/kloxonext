@@ -119,8 +119,14 @@ kloxo_install_bye() {
 			echo "  The password is shown only once - store it now."
 		fi
 	else
-		echo "  Open port 7779 on this server (master <-> slave communication)"
+		echo "  Port 7779 (master <-> slave communication) must be reachable from the master"
 		echo "  Then on the master: admin -> servers -> add server"
+	fi
+
+	if [ -n "${OPT_FIREWALL}" ] ; then
+		echo
+		echo "  Firewall: ports opened for web, FTP, mail, DNS, SSH and the panel"
+		echo "  (a provider firewall / security group must allow them too)"
 	fi
 
 	echo

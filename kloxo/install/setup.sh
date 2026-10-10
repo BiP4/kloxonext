@@ -26,6 +26,7 @@
 #   --php="84 85"         PHP branches for domains (default: 8.4 + newest available)
 #   --admin-password=XXX  password for 'admin' (default: random, printed at the end)
 #   --install-type=slave  install as slave node
+#   --no-firewall         do not open the ports / switch on the firewall
 #   --yes                 do not ask for confirmation
 #
 
@@ -51,6 +52,7 @@ APP_NAME='KloxoNext'
 OPT_PHP=""
 OPT_ADMIN_PASS=""
 OPT_YES=""
+OPT_FIREWALL=1
 
 if [ -f "${ppath}/etc/conf/slave-db.db" ] ; then
 	APP_TYPE='slave'
@@ -64,6 +66,7 @@ for arg in "$@" ; do
 		--admin-password=*) OPT_ADMIN_PASS="${arg#*=}" ;;
 		--install-type=*)   APP_TYPE="${arg#*=}" ;;
 		--yes|-y)           OPT_YES=1 ;;
+		--no-firewall)      OPT_FIREWALL="" ;;
 	esac
 done
 
@@ -269,6 +272,11 @@ sh /script/setup-mail
 
 step "Install third-party applications (phpMyAdmin, Roundcube, ...)"
 sh /script/thirdparty-update --install
+
+if [ -n "${OPT_FIREWALL}" ] ; then
+	step "Open the firewall ports (web, FTP, mail, DNS, SSH, panel)"
+	sh /script/firewall install-defaults "${installtype}" || echo "- firewall not configured: open the ports in Admin > Security > Firewall"
+fi
 
 step "Restart services"
 sh /script/restart-all --force >/dev/null 2>&1
