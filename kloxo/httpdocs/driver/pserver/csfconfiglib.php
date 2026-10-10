@@ -457,6 +457,8 @@ class csfconfig extends lxclass
 	{
 		$ip = self::validIp(isset($_POST['ip']) ? $_POST['ip'] : '');
 		$comment = substr(preg_replace('/[^A-Za-z0-9 ._:@\/()-]/', '', isset($_POST['comment']) ? (string)$_POST['comment'] : ''), 0, 80);
+		// a leading '-' would reach csf as an option
+		$comment = ltrim($comment, ' -');
 		$ttl = isset($_POST['ttl']) ? (int)$_POST['ttl'] : 3600;
 		$ttl = max(60, min($ttl, 31536000));
 

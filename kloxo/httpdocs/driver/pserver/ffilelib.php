@@ -557,7 +557,6 @@ class Ffile extends Lxclass
 
 		$iconpath = get_image_path();
 
-		$skin_name = $login->getSpecialObject('sp_specialplay')->skin_name;
 		$button_type = $login->getSpecialObject('sp_specialplay')->button_type;
 
 		if ($button_type !== 'image') {
@@ -568,11 +567,6 @@ class Ffile extends Lxclass
 			$icon_text = "<img height='16' src='{$iconpath}/ffile_show.gif'>";
 		}
 
-		// Hack hack
-
-		if (isFlatSkin($skin_name)) {
-		} else {
-		}
 ?>
 
 <div style="width:910px; margin:0 auto">

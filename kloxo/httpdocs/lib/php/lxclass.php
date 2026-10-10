@@ -3796,11 +3796,7 @@ abstract class Lxclass
 		}
 
 		if ($string === "list-domain") {
-			if ($this->isCustomer()) {
-				$string = "show-home";
-			} else {
-				$string = "show-home";
-			}
+			$string = "show-home";
 		}
 
 		if (!csa($string, "-")) {
@@ -6242,11 +6238,7 @@ class priv extends Lxaclass
 		}
 
 		if (cse($var, '_flag')) {
-			if (isset($this->__parent_o) && $this->__parent_o->isAdmin()) {
-				$this->$var = 'on';
-			} else {
-				$this->$var = 'on';
-			}
+			$this->$var = 'on';
 			return $this->$var;
 		}
 

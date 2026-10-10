@@ -47,7 +47,6 @@ class easyinstaller__linux extends LxDriverclass
 		$res['systemuser'] = $this->main->__var_username;
 		$res['installdir']=  $this->main->installdir;
 		$res['path'] =$this->main->__var_full_documentroot;
-		$res['src'] = "$sgbl->__path_kloxo_httpd_root/easyinstaller/{$this->main->appname}";
 
 		if ($this->main->dbname) {
 			$__tmpr = new mysqli($this->main->realhost, $this->main->dbuser, $this->main->dbpass);

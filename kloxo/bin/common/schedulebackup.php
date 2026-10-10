@@ -5,8 +5,6 @@ include_once "lib/html/displayinclude.php";
 echo("*** No this function because using cron instead scavenge for 'schedule backup'\n");
 return;
 
-schedulebackup_main();
-
 function schedulebackup_main()
 {
 	global $gbl, $sgbl, $login, $ghtml; 

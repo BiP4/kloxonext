@@ -1259,8 +1259,8 @@ function array_remove($array, $element)
 }
 
 function csb($haystack, $needle, $insensitive = 1)
-{ # Char Search Begin
-	return char_search_beg($haystack, $needle, $insensitive);
+{ # Char Search Begin ($insensitive was never used: the search is case sensitive)
+	return char_search_beg($haystack, $needle);
 }
 
 function char_search_beg($haystack, $needle)

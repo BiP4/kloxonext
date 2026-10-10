@@ -1766,7 +1766,7 @@ function getFromRemote($server, $filepass, $dt, $p)
 	$bp = basename($p);
 
 	if ($filepass['type'] === 'dir') {
-		$tfile = lx_tmp_file("__path_tmp", "lx_$bp");
+		$tfile = lx_tmp_file("lx_$bp");
 		getFromFileserv($server, $filepass, $tfile);
 		lxfile_mkdir("$dt/$bp");
 		lxshell_unzip_with_throw("$dt/$bp", $tfile);
@@ -2951,7 +2951,7 @@ function download_remote($url, $user, $pass, $localfile = null)
 	switch ($protocol) {
 		case 'ftp':
 		case 'ftps':
-			download_from_ftp($url, $user, $pass, $localfile);
+			download_from_ftp($url, $user, $pass, null, $localfile);
 			break;
 		case 'scp':
 		case 'sftp':
@@ -2963,15 +2963,20 @@ function download_remote($url, $user, $pass, $localfile = null)
 	}
 }
 
-function download_from_ftp($url, $user, $pass, $localfile = null)
+// $remotefile: path on the ftp server (taken from the url when empty)
+function download_from_ftp($url, $user, $pass, $remotefile = null, $localfile = null)
 {
 	global $login;
 
-	log_log("download", "$url $localfile");
+	if (!$remotefile) {
+		$remotefile = (string)parse_url($url, PHP_URL_PATH);
+	}
 
 	if (!$localfile) {
-		$localfile = basename($url);
+		$localfile = basename($remotefile);
 	}
+
+	log_log("download", "$url $remotefile $localfile");
 
 	$fn = lxftp_connect($url);
 	$auth = ftp_login($fn, $user, $pass);
@@ -2984,7 +2989,7 @@ function download_from_ftp($url, $user, $pass, $localfile = null)
 	ftp_pasv($fn, true);
 	$fp = lfopen($localfile, "w");
 
-	if (!ftp_fget($fn, $fp, $localfile, FTP_BINARY)) {
+	if (!ftp_fget($fn, $fp, $remotefile, FTP_BINARY)) {
 		throw new lxException($login->getThrow('file_download_failed'), '', $localfile);
 	}
 
@@ -3534,7 +3539,6 @@ function getMainQuotaVar($vlist)
 	$vlist['subweb_a_num'] = "";
 	$vlist['ftpuser_num'] = "";
 	$vlist['ddatabase_num'] = "";
-	$vlist['subweb_a_num'] = "";
 	$vlist['ssl_flag'] = "";
 	$vlist['inc_flag'] = "";
 	$vlist['php_flag'] = "";
@@ -8159,7 +8163,7 @@ function getTimeZoneList()
 
 	$global_list_path = null;
 
-	do_recurse_dir("/usr/share/zoneinfo/", "listFile", null);
+	do_recurse_dir("/usr/share/zoneinfo/", "listFile");
 
 	return $global_list_path;
 }

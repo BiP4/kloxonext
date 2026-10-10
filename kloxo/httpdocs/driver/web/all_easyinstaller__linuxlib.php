@@ -6,12 +6,7 @@ class all_easyinstaller__linux extends LxDriverclass
 	{
 		global $gbl, $sgbl, $login, $ghtml; 
 
-		if ($sgbl->dbg < 1) {
-			$list = lfile("__path_kloxo_httpd_root/easyinstallerdata/description/base_linux.data");
-		} else {
-			$list = lfile("__path_kloxo_httpd_root/easyinstallerdata/description/base_linux.data");
-		//	$list = lfile("__path_kloxo_httpd_root/easyinstallerdata/description/base_linux.data.debug");
-		}
+		$list = lfile("__path_kloxo_httpd_root/easyinstallerdata/description/base_linux.data");
 
 		$res = null;
 

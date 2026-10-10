@@ -104,18 +104,10 @@ class HtmlLib
 				$arkey = substr($key, strpos($key, "_aaa_") + 5);
 				$arval = $value;
 
-				if (!csa($arvar, "password") && !csa($arvar, "text")) {
-					$hvar[$arvar][$arkey] = $arval;
-				} else {
-					$hvar[$arvar][$arkey] = $arval;
-				} // [FIXME] Same behaviour?
+				$hvar[$arvar][$arkey] = $arval;
 			} else {
 				if (!is_array($value)) {
-					if (!csa($key, "password") && !csa($key, "text")) {
-						$hvar[$key] = $value;
-					} else {
-						$hvar[$key] = $value;
-					} // [FIXME] Same behaviour?
+					$hvar[$key] = $value;
 
 				} else {
 					$hvar[$key] = $value;
@@ -5815,11 +5807,7 @@ class HtmlLib
 		if (($sgbl->dbg > 0) && !(isset($gbl->__no_debug_redirect) && $gbl->__no_debug_redirect)) {
 			$cont = ob_get_contents();
 
-			if ($gbl->__fvar_dont_redirect || csa($cont, "Notice") || csa($cont, "Warning") || csa($cont, "Parse error")) {
-				print_time('full', "<br/>*** Page Generation Took: ");
-			} else {
-				print_time('full', "<br/>*** Page Generation Took: ");
-			}
+			print_time('full', "<br/>*** Page Generation Took: ");
 ?>
 			- Looks Like there are some errors... Or Been asked not to redirect. Not redirecting...<br/>
 			- Click <a href="<?= $redirect_url ?>">here</a> to go there Anyways.
@@ -6553,8 +6541,6 @@ class HtmlLib
 					$x = "2709";
 				} elseif ($a[0] === 'forward') {
 					$x = "2709";
-				} elseif ($a[0] === 'general') {
-					$x = "2353";
 				} else {
 					$x = "1f4d6";
 				}
@@ -9373,11 +9359,6 @@ function uploadAbort(e) { // upload abort
 			if (is_array($a)) {
 				// Dont print property etc...
 				continue;
-
-?>
-
-				<?= $name ?>.addMenuItem(<?= $name ?><?= $k ?>, frame1+"<?= $aa ?>", 'Properties', 'mainframe');
-<?php
 			} else {
 				// Hack hack...  NOt showing addforms in the top Menu... Also not showing in the tree view..
 				if (csa(strtolower($a), "addform") || (csa(strtolower($a), 'update') && !csa(strtolower($a), 'updateform'))) {

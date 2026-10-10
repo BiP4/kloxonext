@@ -453,7 +453,7 @@ class pservercore extends Lxclient
 
 		$global_list_path = null;
 
-		do_recurse_dir("/usr/share/zoneinfo/", "listFile", null);
+		do_recurse_dir("/usr/share/zoneinfo/", "listFile");
 
 		return $global_list_path;
 	}

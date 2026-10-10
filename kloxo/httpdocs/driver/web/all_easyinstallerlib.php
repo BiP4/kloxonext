@@ -368,14 +368,7 @@ myobj.scrollTop = <?php echo $scrollposition ?> ;
 
 	static function print_div_botton($position)
 	{
-		return;
-?> 
-<script>
-var myobj = document.getElementById('mydivbottom');
-myobj.scrollTop = 100;
-alert(myobj.scrollTop);
-</script>
-<?php 
+		// was a disabled scroll/alert debug script
 	}
 
 	function showRawPrint($subaction = null)

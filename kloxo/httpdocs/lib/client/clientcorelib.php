@@ -636,7 +636,8 @@ abstract class ClientCore extends Resourcecore
 			throw new lxException ($login->getThrow("failed_to_copy_license_file_permission_error"), 'licence');
 		}
 
-		decodeAndStoreLicense();
+		decodeAndStoreLicense(isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '',
+			lfile_get_contents("__path_program_etc/license.txt"));
 
 		// This is set so that the license alone feature - happens when the license expires - 
 		// will properly redirect back to the original page. 
