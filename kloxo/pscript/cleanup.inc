@@ -49,6 +49,9 @@ else
 	sh /script/fixdns >/dev/null 2>&1
 fi
 
+# KloxoNext - nexus for every account, once per server (flag in etc/flag)
+lxphp.exe ../bin/misc/skin-default-nexus.php
+
 echo
 echo "*** Restart services - BEGIN ***"
 if [ "${1}" == "nokloxorestart" ] ; then

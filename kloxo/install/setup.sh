@@ -264,6 +264,7 @@ sh /script/setdriver --server=localhost --class=dns --driver=bind >/dev/null 2>&
 sh /script/setdriver --server=localhost --class=spam --driver=bogofilter >/dev/null 2>&1
 
 sh /script/skin-set-for-all >/dev/null 2>&1
+(cd "${ppath}/httpdocs" && lxphp.exe ../bin/misc/skin-default-nexus.php --force)
 sh /script/set-hosts >/dev/null 2>&1
 sh /script/fix-service-list >/dev/null 2>&1
 
