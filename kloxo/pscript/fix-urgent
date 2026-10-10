@@ -35,6 +35,22 @@ fi
 sed -i 's/^#ForwardToWall=yes/ForwardToWall=no/g' /etc/systemd/journald.conf
 
 sh /script/fix-limits > /dev/null 2>&1
+
+# rc.local: Kloxo appends boot commands to it (pure-ftpd upload scanner, THP off for
+# MariaDB). Not executable, they never ran, and every 'systemctl daemon-reload'
+# logged "rc.local is not marked executable" on the console.
+for rcl in /etc/rc.d/rc.local /etc/rc.local ; do
+	[ -f "${rcl}" ] && [ ! -L "${rcl}" ] || continue
+	head -1 "${rcl}" | grep -q '^#!' || sed -i '1i #!/bin/sh' "${rcl}"
+	chmod 755 "${rcl}"
+done
+# EL keeps it in /etc/rc.d and links /etc/rc.local to it; Ubuntu has none by default
+if [ ! -e /etc/rc.local ] && [ ! -e /etc/rc.d/rc.local ] ; then
+	# no 'exit 0': the panel appends its commands at the end
+	printf '#!/bin/sh\n# KloxoNext - commands run at the end of the boot\n' > /etc/rc.local
+	chmod 755 /etc/rc.local
+fi
+
 os_debian_bind_compat
 os_systemd_overrides
 
