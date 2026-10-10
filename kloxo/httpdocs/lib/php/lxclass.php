@@ -2217,6 +2217,12 @@ abstract class Lxclass
 
 				$obj = new $class($this->__masterserver, $this->__readserver, $name);
 				$obj->setFromArray($res[0]);
+
+				// KloxoNext - not below this parent: an empty stand-in (see objectactionlib)
+				if (!$res) {
+					$obj->__kn_notfound = true;
+				}
+
 				$this->{$list}[$name] = $obj;
 			} else {
 				$this->{$list}[$name] = exec_class_method($class, 'initThisObject', $this, $class, $name);

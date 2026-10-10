@@ -361,6 +361,13 @@ function createPrincipleObject()
 				break;
 			}
 
+			// KloxoNext - the name is not below this parent: getFromList made an empty
+			// stand-in. Never act on it - saving or deleting it would hit the real row
+			// (and files) of the same name owned by someone else.
+			if (!empty($object->__kn_notfound)) {
+				throw new lxException($login->getThrow("no_permission"), '', "{$v['class']}: {$v['nname']}");
+			}
+
 			if (!$object->isLogin() && !is_object($object->getParentO())) {
 				dprint("<br> <h1>... Parent got currupted for " . $object->getClass() . ":$object->nname with parent " .
 						$__tparent->getClass() . ":$__tparent->nname $object->__parent_o <br> \n");
