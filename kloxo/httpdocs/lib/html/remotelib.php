@@ -12,7 +12,9 @@ function do_remote($rmt)
 		}
 
 		log_message("Remote Object: {$robject->get__table()}:{$robject->nname}:{$robject->dbaction}:$sub\n");
-		$driver = get_class($robject->driverApp);
+		// PHP 8: get_class(null) is fatal and took the whole backend down (objects
+		// deleted on a slave have no driver)
+		$driver = is_object($robject->driverApp ?? null) ? get_class($robject->driverApp) : '-';
 		dprint("Remote Object: {$robject->get__table()}:$driver:{$robject->nname}:{$robject->dbaction}:$sub\n");
 	} else {
 		if (is_array($rmt->func)) {

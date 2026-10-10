@@ -700,11 +700,8 @@ abstract class Lxclass
 
 		$cl = $this->get__table();
 
-		if (isset($this->$var) && $this->$var && $this->$var !== "localhost") {
-			return false;
-		} else {
-			return true;
-		}
+		// also this server's own IP/hostname (see isLocalhost() in lxlib.php)
+		return isLocalhost(isset($this->$var) ? $this->$var : null);
 	}
 
 

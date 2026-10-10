@@ -2630,10 +2630,55 @@ function save_login()
 
 function isLocalhost($var)
 {
-	if ($var && $var !== "localhost") {
-		return false;
+	if (!$var || $var === "localhost") {
+		return true;
 	}
-	return true;
+
+	// KloxoNext - a slave knows itself by the name the master gave it (its IP or
+	// hostname): objects sent by the master carry that name, and calling it
+	// remotely failed with "Machine does not exist in DB"
+	return in_array(strtolower(trim($var)), kn_own_machine_names(), true);
+}
+
+// The names this server answers to: its addresses, its hostname and, on a slave,
+// the name the master uses for it. Cached for the life of the process.
+function kn_own_machine_names()
+{
+	global $sgbl;
+
+	static $names = null;
+
+	if ($names !== null) {
+		return $names;
+	}
+
+	$names = array('127.0.0.1', '::1');
+
+	$h = gethostname();
+
+	if ($h) {
+		$names[] = strtolower($h);
+	}
+
+	$out = @shell_exec('hostname -I 2>/dev/null');
+
+	foreach (preg_split('/\s+/', (string)$out, -1, PREG_SPLIT_NO_EMPTY) as $ip) {
+		$names[] = strtolower($ip);
+	}
+
+	$db = (isset($sgbl->__path_slave_db)) ? $sgbl->__path_slave_db : '/usr/local/lxlabs/kloxo/etc/conf/slave-db.db';
+
+	if (is_readable($db)) {
+		$rmt = @unserialize(file_get_contents($db));
+
+		if (is_object($rmt) && !empty($rmt->myname)) {
+			$names[] = strtolower(trim($rmt->myname));
+		}
+	}
+
+	$names = array_values(array_unique($names));
+
+	return $names;
 }
 
 function get_savedlogin($classname, $clientname)
