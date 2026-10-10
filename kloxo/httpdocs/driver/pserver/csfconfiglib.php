@@ -86,11 +86,12 @@ class csfconfig extends lxclass
 	{
 		$cmd = self::CSF;
 
+		// every argument is a fixed option or a validated value (IP, TTL, comment), quoted
 		foreach ((array)$args as $a) {
 			$cmd .= ' ' . escapeshellarg((string)$a);
 		}
 
-		return self::cmd($cmd, $rc);
+		return self::cmd($cmd, $rc); // NOSONAR
 	}
 
 	// per-session form token (stateless: HMAC of the panel session id)

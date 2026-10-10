@@ -2082,6 +2082,12 @@ class HtmlLib
 			$realname = substr($key, strlen('frm_'));
 			$this->get_htmlvar_details($key, $newclass, $variable, $extra, $htmlvalue);
 
+			// KloxoNext - ser_* is the serialized storage format of the database columns
+			// (setFromArray() unserializes it): never accepted from a form
+			if (strpos((string)$variable, 'ser_') === 0) {
+				continue;
+			}
+
 			$param[$variable] = $val;
 		}
 
