@@ -76,7 +76,6 @@ $gl_country_code["FO"] = "Faroe Islands";
 $gl_country_code["FR"] = "France";
 $gl_country_code["FX"] = "France (European Territory)";
 $gl_country_code["GA"] = "Gabon";
-$gl_country_code["GB"] = "Great Britain";
 $gl_country_code["GD"] = "Grenada";
 $gl_country_code["GE"] = "Georgia";
 $gl_country_code["GF"] = "French Guyana";

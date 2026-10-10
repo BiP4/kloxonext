@@ -21,7 +21,6 @@ class Utmp extends Lxdb
 		$nlist['ip_address'] = '15%';
 		$nlist['logintime'] = '10%';
 		$nlist['logouttime'] = '10%';
-		$nlist['logouttime'] = '10%';
 		$nlist['auxiliary_id'] = '10%';
 		$nlist["consuming_parent"] = "20%";
 		$nlist['logoutreason'] = '10%';

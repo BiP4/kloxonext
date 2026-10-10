@@ -20,7 +20,6 @@ $__keyword["system"] = "System";
 $__keyword["administration"] = "Administration";
 $__keyword["logout"] = "Logout";
 $__keyword["about"] = "About";
-$__keyword["status"] = "Status";
 $__keyword["enable"] = "Enable";
 $__keyword["disable"] = "Disable";
 $__keyword["console"] = "Console";
@@ -49,7 +48,6 @@ $__keyword["console_message"] = "You are actually logging into a user (%username
 	"you will be dropped into the vps. Note that you do not need an ipaddress to be configured on the vps to use this facility. " .
 	"You are basically connecting to the HOST as user, which will automatically transfer you to the vps.";
 $__keyword["advanced"] = "Advanced";
-$__keyword["domain"] = "Domain";
 
 // Add for "simplicity" skin menu
 $__keyword["server"] = "Server";
@@ -212,7 +210,6 @@ $__throw["could_not_create_tmp_dir"] = "Could not create TMP dir";
 $__throw["corrupted_file"] = "Corrupted File";
 $__throw["need"] = "Need";
 $__throw["could_not_connect_to_ftp_server"] = "Could not connect to FTP server";
-$__throw["could_not_connect_to_server"] = "Could not connect to server";
 $__throw["file_download_failed"] = "File download failed";
 $__throw["install_failed"] = "Install failed";
 $__throw["remove_failed"] = "Remove failed";
@@ -227,7 +224,6 @@ $__throw["invalid_plan_name"] = "Invalid plan name";
 $__throw["more_than_128_chars"] = "More than 128 chars";
 $__throw["more_than_255_chars"] = "More than 255 chars";
 
-$__throw["could_not_get_application_version_list"] = "Could not get Application version list";
 
 $__throw["no_object"] = "No object";
 $__throw["no_syncserver"] = "No Syncserver";
@@ -248,7 +244,6 @@ $__throw["invalid_ip_address"] = "Invalid IPAddress";
 $__throw["invalid_domain_in_primary_ns"] = "Invalid domain in primary NS";
 $__throw["invalid_domain_in_secondary_ns"] = "Invalid domain in secondary NS";
 
-$__throw["template_not_owner"] = "Template not owner";
 
 $__throw["invalid_char_in_template_name"] = "Invalid char in template name";
 $__throw["template_name_over_char_limit"] = "Template name over char limit";
@@ -296,7 +291,6 @@ $__throw["name_cannot_contain_colon"] = "Name cannot contain colon";
 $__throw["account_is_disabled"] = "Account is disabled";
 $__throw["name_cannot_contain_dash"] = "Name cannot contain dash";
 $__throw["name_cannot_contain_space"] = "Name cannot contain space";
-$__throw["already_exists"] = "Already exists";
 $__throw["can_not_set_own_limit"] = "Can not set own limit";
 $__throw["can_not_change_plan"] = "Can not change plan";
 $__throw["can_not_find_the_resource_plan"] = "Can not find the resource plan";
