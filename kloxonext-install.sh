@@ -35,7 +35,7 @@ if [ "$(id -u)" -ne 0 ] ; then
 	exit 1
 fi
 
-if [ -d /var/lib/mysql/kloxo ] && [ -f "${KPATH}/bin/kloxoversion" ] ; then
+if [[ -d /var/lib/mysql/kloxo ]] && [[ -f "${KPATH}/bin/kloxoversion" ]] ; then
 	echo "KloxoNext/Kloxo is already installed. Use 'sh /script/upcp' to update."
 	exit 1
 fi
@@ -51,7 +51,7 @@ cat <<'EOF'
  ------------------------------------------------------------------------
 EOF
 
-if [[ ! " ${PASS_ARGS[*]} " =~ " --yes " ]] && [ -t 0 ] ; then
+if [[ ! " ${PASS_ARGS[*]} " =~ " --yes " ]] && [[ -t 0 ]] ; then
 	read -r -p "Continue? [y/N] " a
 	[[ "${a}" =~ ^[Yy]$ ]] || exit 1
 fi
@@ -68,16 +68,16 @@ fi
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TMP=""
 
-if [ -n "${REPO}" ] ; then
+if [[ -n "${REPO}" ]] ; then
 	TMP="$(mktemp -d)"
 	git clone --depth 1 --branch "${BRANCH}" "${REPO}" "${TMP}/src" || exit 1
 	SRC="${TMP}/src"
-elif [ -d "${SRC}/.git" ] ; then
+elif [[ -d "${SRC}/.git" ]] ; then
 	REPO="$(git -C "${SRC}" remote get-url origin 2>/dev/null)"
 	BRANCH="$(git -C "${SRC}" rev-parse --abbrev-ref HEAD 2>/dev/null)"
 fi
 
-if [ ! -d "${SRC}/kloxo/httpdocs" ] ; then
+if [[ ! -d "${SRC}/kloxo/httpdocs" ]] ; then
 	echo "Cannot find the KloxoNext sources (expected ${SRC}/kloxo/httpdocs)."
 	exit 1
 fi
@@ -95,7 +95,7 @@ echo 'kloxo' > /script/programname
 mkdir -p "${KPATH}/etc/conf" "${KPATH}/log"
 
 # Where 'sh /script/kloxonext-update' (and the panel update page) fetch new versions
-if [ -n "${REPO}" ] ; then
+if [[ -n "${REPO}" ]] ; then
 	raw=""
 	if [[ "${REPO}" =~ github\.com[:/]([^/]+)/([^/.]+) ]] ; then
 		raw="https://raw.githubusercontent.com/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/${BRANCH}/kloxo/bin/kloxoversion"
@@ -110,11 +110,11 @@ EOF
 fi
 
 # installed commit: the panel Update page / auto-update compare it with GitHub
-if [ -d "${SRC}/.git" ] ; then
+if [[ -d "${SRC}/.git" ]] ; then
 	git -C "${SRC}" rev-parse HEAD > "${KPATH}/etc/conf/update-commit" 2>/dev/null
 fi
 
-[ -n "${TMP}" ] && rm -rf "${TMP}"
+[[ -n "${TMP}" ]] && rm -rf "${TMP}"
 
 getent group lxlabs >/dev/null || groupadd -r lxlabs
 getent passwd lxlabs >/dev/null || useradd -r -M -d /home/lxlabs -g lxlabs -s /sbin/nologin lxlabs

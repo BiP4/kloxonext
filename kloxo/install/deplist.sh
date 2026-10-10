@@ -1,7 +1,7 @@
 #!/bin/bash
 [ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 
-if [ "${1}" == "" ] ; then
+if [[ "${1}" == "" ]] ; then
 	t='php74'
 else
 	t=${1}

@@ -26,7 +26,7 @@ echo "== OS: ${OS_ID} ${OS_VERSION} family=${OS_FAMILY} pkg=${OS_PKG}"
 os_is_supported && ok "supported OS" || bad "os_is_supported"
 
 # dash compatibility: scripts must re-exec under bash
-if [ -x /bin/dash ] ; then
+if [[ -x /bin/dash ]] ; then
 	out="$(dash /script/php-branch-installer --help 2>&1)"
 	echo "${out}" | grep -q "format:" && ok "dash re-exec guard" || bad "dash re-exec guard: ${out}"
 fi
@@ -38,15 +38,15 @@ echo "== repos"
 os_setup_repos >/dev/null 2>&1
 b="$(php_available_branches)"
 echo "   available PHP branches: ${b}"
-PB="$(php_panel_branch)"; [ "${PB}" -ge 84 ] && [[ " ${b} " == *" ${PB} "* ]] && ok "panel PHP branch ${PB} available" || bad "no PHP >= 8.4 available"
+PB="$(php_panel_branch)"; [[ "${PB}" -ge 84 ]] && [[ " ${b} " == *" ${PB} "* ]] && ok "panel PHP branch ${PB} available" || bad "no PHP >= 8.4 available"
 
 echo "== phpm-installer php${PB}s / php${PB}m"
 bash /script/phpm-installer php${PB}s -y > /tmp/p84s.log 2>&1 || { tail -20 /tmp/p84s.log; }
 bash /script/phpm-installer php${PB}m > /tmp/p84m.log 2>&1 || { tail -20 /tmp/p84m.log; }
 
 for base in php${PB}s php${PB}m ; do
-	[ -x /opt/${base}/usr/bin/php ] && ok "${base} php binary" || bad "${base} php binary"
-	[ -x /opt/${base}/usr/sbin/php-fpm ] && ok "${base} php-fpm binary" || bad "${base} php-fpm binary"
+	[[ -x /opt/${base}/usr/bin/php ]] && ok "${base} php binary" || bad "${base} php binary"
+	[[ -x /opt/${base}/usr/sbin/php-fpm ]] && ok "${base} php-fpm binary" || bad "${base} php-fpm binary"
 	v="$(/opt/${base}/custom/php-cli.sh -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>&1)"
 	[ "${v}" == "$(php_dotted ${PB})" ] && ok "${base} cli wrapper runs PHP ${v}" || bad "${base} cli wrapper: ${v}"
 	mods="$(/opt/${base}/custom/php-cli.sh -m 2>&1)"
@@ -89,4 +89,4 @@ nginx -t -c /usr/local/lxlabs/kloxo/init/kloxo-nginx.conf > /tmp/nginx-t.log 2>&
 
 echo
 echo "RESULT ${OS_ID} ${OS_VERSION}: ${pass} passed, ${fail} failed"
-[ "${fail}" -eq 0 ]
+[[ "${fail}" -eq 0 ]]

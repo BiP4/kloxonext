@@ -51,8 +51,8 @@ if [ "$(rpm -q ^'$rpm_main_pck' | grep -v 'package .* is not installed')" == "" 
 	yum install -y $rpm_main_pck >/dev/null 2>&1
 fi
 
-if [ ! -L /script ] ; then
-	if [ -d /script ] ; then
+if [[ ! -L /script ]] ; then
+	if [[ -d /script ]] ; then
 		'rm' -rf /script >/dev/null 2>&1
 	fi
 

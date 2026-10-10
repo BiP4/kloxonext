@@ -31,7 +31,7 @@ yum_pack1="zip unzip"
 yum_pack2="wget"
 kloxoflname="kloxo"
 
-if [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
+if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]] ; then
 	echo
 	echo " ----------------------------------------------------------------------"
 	echo "  format: sh $0 --fork=<> --branch=<>"
@@ -49,13 +49,13 @@ fi
 
 echo "Start pack..."
 
-if [ "$1" == "" ] ; then
+if [[ "$1" == "" ]] ; then
 	kloxo_fork="KloxoNGCommunity"
 else
 	kloxo_fork=${1#--fork\=}
 fi
 
-if [ "$2" == "" ] ; then
+if [[ "$2" == "" ]] ; then
 	kloxo_branch="dev"
 else
 	kloxo_branch=${2#--branch\=}
@@ -73,7 +73,7 @@ if [ "$(rpm -q wget | grep -v 'package .* is not installed')" == "" ] ; then
 	yum install $yum_pack2 -y
 fi
 
-if [ ! -d ./kloxo/httpdocs ] ; then
+if [[ ! -d ./kloxo/httpdocs ]] ; then
 	echo "Download Kloxo git Sources"
 	'rm' -rf ${kloxo_branch}* > /dev/null 2>&1
 	wget https://github.com/${kloxo_fork}/kloxo8/archive/${kloxo_branch}.zip -O kloxo8-${kloxo_branch}.zip

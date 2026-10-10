@@ -9,7 +9,7 @@
 
 for fd in /proc/$$/fd/* ; do
 	n="${fd##*/}"
-	if [ "${n}" -gt 2 ] 2>/dev/null ; then
+	if [[ "${n}" -gt 2 ]] 2>/dev/null ; then
 		eval "exec ${n}>&-" 2>/dev/null
 	fi
 done

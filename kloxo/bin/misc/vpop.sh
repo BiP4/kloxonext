@@ -8,13 +8,13 @@ dbpass=$4
 
 MYSQLPR=`which mysql`
 
-if [ ! -f "$MYSQLPR" ]; then
+if [[ ! -f "$MYSQLPR" ]]; then
 	echo "mysql client is not there"
 	exit 1
 fi
 
 #if [ -f /var/lock/subsys/mysqld ] ;then
-	if [ -z $pass ] ; then
+	if [[ -z $pass ]] ; then
 		echo "CREATE DATABASE IF NOT EXISTS vpopmail;GRANT ALL PRIVILEGES ON vpopmail.* TO $dbuser@localhost IDENTIFIED BY '$dbpass'" | "$MYSQLPR" -u"$name"
 	else
 		echo "CREATE DATABASE IF NOT EXISTS vpopmail;GRANT ALL PRIVILEGES ON vpopmail.* TO $dbuser@localhost IDENTIFIED BY '$dbpass'" | "$MYSQLPR" -u"$name" -p"$pass"

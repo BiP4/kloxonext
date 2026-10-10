@@ -7,13 +7,13 @@
 
 root="/usr/local/lxlabs/kloxo"
 
-if [ -f "${root}/sbin/custom.kloxo.php" ] ; then
+if [[ -f "${root}/sbin/custom.kloxo.php" ]] ; then
 	server="${root}/sbin/custom.kloxo.php"
 else
 	server="${root}/sbin/kloxo.php"
 fi
 
-if [ -f "${root}/etc/conf/slave-db.db" ] ; then
+if [[ -f "${root}/etc/conf/slave-db.db" ]] ; then
 	mode="slave"
 else
 	mode="master"

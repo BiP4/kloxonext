@@ -32,18 +32,18 @@
 
 ppath="/usr/local/lxlabs/kloxo"
 
-if [ ! -d "${ppath}/pscript" ] ; then
+if [[ ! -d "${ppath}/pscript" ]] ; then
 	echo "KloxoNext files not found in ${ppath}. Use kloxonext-install.sh to bootstrap."
 	exit 1
 fi
 
 # /script must exist before anything else (every helper lives there)
-if [ ! -L /script ] ; then
+if [[ ! -L /script ]] ; then
 	rm -rf /script
 	ln -sf "${ppath}/pscript" /script
 fi
 
-[ -f /script/programname ] || echo 'kloxo' > /script/programname
+[[ -f /script/programname ]] || echo 'kloxo' > /script/programname
 
 . /script/os.inc
 . /script/php-native.inc
@@ -54,7 +54,7 @@ OPT_ADMIN_PASS=""
 OPT_YES=""
 OPT_FIREWALL=1
 
-if [ -f "${ppath}/etc/conf/slave-db.db" ] ; then
+if [[ -f "${ppath}/etc/conf/slave-db.db" ]] ; then
 	APP_TYPE='slave'
 else
 	APP_TYPE='master'
@@ -97,7 +97,7 @@ if os_is_supported ; then
 else
 	echo -e "Operating system              ${C_NO} (${OS_ID} ${OS_VERSION})"
 	echo "  Supported: AlmaLinux/Rocky 9.x and 10.x, Ubuntu 26.04 LTS"
-	[ -n "${OPT_YES}" ] || die "Unsupported OS (use --yes to force at your own risk)"
+	[[ -n "${OPT_YES}" ]] || die "Unsupported OS (use --yes to force at your own risk)"
 fi
 
 [ "$(uname -m)" == "x86_64" ] || [ "$(uname -m)" == "aarch64" ] || die "Only x86_64 and aarch64 are supported"
@@ -121,7 +121,7 @@ fi
 
 mkdir -p "${ppath}/log" "${ppath}/etc/conf" "${ppath}/etc/flag" "${ppath}/pid" "${ppath}/session"
 
-if [ -d /var/lib/mysql/kloxo ] ; then
+if [[ -d /var/lib/mysql/kloxo ]] ; then
 	kloxostate='installed'
 else
 	kloxostate='none'
@@ -216,7 +216,7 @@ PHP_PANEL_BRANCH="$(php_panel_branch)"
 step "Install PHP for the panel (php${PHP_PANEL_BRANCH}s)"
 sh /script/phpm-installer "php${PHP_PANEL_BRANCH}s" -y || die "Cannot install PHP $(php_dotted "${PHP_PANEL_BRANCH}") for the panel"
 
-if [ -z "${OPT_PHP}" ] ; then
+if [[ -z "${OPT_PHP}" ]] ; then
 	OPT_PHP="${PHP_PANEL_BRANCH} $(php_latest_available)"
 fi
 
@@ -274,7 +274,7 @@ sh /script/setup-mail
 step "Install third-party applications (phpMyAdmin, Roundcube, ...)"
 sh /script/thirdparty-update --install
 
-if [ -n "${OPT_FIREWALL}" ] ; then
+if [[ -n "${OPT_FIREWALL}" ]] ; then
 	step "Open the firewall ports (web, FTP, mail, DNS, SSH, panel)"
 	sh /script/firewall install-defaults "${installtype}" || echo "- firewall not configured: open the ports in Admin > Security > Firewall"
 fi

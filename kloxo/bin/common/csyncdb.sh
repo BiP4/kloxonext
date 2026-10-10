@@ -2,7 +2,7 @@
 [ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
 program=$1
 shift
-if [ $program = 'kloxo' ] ; then
+if [[ $program = 'kloxo' ]] ; then
 	db="kloxo4_2"
 else 
 	db="hypervm1_0"
@@ -12,7 +12,7 @@ echo -n "Taking backup of the current databse...   "
 lxphp.exe ../bin/common/mebackup.php >/dev/null
 echo "done.."
 
-if [ -z $1 ] ; then
+if [[ -z $1 ]] ; then
 	echo need the secondary slave address
 	exit;
 fi
