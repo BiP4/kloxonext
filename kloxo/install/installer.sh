@@ -30,7 +30,7 @@ $main_release_rpm="kloxo-release.rpm"
 $rpm_main_pck='kloxo'
 
 #if [ "$(rpm -qa kloxo-release)" == "" ] ; then
-if [ "$(rpm -q kloxo-release | grep -v 'package .* is not installed')" == "" ] ; then
+if [[ "$(rpm -q kloxo-release | grep -v 'package .* is not installed')" == "" ]] ; then
 
 
 	cd /tmp
@@ -47,7 +47,7 @@ else
 fi
 
 #if [ "$(rpm -qa ^'$rpm_main_pck')" == "" ] ; then
-if [ "$(rpm -q ^'$rpm_main_pck' | grep -v 'package .* is not installed')" == "" ] ; then
+if [[ "$(rpm -q ^'$rpm_main_pck' | grep -v 'package .* is not installed')" == "" ]] ; then
 	yum install -y $rpm_main_pck >/dev/null 2>&1
 fi
 

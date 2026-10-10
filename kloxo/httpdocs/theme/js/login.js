@@ -46,6 +46,6 @@ function forgotfield(form)
 }
 
 function ctrim(value) {
-	return value.replace(/^\s+|\s+$/g,"");
+	return value.trim();
 }
 

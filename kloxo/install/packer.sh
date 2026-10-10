@@ -64,22 +64,23 @@ fi
 #Preparing enviroment for packing
 
 #if [ "$(rpm -qa|grep unzip)" == "" ] ; then
-if [ "$(rpm -q unzip | grep -v 'package .* is not installed')" == "" ] ; then
+if [[ "$(rpm -q unzip | grep -v 'package .* is not installed')" == "" ]] ; then
 	yum install $yum_pack1 -y
 fi
 
 #if [ "$(rpm -qa|grep wget)" == "" ] ; then
-if [ "$(rpm -q wget | grep -v 'package .* is not installed')" == "" ] ; then
+if [[ "$(rpm -q wget | grep -v 'package .* is not installed')" == "" ]] ; then
 	yum install $yum_pack2 -y
 fi
 
 if [[ ! -d ./kloxo/httpdocs ]] ; then
 	echo "Download Kloxo git Sources"
 	'rm' -rf ${kloxo_branch}* > /dev/null 2>&1
-	wget https://github.com/${kloxo_fork}/kloxo8/archive/${kloxo_branch}.zip -O kloxo8-${kloxo_branch}.zip
+	# github answers with a single redirect to codeload.github.com
+	wget --max-redirect=1 https://github.com/${kloxo_fork}/kloxo8/archive/${kloxo_branch}.zip -O kloxo8-${kloxo_branch}.zip
 
-	unzip -oq kloxo-ng-${kloxo_branch}.zip > /dev/null 2>&1
-	'rm' -rf kloxo-ng-${kloxo_branch}.zip > /dev/null 2>&1
+	unzip -oq kloxo8-${kloxo_branch}.zip > /dev/null 2>&1
+	'rm' -rf kloxo8-${kloxo_branch}.zip > /dev/null 2>&1
 	'mv' -f ./kloxo*-${kloxo_branch}/kloxo ./
 	'rm' -rf ./kloxo*-${kloxo_branch}
 else

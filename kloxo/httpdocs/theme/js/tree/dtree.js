@@ -54,7 +54,7 @@ function Node(id, pid, name, url, title, target, icon, iconOpen, open, help, alt
 
 	this._ai = 0;
 
-	this._p;
+	this._p = undefined;
 
 };
 

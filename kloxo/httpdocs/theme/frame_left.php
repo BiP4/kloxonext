@@ -14,7 +14,8 @@ function lpanel_main()
 	init_language();
 
 ?>
-<html>
+<html lang="en">
+<title>Resources</title>
 <?php
 	print_meta_lan();
 

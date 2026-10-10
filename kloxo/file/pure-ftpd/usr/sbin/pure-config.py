@@ -31,10 +31,7 @@ import os
 import sys
 
 # autoconf stuff
-if '/usr/sbin'[0] == '/':
-    pureftpd = '/usr/sbin/pure-ftpd'
-else:
-    pureftpd = '/usr/sbin/pure-ftpd'
+pureftpd = '/usr/sbin/pure-ftpd'
 
 argv = sys.argv[1:]
 try:
@@ -43,7 +40,7 @@ except IndexError:
     print("Usage:", sys.argv[0], "<configuration file> [extra options]")
     sys.exit(1)
 
-comment = re.compile("[ ]*#+.*")
+comment = re.compile(" *#.*")
 
 # option_tuple members are lists as follows:
 # 0 - case insensitive regex to match
@@ -53,69 +50,69 @@ comment = re.compile("[ ]*#+.*")
 #             into a literal option which follows the flag
 
 option_tuple = (
-    ["IPV4Only[\s]+yes",                   "-4"                  ],
-    ["IPV6Only[\s]+yes",                   "-6"                  ],
-    ["FileSystemCharset\s+(\S+)",          "-8", None            ],
-    ["ClientCharset\s+(\S+)",              "-9", None            ],
-    ["ChrootEveryone[\s]+yes",             "-A"                  ],
-    ["TrustedGID[\s]+([\d]+)",             "-a", None            ],
-    ["BrokenClientsCompatibility[\s]+yes", "-b"                  ],
-    ["MaxClientsNumber\s+(\d+)",           "-c", None            ],
-    ["Daemonize\s+yes",                    "-B"                  ],
-    ["MaxClientsPerIP\s+(\d+)",            "-C", None            ],
-    ["VerboseLog\s+yes",                   "-d"                  ],
-    ["DisplayDotFiles\s+yes",              "-D"                  ],
-    ["AnonymousOnly\s+yes",                "-e"                  ],
-    ["MaxDiskUsage\s+(\d+)",               "-k", None            ],
-    ["NoAnonymous\s+yes",                  "-E"                  ],
-    ["SyslogFacility\s+(\S+)",             "-f", None            ],
-    ["FortunesFile\s+(\S+)",               "-F", None            ],
-    ["DontResolve\s+yes",                  "-H"                  ],
-    ["MaxIdleTime\s+(\d+)",                "-I", None            ],
-    ["LDAPConfigFile\s+(\S+)",             "-l", "ldap:",   None ],
-    ["MySQLConfigFile\s+(\S+)",            "-l", "mysql:",  None ],
-    ["PGSQLConfigFile\s+(\S+)",            "-l", "pgsql:",  None ],
-    ["PureDB\s+(\S+)",                     "-l", "puredb:", None ],
-    ["ExtAuth\s+(\S+)",                    "-l", "extauth:",None ],
-    ["PAMAuthentication\s+yes",            "-l", "pam"           ],
-    ["UnixAuthentication\s+yes",           "-l", "unix"          ],
-    ["LimitRecursion\s+(\d+)\s+(\d+)",     "-L", None, ":", None ],
-    ["AnonymousCanCreateDirs\s+yes",       "-M"                  ],
-    ["MaxLoad\s+(\d+)",                    "-m", None            ],
-    ["NATmode\s+yes",                      "-N"                  ],
-    ["CallUploadScript\s+yes",             "-o"                  ],
-    ["PassivePortRange\s+(\d+)\s+(\d+)",   "-p", None, ":", None ],
-    ["ForcePassiveIP\s+(\S+)",             "-P", None            ],
-    ["AnonymousRatio\s+(\d+)\s+(\d+)",     "-q", None, ":", None ],
-    ["UserRatio\s+(\d+)\s+(\d+)",          "-Q", None, ":", None ],
-    ["AntiWarez\s+yes",                    "-s"                  ],
-    ["Bind\s+(\S+)",                       "-S", None            ],
-    ["AnonymousBandwidth\s+([:0-9]+)",     "-t", None            ],
-    ["UserBandwidth\s+([:0-9]+)",          "-T", None            ],
-    ["Quota\s+([:0-9]+)",                  "-n", None            ],
-    ["Umask\s+(\d+):(\d+)",                "-U", None, ":", None ],
-    ["MinUID\s+(\d+)",                     "-u", None            ],
-    ["AllowUserFXP\s+yes",                 "-w"                  ],
-    ["AllowAnonymousFXP\s+yes",            "-W"                  ],
-    ["ProhibitDotFilesWrite\s+yes",        "-x"                  ],
-    ["ProhibitDotFilesRead\s+yes",         "-X"                  ],
-    ["AllowDotFiles\s+yes",                "-z"                  ],
-    ["AutoRename\s+yes",                   "-r"                  ],
-    ["AnonymousCantUpload\s+yes",          "-i"                  ],
-    ["TrustedIP\s+(\S+)",                  "-V", None            ],
-    ["LogPID\s+yes",                       "-1"                  ],
-    ["AltLog\s+(\S+)",                     "-O", None            ],
-    ["NoChmod\s+yes",                      "-R"                  ],
-    ["KeepAllFiles\s+yes",                 "-K"                  ],
-    ["CreateHomeDir\s+yes",                "-j"                  ],
-    ["NoRename\s+yes",                     "-G"                  ],
-    ["CustomerProof\s+yes",                "-Z"                  ],
-    ["NoTruncate\s+yes",                   "-0"                  ],
-    ["PIDFile\s+(\S+)",                    "-g", None            ],
-    ["TLSCipherSuite\s+(\S+)",             "-J", None            ],
-    ["PerUserLimits\s+([:0-9]+)",          "-y", None            ],
-    ["CertFile\s+(\S+)",                   "-2", None            ],
-    ["TLS\s+(\d)",                         "-Y", None            ])
+    [r"IPV4Only[\s]+yes",                   "-4"                  ],
+    [r"IPV6Only[\s]+yes",                   "-6"                  ],
+    [r"FileSystemCharset\s+(\S+)",          "-8", None            ],
+    [r"ClientCharset\s+(\S+)",              "-9", None            ],
+    [r"ChrootEveryone[\s]+yes",             "-A"                  ],
+    [r"TrustedGID[\s]+([\d]+)",             "-a", None            ],
+    [r"BrokenClientsCompatibility[\s]+yes", "-b"                  ],
+    [r"MaxClientsNumber\s+(\d+)",           "-c", None            ],
+    [r"Daemonize\s+yes",                    "-B"                  ],
+    [r"MaxClientsPerIP\s+(\d+)",            "-C", None            ],
+    [r"VerboseLog\s+yes",                   "-d"                  ],
+    [r"DisplayDotFiles\s+yes",              "-D"                  ],
+    [r"AnonymousOnly\s+yes",                "-e"                  ],
+    [r"MaxDiskUsage\s+(\d+)",               "-k", None            ],
+    [r"NoAnonymous\s+yes",                  "-E"                  ],
+    [r"SyslogFacility\s+(\S+)",             "-f", None            ],
+    [r"FortunesFile\s+(\S+)",               "-F", None            ],
+    [r"DontResolve\s+yes",                  "-H"                  ],
+    [r"MaxIdleTime\s+(\d+)",                "-I", None            ],
+    [r"LDAPConfigFile\s+(\S+)",             "-l", "ldap:",   None ],
+    [r"MySQLConfigFile\s+(\S+)",            "-l", "mysql:",  None ],
+    [r"PGSQLConfigFile\s+(\S+)",            "-l", "pgsql:",  None ],
+    [r"PureDB\s+(\S+)",                     "-l", "puredb:", None ],
+    [r"ExtAuth\s+(\S+)",                    "-l", "extauth:",None ],
+    [r"PAMAuthentication\s+yes",            "-l", "pam"           ],
+    [r"UnixAuthentication\s+yes",           "-l", "unix"          ],
+    [r"LimitRecursion\s+(\d+)\s+(\d+)",     "-L", None, ":", None ],
+    [r"AnonymousCanCreateDirs\s+yes",       "-M"                  ],
+    [r"MaxLoad\s+(\d+)",                    "-m", None            ],
+    [r"NATmode\s+yes",                      "-N"                  ],
+    [r"CallUploadScript\s+yes",             "-o"                  ],
+    [r"PassivePortRange\s+(\d+)\s+(\d+)",   "-p", None, ":", None ],
+    [r"ForcePassiveIP\s+(\S+)",             "-P", None            ],
+    [r"AnonymousRatio\s+(\d+)\s+(\d+)",     "-q", None, ":", None ],
+    [r"UserRatio\s+(\d+)\s+(\d+)",          "-Q", None, ":", None ],
+    [r"AntiWarez\s+yes",                    "-s"                  ],
+    [r"Bind\s+(\S+)",                       "-S", None            ],
+    [r"AnonymousBandwidth\s+([:0-9]+)",     "-t", None            ],
+    [r"UserBandwidth\s+([:0-9]+)",          "-T", None            ],
+    [r"Quota\s+([:0-9]+)",                  "-n", None            ],
+    [r"Umask\s+(\d+):(\d+)",                "-U", None, ":", None ],
+    [r"MinUID\s+(\d+)",                     "-u", None            ],
+    [r"AllowUserFXP\s+yes",                 "-w"                  ],
+    [r"AllowAnonymousFXP\s+yes",            "-W"                  ],
+    [r"ProhibitDotFilesWrite\s+yes",        "-x"                  ],
+    [r"ProhibitDotFilesRead\s+yes",         "-X"                  ],
+    [r"AllowDotFiles\s+yes",                "-z"                  ],
+    [r"AutoRename\s+yes",                   "-r"                  ],
+    [r"AnonymousCantUpload\s+yes",          "-i"                  ],
+    [r"TrustedIP\s+(\S+)",                  "-V", None            ],
+    [r"LogPID\s+yes",                       "-1"                  ],
+    [r"AltLog\s+(\S+)",                     "-O", None            ],
+    [r"NoChmod\s+yes",                      "-R"                  ],
+    [r"KeepAllFiles\s+yes",                 "-K"                  ],
+    [r"CreateHomeDir\s+yes",                "-j"                  ],
+    [r"NoRename\s+yes",                     "-G"                  ],
+    [r"CustomerProof\s+yes",                "-Z"                  ],
+    [r"NoTruncate\s+yes",                   "-0"                  ],
+    [r"PIDFile\s+(\S+)",                    "-g", None            ],
+    [r"TLSCipherSuite\s+(\S+)",             "-J", None            ],
+    [r"PerUserLimits\s+([:0-9]+)",          "-y", None            ],
+    [r"CertFile\s+(\S+)",                   "-2", None            ],
+    [r"TLS\s+(\d)",                         "-Y", None            ])
 
 for option in option_tuple:
     option[0] = re.compile(option[0], re.IGNORECASE)

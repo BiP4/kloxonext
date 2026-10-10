@@ -89,7 +89,7 @@ die() {
 
 step "Pre-flight checks"
 
-[ "$(id -u)" -eq 0 ] || die "You must be 'root' to install ${APP_NAME}"
+[[ "$(id -u)" -eq 0 ]] || die "You must be 'root' to install ${APP_NAME}"
 echo -e "Installing as root            ${C_OK}"
 
 if os_is_supported ; then
@@ -100,11 +100,11 @@ else
 	[[ -n "${OPT_YES}" ]] || die "Unsupported OS (use --yes to force at your own risk)"
 fi
 
-[ "$(uname -m)" == "x86_64" ] || [ "$(uname -m)" == "aarch64" ] || die "Only x86_64 and aarch64 are supported"
+[[ "$(uname -m)" == "x86_64" || "$(uname -m)" == "aarch64" ]] || die "Only x86_64 and aarch64 are supported"
 
 command -v hostname >/dev/null 2>&1 || { pkg_install hostname >/dev/null 2>&1 ; }
 
-if [ "$(hostname -f 2>/dev/null)" == "$(hostname -s)" ] ; then
+if [[ "$(hostname -f 2>/dev/null)" == "$(hostname -s)" ]] ; then
 	die "Hostname '$(hostname)' is not a FQDN. Run: hostnamectl set-hostname server1.example.com"
 fi
 echo -e "FQDN hostname                 ${C_OK} ($(hostname -f))"

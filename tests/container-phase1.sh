@@ -48,7 +48,7 @@ for base in php${PB}s php${PB}m ; do
 	[[ -x /opt/${base}/usr/bin/php ]] && ok "${base} php binary" || bad "${base} php binary"
 	[[ -x /opt/${base}/usr/sbin/php-fpm ]] && ok "${base} php-fpm binary" || bad "${base} php-fpm binary"
 	v="$(/opt/${base}/custom/php-cli.sh -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>&1)"
-	[ "${v}" == "$(php_dotted ${PB})" ] && ok "${base} cli wrapper runs PHP ${v}" || bad "${base} cli wrapper: ${v}"
+	[[ "${v}" == "$(php_dotted ${PB})" ]] && ok "${base} cli wrapper runs PHP ${v}" || bad "${base} cli wrapper: ${v}"
 	mods="$(/opt/${base}/custom/php-cli.sh -m 2>&1)"
 	for m in mysqli mbstring curl openssl; do
 		echo "${mods}" | grep -qix "${m}" && ok "${base} module ${m}" || bad "${base} module ${m}"
@@ -56,7 +56,7 @@ for base in php${PB}s php${PB}m ; do
 done
 
 php_set_branch ${PB}
-[ "$(cat /usr/local/lxlabs/kloxo/init/php_branch_active)" == "php${PB}m" ] && ok "php branch -> php${PB}m" || bad "php branch"
+[[ "$(cat /usr/local/lxlabs/kloxo/init/php_branch_active)" == "php${PB}m" ]] && ok "php branch -> php${PB}m" || bad "php branch"
 command -v php >/dev/null && ok "/usr/bin/php present ($(php -r 'echo PHP_VERSION;'))" || bad "/usr/bin/php missing"
 
 echo "== panel library under PHP 8.4"

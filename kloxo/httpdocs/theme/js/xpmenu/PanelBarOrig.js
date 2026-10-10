@@ -138,24 +138,13 @@ function getLink(pTarget, pstrLink, pstrLinkData)
 	return strRet;
 }
 
+// hover highlighting is disabled (handlers kept for the generated markup)
 function mousehover(pobjSrc)
 {
-	return;
-	var strCls = pobjSrc.className;
-	if (strCls == "menuHeaderExpanded")
-		pobjSrc.className = "menuHeaderExpandedOver";
-	else
-		pobjSrc.className = "menuHeaderCollapsedOver";
 }
 
 function mouseout(pobjSrc)
 {
-	return;
-	var strCls = pobjSrc.className;
-	if (strCls == "menuHeaderExpandedOver")
-		pobjSrc.className = "menuHeaderExpanded";
-	else
-		pobjSrc.className = "menuHeaderCollapsed";
 }
 
 function toggle(pobjSrc)

@@ -6,8 +6,17 @@ crossobj= document.getElementById(nameid);
 crossobj.style.visibility="hidden";
 }
 
+// used for generated passwords: crypto random, rejection sampling avoids modulo bias
 function getRandomNum(lbound, ubound) {
-	return (Math.floor(Math.random() * (ubound - lbound)) + lbound);
+	var range = ubound - lbound;
+	var limit = Math.floor(4294967296 / range) * range;
+	var buf = new Uint32Array(1);
+
+	do {
+		window.crypto.getRandomValues(buf);
+	} while (buf[0] >= limit);
+
+	return lbound + (buf[0] % range);
 }
 function getRandomChar() {
 	var numberChars = "0123456789";
@@ -61,7 +70,7 @@ function searchpage(C)
 	var j;
 	var K = C.value.toLowerCase();
 
-	var nK = K.replace(/^\s*/, "").replace(/\s*$/, "");
+	var nK = K.trim();
 	//alert("*" + nK + "*");
 	nK = nK.replace(" ", "_");
 	for (i = 0 ; i < global_action_box.length; i++) {
