@@ -2,7 +2,7 @@
 
 $path = __FILE__;
 $dir = dirname(dirname(dirname($path)));
-include_once "$dir/lib/html/include.php";
+include_once "$dir/lib/html/displayinclude.php";
 
 // print($dir . "<br>");
 
@@ -45,10 +45,21 @@ if (!csa($request, "sitepreview/")) {
 
 $request = strfrom($request, "sitepreview/");
 
-$domain = strtilfirst($request, "/");
+$domain = strtolower(strtilfirst($request, "/"));
 
 // print("request: " . $request . "<br>");
 // print("domain: " . $domain . "<br>");
+
+// KloxoNext - a preview is a panel feature: logged in (redirects to the login page
+// otherwise), a valid domain name, and a domain of this account (or the administrator)
+if (!preg_match('/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/', $domain)) {
+	header("HTTP/1.0 404 Not Found");
+	print("404--- <br> ");
+
+	exit;
+}
+
+initProgram();
 
 $sq = new Sqlite(null, 'web');
 $res = $sq->getRowsWhere("nname = '" . kn_sql_escape($domain) . "'");
@@ -57,6 +68,18 @@ if (!$res) {
 	print("Domain Doesn't exist\n");
 
 	exit;
+}
+
+if (!$login->isAdmin()) {
+	// web.customer_name is the client that owns the domain
+	$owner = isset($res[0]['customer_name']) ? (string)$res[0]['customer_name'] : '';
+
+	if ($owner === '' || $owner !== (string)$login->nname) {
+		header("HTTP/1.0 403 Forbidden");
+		print("Not your domain\n");
+
+		exit;
+	}
 }
 
 $server = $res[0]['syncserver'];

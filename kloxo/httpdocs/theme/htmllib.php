@@ -4009,7 +4009,7 @@ class HtmlLib
 		$filtername = $object->getFilterVariableForThis($class);
 ?>
 
-		<form name="form<?= $name ?>_page_<?= $place ?>" method="get" action="<?= $_SERVER["PHP_SELF"] ?>" accept-charset="utf-8">
+		<form name="form<?= $name ?>_page_<?= $place ?>" method="get" action="<?= htmlspecialchars($_SERVER["PHP_SELF"], ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
 <?php
 			$this->print_current_input_var_unset_filter($filtername, array('pagenum'));
 			$this->print_current_input_vars(array('frm_hpfilter'));
@@ -4262,7 +4262,7 @@ class HtmlLib
 		</div>
 
 		<div id=search_<?= $unique_name ?> style="<?= $visiblity ?>;" class="div_showhide">
-			<form name="lpfform_rsearch" method="get" action="<?= $url ?>" onsubmit="return true;" accept-charset="utf-8">
+			<form name="lpfform_rsearch" method="get" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" onsubmit="return true;" accept-charset="utf-8">
 				<table width='100%' border='0' align="center" cellpadding='0' style='<?= $backgroundstring ?> border: 1px solid #<?= $col ?>'>
 					<tr>
 						<td><img width=26 height=26 src="<?= $img ?>"></td>
@@ -5016,7 +5016,7 @@ class HtmlLib
 									<table <?= $blackstyle ?>>
 										<tr>
 											<td>
-												<form method="post" action="<?= $_SERVER["PHP_SELF"] ?>" accept-charset="utf-8">
+												<form method="post" action="<?= htmlspecialchars($_SERVER["PHP_SELF"], ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
 <?php
 				$this->print_current_input_vars(array("frm_confirmed"));
 				$this->print_input("hidden", "frm_confirmed", "yes");
@@ -5312,7 +5312,7 @@ class HtmlLib
 		<td width=10></td>
 		<td align="center" valign=bottom>
 
-			<form name="form<?= $form_name ?>" method="post" action="<?= $url ?>">
+			<form name="form<?= $form_name ?>" method="post" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>">
 				<input type='hidden' name='frm_token' value='<?= getCSRFToken(); ?>'>
 <?php
 		$this->print_input_vars($post);
@@ -8206,7 +8206,7 @@ function uploadProgress(e) { // upload process in progress
 }
 
 function uploadFinish(e) { // upload successfully finished
-	window.location.href = '/display.php?<?php echo str_replace("frm_action=updateform&frm_subaction=upload", "frm_action=show", $_SERVER['QUERY_STRING']); ?>';
+	window.location.href = '/display.php?' + <?php echo json_encode(str_replace("frm_action=updateform&frm_subaction=upload", "frm_action=show", (string)$_SERVER['QUERY_STRING']), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 
 	document.getElementById('progress_percent').innerHTML = '100%';
 	document.getElementById('progress').style.width = '400px';
@@ -9839,7 +9839,7 @@ function uploadAbort(e) { // upload abort
 
 ?>
 
-		<form name="<?= $formname ?>" method="get" action="<?= $url ?>" accept-charset="utf-8">
+		<form name="<?= $formname ?>" method="get" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
 			<?= $this->print_current_input_vars(array('frm_hpfilter')) ?>
 
 			<input type="hidden" id="frm_hpfilter[<?= $filtername ?>][sortby]" name="frm_hpfilter[<?= $filtername ?>][sortby]" value="<?= $sortby ?>">
@@ -9900,7 +9900,7 @@ function uploadAbort(e) { // upload abort
 									<tr>
 										<td width="10" height="22"></td>
 										<td height="22">
-											<form name="lpform_search" method="post" action="<?= $url ?>" onsubmit="return checksearch(this,1);" accept-charset="utf-8">
+											<form name="lpform_search" method="post" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" onsubmit="return checksearch(this,1);" accept-charset="utf-8">
 												<input type='hidden' name='frm_token' value='<?= getCSRFToken(); ?>'>
 												<?= $this->print_current_input_var_unset_filter($filtername, array('sortby', 'sortdir', 'pagenum')) ?>
 
@@ -9913,7 +9913,7 @@ function uploadAbort(e) { // upload abort
 										<td height="22" width="20"><a href='javascript:document.lpform_search.submit()'><?=$search_text;?></a></td>
 										<td width="30" height="22">&nbsp;&nbsp;&nbsp;</td>
 										<td width="70">
-											<form name="lpform_showall" method="post" action="<?= $url ?>" accept-charset="utf-8">
+											<form name="lpform_showall" method="post" action="<?= htmlspecialchars((string)$url, ENT_QUOTES, 'UTF-8') ?>" accept-charset="utf-8">
 												<input type='hidden' name='frm_token' value='<?= getCSRFToken(); ?>'>
 												<?= $this->print_current_input_vars(array("frm_hpfilter")) ?>
 

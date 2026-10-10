@@ -7,12 +7,21 @@
 
 	$state = 0;
 
-	$host = $a["HTTP_HOST"];
+	// KloxoNext - every part of the redirect is checked: it is printed into a script
+	$host = (string)($a["HTTP_HOST"] ?? '');
 	$splitter = explode(":", $host);
-	$domain = $splitter[0];
-	$port = ($splitter[1]) ? $splitter[1] : '7778';
-	$requesturi = $a["REQUEST_URI"];
-	$scheme = $a["HTTP_SCHEME"];
+	$domain = strtolower($splitter[0]);
+	$port = (isset($splitter[1]) && ctype_digit($splitter[1])) ? $splitter[1] : '7778';
+	$requesturi = (string)($a["REQUEST_URI"] ?? '/');
+	$scheme = (($a["HTTP_SCHEME"] ?? '') === 'https') ? 'https' : 'http';
+
+	if (!preg_match('/^[a-z0-9.-]{1,253}$/', $domain)) {
+		$domain = '';
+	}
+
+	if ($requesturi === '' || $requesturi[0] !== '/' || strpos($requesturi, '//') === 0) {
+		$requesturi = '/';
+	}
 
 	$domain_pure = preg_replace('/(cp\.|webmail\.|www\.|mail\.)(.*)/i', "$2", $domain);
 
@@ -39,12 +48,13 @@
 		}
 	}
 
-	if ($state !== 0) {
+	if ($state !== 0 && $domain !== '' && preg_match('/^[a-z0-9.-]{1,253}$/', $domain) && ctype_digit((string)$port)) {
 	/*
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: {$scheme}://{$domain}:{$port}{$requesturi}");
 		exit();
 	*/
-		$s = "<script> location.replace('{$scheme}://{$domain}:{$port}{$requesturi}'); </script>";
+		$target = json_encode("{$scheme}://{$domain}:{$port}{$requesturi}", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES);
+		$s = "<script> location.replace({$target}); </script>";
 		echo $s;
 	}

@@ -134,11 +134,18 @@ function json_print($type, $opt, $message)
 		$out['message'] = $message;
 		$out['return'] = $type;
 		$out = json_encode($out);
+		$ctype = 'application/json';
 	} else {
 		$out = $message;
+		$ctype = 'text/plain';
 	}
 
 	while(@ob_end_clean());
+
+	// KloxoNext - an API answer, never rendered as a page
+	if (!headers_sent()) {
+		header("Content-Type: {$ctype}; charset=utf-8");
+	}
 
 	print($out);
 }

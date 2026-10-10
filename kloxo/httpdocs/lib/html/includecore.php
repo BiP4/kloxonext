@@ -43,6 +43,12 @@ function lx_array_map_safe($callback, $value)
 	return $value;
 }
 
+// KloxoNext - PHP_SELF carries any path after the script name (/display.php/"><x>) and is
+// printed in forms and links: keep it to the script itself
+if (isset($_SERVER['SCRIPT_NAME']) && $_SERVER['SCRIPT_NAME'] !== '') {
+	$_SERVER['PHP_SELF'] = $_SERVER['SCRIPT_NAME'];
+}
+
 if (function_exists('mysqli_report')) {
 	mysqli_report(MYSQLI_REPORT_OFF);
 }
