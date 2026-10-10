@@ -213,6 +213,13 @@ class dns__ extends lxDriverClass
 	{
 		$ret = rl_exec_get('localhost', 'localhost', 'getDnsMasters', array($this->main->syncserver));
 
+		// KloxoNext - while a subdomain is being added its 'domain' row (dtype subdomain) is
+		// not saved yet, so getDnsMasters() still lists it: named.conf got a zone without a
+		// file and BIND did not start ("loading from master file master/<sub> failed")
+		if (is_array($ret) && $this->getSubdomainParent()) {
+			$ret = array_values(array_diff($ret, array($this->main->nname)));
+		}
+
 		return $ret;
 	}
 
