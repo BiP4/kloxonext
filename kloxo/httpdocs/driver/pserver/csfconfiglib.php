@@ -647,8 +647,8 @@ class csfconfig extends lxclass
 		<input type="hidden" name="kn_csf_action" value="saveconf">
 
 		<div class="kn-csf-bar">
-			<input type="search" id="kn-csf-search" placeholder="Search options and help (e.g. TCP_IN, LF_SSHD, port scan)">
-			<select id="kn-csf-jump">
+			<input type="search" id="kn-csf-search" aria-label="Search options" placeholder="Search options and help (e.g. TCP_IN, LF_SSHD, port scan)">
+			<select id="kn-csf-jump" aria-label="Go to section">
 				<option value="">Go to section…</option>
 				<?php $i = 0; foreach ($sections as $name => $s) { ?>
 				<option value="kn-csf-s<?= $i++ ?>"><?= self::h($name) ?> (<?= count($s['opts']) ?>)</option>
@@ -760,7 +760,7 @@ class csfconfig extends lxclass
 			<input type="hidden" name="file" value="<?= self::h($f) ?>">
 			<h3><?= self::h(self::DIR . '/' . $f) ?></h3>
 			<p class="kn-csf-sdesc"><?= self::h($list[$f]) ?>. A backup is kept; when csf does not accept the file the previous version is restored.</p>
-			<textarea name="content" rows="24" spellcheck="false"><?= self::h((string)@file_get_contents(self::DIR . '/' . $f)) ?></textarea>
+			<textarea name="content" rows="24" spellcheck="false" aria-label="File content"><?= self::h((string)@file_get_contents(self::DIR . '/' . $f)) ?></textarea>
 			<button type="submit" class="kn-csf-btn primary">Save &amp; restart csf</button>
 		</form>
 		<?php } ?>

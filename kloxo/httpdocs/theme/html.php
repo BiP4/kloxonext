@@ -425,7 +425,7 @@ class Html extends Htmllib
 ?>
 			<td background='<?= $imgtablerowhead ?>' style="width: 10px; text-align: center">
 				<form name="formselectall<?= $unique_name; ?>" value='hello'>
-					<input type='checkbox' name="selectall<?= $unique_name; ?>" value='on' <?= $checked; ?> onclick="javascript:calljselectall<?= $unique_name; ?>()">
+					<input aria-label="Select all" type='checkbox' name="selectall<?= $unique_name; ?>" value='on' <?= $checked; ?> onclick="javascript:calljselectall<?= $unique_name; ?>()">
 				</form>
 			</td>
 		</tr>

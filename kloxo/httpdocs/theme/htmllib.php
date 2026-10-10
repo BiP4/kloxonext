@@ -2179,36 +2179,36 @@ class HtmlLib
 			</tr>
 			<tr class="tablerow1">
 				<td class="col">&nbsp;</td>
-				<td align="center"><input type="checkbox" name="userall" onclick="allrights(document.chmod,this,'user');"></td>
-				<td align="center"><input type="checkbox" name="groupall" onclick="allrights(document.chmod,this,'group');"></td>
-				<td align="center"><input type="checkbox" name="otherall" onclick="allrights(document.chmod,this,'other');"></td>
+				<td align="center"><input aria-label="All rights for user" type="checkbox" name="userall" onclick="allrights(document.chmod,this,'user');"></td>
+				<td align="center"><input aria-label="All rights for group" type="checkbox" name="groupall" onclick="allrights(document.chmod,this,'group');"></td>
+				<td align="center"><input aria-label="All rights for other" type="checkbox" name="otherall" onclick="allrights(document.chmod,this,'other');"></td>
 			</tr>
 			<tr class="tablerow0">
 				<td class="col"><?=$login->getKeywordUC('permissions_read');?></td>
-				<td align="center"><input type="checkbox" name="ru" onclick="changerights(document.chmod,this,'user',4);"></td>
-				<td align="center"><input type="checkbox" name="rg" onclick="changerights(document.chmod,this,'group',4);"></td>
-				<td align="center"><input type="checkbox" name="ro" onclick="changerights(document.chmod,this,'other',4);"></td>
+				<td align="center"><input aria-label="Read user" type="checkbox" name="ru" onclick="changerights(document.chmod,this,'user',4);"></td>
+				<td align="center"><input aria-label="Read group" type="checkbox" name="rg" onclick="changerights(document.chmod,this,'group',4);"></td>
+				<td align="center"><input aria-label="Read other" type="checkbox" name="ro" onclick="changerights(document.chmod,this,'other',4);"></td>
 			</tr>
 			<tr class="tablerow1">
 				<td class="col"><?=$login->getKeywordUC('permissions_write');?></td>
-				<td align="center"><input type="checkbox" name="wu" onclick="changerights(document.chmod,this,'user',2);"></td>
-				<td align="center"><input type="checkbox" name="wg" onclick="changerights(document.chmod,this,'group',2);"></td>
-				<td align="center"><input type="checkbox" name="wo" onclick="changerights(document.chmod,this,'other',2);"></td>
+				<td align="center"><input aria-label="Write user" type="checkbox" name="wu" onclick="changerights(document.chmod,this,'user',2);"></td>
+				<td align="center"><input aria-label="Write group" type="checkbox" name="wg" onclick="changerights(document.chmod,this,'group',2);"></td>
+				<td align="center"><input aria-label="Write other" type="checkbox" name="wo" onclick="changerights(document.chmod,this,'other',2);"></td>
 			</tr>
 			<tr class="tablerow0">
 				<td class="col"><?=$login->getKeywordUC('permissions_execute');?></td>
-				<td align="center"><input type="checkbox" name="eu" onclick="changerights(document.chmod,this,'user',1);"></td>
-				<td align="center"><input type="checkbox" name="eg" onclick="changerights(document.chmod,this,'group',1);"></td>
-				<td align="center"><input type="checkbox" name="eo" onclick="changerights(document.chmod,this,'other',1);"></td>
+				<td align="center"><input aria-label="Execute user" type="checkbox" name="eu" onclick="changerights(document.chmod,this,'user',1);"></td>
+				<td align="center"><input aria-label="Execute group" type="checkbox" name="eg" onclick="changerights(document.chmod,this,'group',1);"></td>
+				<td align="center"><input aria-label="Execute other" type="checkbox" name="eo" onclick="changerights(document.chmod,this,'other',1);"></td>
 			</tr>
 			<tr>
 				<td colspan="4" height="2">&nbsp;</td>
 			</tr>
 			<tr class="tablerow1">
 				<td class="col"><?=$login->getKeywordUC('permissions_total');?></td> 
-				<td align="center"><input type="text" size="1" name="user" class="textchmoddisable" value="<?= $user ?>"></td>
-				<td align="center"><input type="text" size="1" name="group" class="textchmoddisable" value="<?= $group ?>"></td>
-				<td align="center"><input type="text" size="1" name="other" class="textchmoddisable" value="<?= $other ?>"></td>
+				<td align="center"><input aria-label="User permission" type="text" size="1" name="user" class="textchmoddisable" value="<?= $user ?>"></td>
+				<td align="center"><input aria-label="Group permission" type="text" size="1" name="group" class="textchmoddisable" value="<?= $group ?>"></td>
+				<td align="center"><input aria-label="Other permission" type="text" size="1" name="other" class="textchmoddisable" value="<?= $other ?>"></td>
 			</tr>
 			<tr>
 				<td colspan="4" height="4">&nbsp;</td>
@@ -2218,7 +2218,7 @@ class HtmlLib
 ?>
 			<tr>
 				<td colspan="4">&nbsp;&nbsp;<?=$login->getKeywordUC('permissions_target');?>:&nbsp;
-					<select name="frm_ffile_c_target_f">
+					<select aria-label="Apply to" name="frm_ffile_c_target_f">
 						<option value="file"><?=$login->getKeywordUC('permissions_target_file');?></option>
 						<option value="dir"><?=$login->getKeywordUC('permissions_target_dir');?></option>
 						<option SELECTED value="all"><?=$login->getKeywordUC('permissions_target_all');?></option>
@@ -2229,7 +2229,7 @@ class HtmlLib
 				<td colspan="4" height="4">&nbsp;</td>
 			</tr>
 			<tr>
-				<td colspan="4">&nbsp;&nbsp;<input type="checkbox" name="frm_ffile_c_recursive_f">&nbsp;<?=$login->getKeywordUC('permissions_recursively');?></td>
+				<td colspan="4">&nbsp;&nbsp;<input aria-label="Recursive" type="checkbox" name="frm_ffile_c_recursive_f">&nbsp;<?=$login->getKeywordUC('permissions_recursively');?></td>
 			</tr>
 <?php
 	}
@@ -2324,7 +2324,7 @@ class HtmlLib
 			</tr>
 			<tr>
 				<td colspan="1">&nbsp;&nbsp;<?=$login->getKeywordUC('ownership_user');?>:</td>
-				<td colspan="3"><select name="frm_ffile_c_user_f">
+				<td colspan="3"><select aria-label="Owner user" name="frm_ffile_c_user_f">
 						<option SELECTED value="<?=$ffile->__username_o;?>"><?=$ffile->__username_o;?></option>
 						<option value="apache">apache</option>
 <?php
@@ -2342,7 +2342,7 @@ class HtmlLib
 			</tr>
 			<tr>
 				<td colspan="1">&nbsp;&nbsp;<?=$login->getKeywordUC('ownership_group');?>:</td>
-				<td colspan="3"><select name="frm_ffile_c_group_f">
+				<td colspan="3"><select aria-label="Owner group" name="frm_ffile_c_group_f">
 						<option SELECTED value="<?=$ffile->__username_o;?>"><?=$ffile->__username_o;?></option>
 						<option value="apache">apache</option>
 <?php
@@ -2362,7 +2362,7 @@ class HtmlLib
 				<td colspan="4" height="4">&nbsp;</td>
 			</tr>
 			<tr>
-				<td colspan="4">&nbsp;&nbsp;<input type="checkbox" name="frm_ffile_c_recursive_f">&nbsp;<?=$login->getKeywordUC('ownership_recursively');?></td>
+				<td colspan="4">&nbsp;&nbsp;<input aria-label="Recursive" type="checkbox" name="frm_ffile_c_recursive_f">&nbsp;<?=$login->getKeywordUC('ownership_recursively');?></td>
 			</tr>
 <?php
 	}
@@ -3964,7 +3964,7 @@ class HtmlLib
 	{
 ?>
 
-			<input type="<?= $type ?>" name="<?= $name ?>" value="<?= $value ?>" <?= $extra ?> />
+			<input aria-label="Value" type="<?= $type ?>" name="<?= $name ?>" value="<?= $value ?>" <?= $extra ?> />
 <?php
 	}
 
@@ -4290,7 +4290,7 @@ class HtmlLib
 				if ($width[0] === 's') {
 ?>
 
-									<select name="frm_hpfilter[<?= $filtername ?>][<?= $name ?>_o_cont]" class="searchbox" size="1" width="10" maxlength="30">
+									<select aria-label="Choose a value" name="frm_hpfilter[<?= $filtername ?>][<?= $name ?>_o_cont]" class="searchbox" size="1" width="10" maxlength="30">
 <?php
 					foreach ($width[1] as $v) {
 						$sel = '';
@@ -4311,7 +4311,7 @@ class HtmlLib
 			} else {
 ?>
 
-									<input type="text" name="frm_hpfilter[<?= $filtername ?>][<?= $name ?>_o_cont]" value="<?= $value ?>" class="searchbox" size="11" maxlength="30">
+									<input aria-label="Value" type="text" name="frm_hpfilter[<?= $filtername ?>][<?= $name ?>_o_cont]" value="<?= $value ?>" class="searchbox" size="11" maxlength="30">
 <?php
 			}
 ?>
@@ -4721,7 +4721,7 @@ class HtmlLib
 						<form name="formselectall<?= $unique_name ?>" method="get" accept-charset="utf-8">
 							<?= $filteropacitystringspan ?>
 
-							<input <?= $filteropacitystring ?> type=checkbox name="selectall<?= $unique_name ?>" value='on' <?= $checked ?> onclick="calljselectall<?= $unique_name ?>()">
+							<input aria-label="Value" <?= $filteropacitystring ?> type=checkbox name="selectall<?= $unique_name ?>" value='on' <?= $checked ?> onclick="calljselectall<?= $unique_name ?>()">
 							<?= $filteropacitystringspanend ?>
 
 						</form>
@@ -5076,7 +5076,7 @@ class HtmlLib
 			if ($rpagesize < 1000) {
 ?>
 
-														<select class="textbox" onchange="document.perpage_<?= $unique_name ?>.submit()" style="width:60px; border: 1px solid #888" name="frm_hpfilter[<?= $filtername ?>][pagesize]">
+														<select aria-label="Items per page" class="textbox" onchange="document.perpage_<?= $unique_name ?>.submit()" style="width:60px; border: 1px solid #888" name="frm_hpfilter[<?= $filtername ?>][pagesize]">
 <?php
 				$list = array($rpagesize / 2, $rpagesize, $rpagesize * 2, $rpagesize * 4, $rpagesize * 8, $rpagesize * 16);
 
@@ -5099,7 +5099,7 @@ class HtmlLib
 			} else {
 ?>
 
-														<input type="text" class="textbox" style="width:25px" name="frm_hpfilter[<?= $filtername ?>][pagesize]" value="<?= $f_page ?>">
+														<input aria-label="Value" type="text" class="textbox" style="width:25px" name="frm_hpfilter[<?= $filtername ?>][pagesize]" value="<?= $f_page ?>">
 <?php
 			}
 				
@@ -5149,7 +5149,7 @@ class HtmlLib
 											$this->print_current_input_var_unset_filter($filtername, array('pagenum'));
 											$this->print_current_input_vars(array('frm_hpfilter'));
 ?>
-											<input class="textbox small" style="width:40px; border: 1px solid #888" name="frm_hpfilter[<?= $filtername ?>][pagenum]" type="text" value="<?= $cgi_pagenum ?>"></td>
+											<input aria-label="Value" class="textbox small" style="width:40px; border: 1px solid #888" name="frm_hpfilter[<?= $filtername ?>][pagenum]" type="text" value="<?= $cgi_pagenum ?>"></td>
 <?php
 				if ($skin_name === 'feather') {
 ?>
@@ -5981,7 +5981,7 @@ class HtmlLib
 						<?= $dttypestr ?>
 						<?php $this->print_input_vars($filter); ?>
 						Period
-						<select class='textbox' onChange='document.graphselectjump.submit()' name='frm_c_graph_time'>
+						<select aria-label="Graph period" class='textbox' onChange='document.graphselectjump.submit()' name='frm_c_graph_time'>
 <?php
 		foreach ($list as $k => $l) {
 			$sssl = '';
@@ -6125,7 +6125,7 @@ class HtmlLib
 
 					<?= $filteropacitystringspan ?>
 
-					<select <?= $filteropacitystring ?> <?= $ststring ?> class="textbox select_switch" onChange='document.topjumpselect.submit()' name='frm_o_o[<?= $num ?>][nname]'>
+					<select aria-label="Choose a value" <?= $filteropacitystring ?> <?= $ststring ?> class="textbox select_switch" onChange='document.topjumpselect.submit()' name='frm_o_o[<?= $num ?>][nname]'>
 
 <?php
 		foreach ($list as $k => $l) {
@@ -7176,7 +7176,7 @@ class HtmlLib
 
 		<div class="div_note">
 			<div class="div_note_title" style="background:#6698c9 <?= $img_url ?>"><span style="font-weight:bold">&nbsp;Find</span></div>
-			<div><input style="width: 100%; border:0; padding:2px;" type='text' name='find' onKeyUp="searchpage(this)"></div>
+			<div><input aria-label="Find on this page" style="width: 100%; border:0; padding:2px;" type='text' name='find' onKeyUp="searchpage(this)"></div>
 		</div>
 		<br/>
 <?php
@@ -7357,10 +7357,10 @@ class HtmlLib
 		<?= $variable_description ?>
 
 		<br/>
-		<input class="<?= $tclass ?>" <?= $tdisabled ?> type="text" name="<?= $variable->text->name ?>" value="<?= $variable->text->value ?>" size="20">
+		<input aria-label="Value" class="<?= $tclass ?>" <?= $tdisabled ?> type="text" name="<?= $variable->text->name ?>" value="<?= $variable->text->value ?>" size="20">
 		<span class="small"><?= $variable->text->text ?></span>
 		<?= $variable->checkbox->desc ?>
-		<input class="<?= $ckclass ?>" type="checkbox" name="<?= $variable->checkbox->name ?>" value="<?= trim($variable->checkbox->value) ?>" <?= $checked ?> onclick="<?= "checkBoxTextToggle('$form', '{$variable->checkbox->name}', '{$variable->text->name}', '{$variable->checkbox->value}', '{$variable->text->value}');" ?>">
+		<input aria-label="Value" class="<?= $ckclass ?>" type="checkbox" name="<?= $variable->checkbox->name ?>" value="<?= trim($variable->checkbox->value) ?>" <?= $checked ?> onclick="<?= "checkBoxTextToggle('$form', '{$variable->checkbox->name}', '{$variable->text->name}', '{$variable->checkbox->value}', '{$variable->text->value}');" ?>">
 <?php
 	}
 
@@ -7621,7 +7621,7 @@ class HtmlLib
 
 		<br/>
 		<?= $variable->pretext ?>
-		<input class="<?= $variable->name ?> textbox" type="<?= $texttype ?>" style="width: 45%; border: 1px solid #aaa; margin: 2px 0 2px 0; padding: 2px 0 2px 0" name="<?= $variable->name ?>" value="<?= $m_value ?>"> <?= $variable->posttext ?>
+		<input aria-label="Value" class="<?= $variable->name ?> textbox" type="<?= $texttype ?>" style="width: 45%; border: 1px solid #aaa; margin: 2px 0 2px 0; padding: 2px 0 2px 0" name="<?= $variable->name ?>" value="<?= $m_value ?>"> <?= $variable->posttext ?>
 <?php
 
 		if ($variable->type === 'fileselect') {
@@ -7662,7 +7662,7 @@ class HtmlLib
 		if ($postvar) {
 ?>
 
-			<select style="width: 45%; margin: 2px" name="<?= $postvar->name ?>" value="">
+			<select aria-label="Choose a value" style="width: 45%; margin: 2px" name="<?= $postvar->name ?>" value="">
 <?php
 				foreach ($postvar->option as $vv) {
 ?>
@@ -7685,13 +7685,13 @@ class HtmlLib
 		foreach ($list as $k => $l) {
 ?>
 
-			<input type="radio" name="radio_<?= $variable ?>" value="<?= $k ?>"> <?= $l ?> <br/>
+			<input aria-label="Option" type="radio" name="radio_<?= $variable ?>" value="<?= $k ?>"> <?= $l ?> <br/>
 <?php
 		}
 ?>
 
-		<input type="radio" name="radio_<?= $variable ?>" value="__provide__"> Provide
-		<input type="textbox" name="<?= $variable ?> value="">
+		<input aria-label="Option" type="radio" name="radio_<?= $variable ?>" value="__provide__"> Provide
+		<input aria-label="Value" type="textbox" name="<?= $variable ?> value="">
 
 <?php
 	}
@@ -7838,7 +7838,7 @@ class HtmlLib
 
 					<?= $filteropacitystringspan ?>
 
-					<input style="border: 1px solid #aaa;" <?= $filteropacitystring ?> <?= $blackstyle ?> type=checkbox name="<?= $variable->name ?>" <?= $checkv ?> value="<?= $variable->value ?>">
+					<input aria-label="Value" style="border: 1px solid #aaa;" <?= $filteropacitystring ?> <?= $blackstyle ?> type=checkbox name="<?= $variable->name ?>" <?= $checkv ?> value="<?= $variable->value ?>">
 					<?= $variable_description ?> <?= $filteropacitystringspanend ?>
 <?php
 
@@ -7858,7 +7858,7 @@ class HtmlLib
 					<br/>
 					<?= $filteropacitystringspan ?>
 
-					<select style="border: 1px solid #aaa; margin: 2px" <?= $filteropacitystring ?> class="textbox" name="<?= $v ?>">
+					<select aria-label="Choose a value" style="border: 1px solid #aaa; margin: 2px" <?= $filteropacitystring ?> class="textbox" name="<?= $v ?>">
 <?php
 				foreach ($variable->option as $k => $option) {
 					$issel = false;
@@ -8204,7 +8204,7 @@ function uploadAbort(e) { // upload abort
 ?>
 
 					<?= $variable_description ?> <?= $myneedstring ?> <br/>
-					<input class="filebox" type="file" name="<?= $variable->name ?>" size="30">
+					<input aria-label="File" class="filebox" type="file" name="<?= $variable->name ?>" size="30">
 <?php
 				}
 				break;
@@ -8243,7 +8243,7 @@ function uploadAbort(e) { // upload abort
 ?>
 
 <script type="text/javascript" src="/editor/ckeditor/ckeditor.js"></script>
-<textarea class="ckeditor" name="<?=$variable->name;?>"><?php echo $value; ?></textarea>
+<textarea aria-label="Text" class="ckeditor" name="<?=$variable->name;?>"><?php echo $value; ?></textarea>
 <script>
 	CKEDITOR.replace( '<?=$variable->name;?>' , { customConfig: '<?=$jsconfig;?>' } );
 </script>
@@ -9841,7 +9841,7 @@ function uploadAbort(e) { // upload abort
 
 												<?php $this->print_current_input_vars(array("frm_hpfilter")); ?>
 
-												<input <?= $blackstyle ?> type="text" name="frm_hpfilter[<?= $filtername ?>][searchstring]" value="<?= $value ?>" class='searchbox' size="18">
+												<input aria-label="Value" <?= $blackstyle ?> type="text" name="frm_hpfilter[<?= $filtername ?>][searchstring]" value="<?= $value ?>" class='searchbox' size="18">
 											</form>
 										</td>
 										<td width="10" height="22">&nbsp;</td>

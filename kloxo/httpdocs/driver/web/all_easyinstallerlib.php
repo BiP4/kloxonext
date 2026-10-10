@@ -290,7 +290,7 @@ class all_easyinstaller extends Lxclass
 	<td rowspan=5 width=1 bgcolor=black></td> 
 	<td > <form method=post action=/display.php >
 	<?php $ghtml->print_current_input_vars(array('frm_searchstring')); ?> 
-	<input name=frm_searchstring type=text value=<?php echo $searchstring ?> >
+	<input aria-label="Search" name=frm_searchstring type=text value=<?php echo $searchstring ?> >
 	<input type=submit name=search value=Search class=submitbutton>
 	</form> 
 	</td>
