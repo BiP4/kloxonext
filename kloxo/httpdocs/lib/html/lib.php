@@ -2804,6 +2804,50 @@ function curl_get_file($file)
 	return $data;
 }
 
+// KloxoNext - downloads from the internet: http/https only (curl also speaks file://,
+// gopher:// ...), certificate and host name verified, redirects stay on http/https
+function kn_curl_internet($ch)
+{
+	curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+}
+
+// KloxoNext - a URL typed by a user (File Manager "download from URL"): http/https to a
+// public address only, not this server or the internal network
+function kn_public_url_ok($url)
+{
+	$p = parse_url((string)$url);
+
+	if (!$p || !isset($p['scheme'], $p['host']) || !in_array(strtolower($p['scheme']), array('http', 'https'), true)) {
+		return false;
+	}
+
+	$host = trim($p['host'], '[]');
+	$ips = filter_var($host, FILTER_VALIDATE_IP) ? array($host) : array();
+
+	if (!$ips) {
+		foreach ((array)@dns_get_record($host, DNS_A | DNS_AAAA) as $r) {
+			if (isset($r['ip'])) { $ips[] = $r['ip']; }
+			if (isset($r['ipv6'])) { $ips[] = $r['ipv6']; }
+		}
+	}
+
+	if (!$ips) {
+		return false;
+	}
+
+	foreach ($ips as $ip) {
+		if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 function curl_get_file_contents($file)
 {
 	$server = getDownloadServer();
@@ -2812,12 +2856,7 @@ function curl_get_file_contents($file)
 	ob_start();
 
 	curl_setopt($ch, CURLOPT_FAILONERROR, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-	// MR -- possible fix download/upload issue in php 5.3
-	curl_setopt($ch, CURLOPT_SSLVERSION, 3);
-	curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'SSLv3');
+	kn_curl_internet($ch);
 
 	curl_exec($ch);
 
@@ -2857,8 +2896,7 @@ function curl_general_get($url)
 	ob_start();
 
 	curl_setopt($ch, CURLOPT_FAILONERROR, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	kn_curl_internet($ch);
 	curl_exec($ch);
 
 	$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -3049,8 +3087,7 @@ function download_file($url, $localfile = null)
 	}
 
 	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	kn_curl_internet($ch);
 	curl_exec($ch);
 
 	dprint("Curl Message: " . curl_error($ch) . "\n");
@@ -3175,8 +3212,7 @@ function download_and_print_file($server, $file)
 	$ch = curl_init("$server/$file");
 
 	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	kn_curl_internet($ch);
 	curl_exec($ch);
 	curl_close($ch);
 }

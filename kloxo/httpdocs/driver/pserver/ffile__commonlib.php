@@ -199,6 +199,11 @@ class ffile__common
 			throw new lxException($login->getThrow('file_exists'), '', $fullpath);
 		}
 		
+		// KloxoNext - public http/https addresses only (the download runs on the server)
+		if (!kn_public_url_ok($this->main->download_url_f)) {
+			throw new lxException($login->getThrow('please_type_full_url_including_file_name'), '', $this->main->download_url_f);
+		}
+
 		download_file($this->main->download_url_f, $fullpath);
 		
 		return $fullpath;

@@ -10,8 +10,10 @@ function send_to_some_http_server($raddress, $port, $url)
 
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+	// KloxoNext - panel-to-panel call (master <-> slave): the servers use their own
+	// self-signed certificates and authenticate each other with the slave password
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // NOSONAR
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); // NOSONAR
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $url);
 
 	// MR -- importance if using ssl after openssl issue
