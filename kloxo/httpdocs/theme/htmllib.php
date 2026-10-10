@@ -8622,7 +8622,10 @@ function uploadAbort(e) { // upload abort
 ?>
 
 		<script>
-			top.bottomframe.updateStatusBar("<?=$message?>");
+			// KloxoNext - the status bar lived in the old bottom frame (nexus has no frames)
+			if (top.bottomframe && top.bottomframe.updateStatusBar) {
+				top.bottomframe.updateStatusBar(<?= json_encode((string)$message, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>);
+			}
 		</script>
 <?php
 	}

@@ -368,6 +368,7 @@ dTree.prototype.getSelected = function() {
 // Highlights the selected node
 
 dTree.prototype.s = function(id) {
+	var eNew, eOld;
 
 	if (!this.config.useSelection) return;
 
@@ -520,6 +521,7 @@ dTree.prototype.closeAllChildren = function(node) {
 // Change the status of a node(open or closed)
 
 dTree.prototype.nodeStatus = function(status, id, bottom) {
+	var eDiv, eIcon, eJoin;
 
 	eDiv	= document.getElementById('d' + this.obj + id);
 
@@ -661,6 +663,7 @@ if (!Array.prototype.push) {
 if (!Array.prototype.pop) {
 
 	Array.prototype.pop = function array_pop() {
+	var lastElement;
 
 		lastElement = this[this.length-1];
 

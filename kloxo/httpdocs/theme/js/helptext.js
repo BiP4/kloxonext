@@ -38,6 +38,7 @@ function findPosition( oLink ) {
 
 function showHelpInPos() 
 {
+	var tpos;
 	tpos = findPosition(document.getElementById('helppic')) + 30;
 	//showMenuInFrame('help',82,tpos);
 }

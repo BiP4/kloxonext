@@ -20,6 +20,7 @@ function fieldcheck(form)
 
 function forgotfield(form)
 {
+	var emailchk, m4;
 	m1="Enter the Username.";
 	m2="Enter the Email Id.";
 	m3="Enter the Username & Email Id.";

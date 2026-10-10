@@ -54,6 +54,7 @@ function generatePass(form, variable)
 
 function searchpage(C)
 {
+	var bid, nnid;
 	var i;
 	var j;
 	var K = C.value.toLowerCase();
@@ -124,6 +125,7 @@ function toggleVisibilityByClass(className)
 
 function toggleVisibilityById(id)
 {
+	var expandMess, retractMess;
 	var el = document.getElementById(id);
 
 	// if ( el.style.visibility == 'visible') {
@@ -306,6 +308,7 @@ function navigShowHelpMessage()
 
 var selFolderObj
 function selectFolder(obj, rootFolder, url){
+	var windowFolderSel;
 	selFolderObj=obj;
 	windowFolderSel=window.open(url,'FolderSel','toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,titlebar=no,width=500,height=400,top='+ parseInt((window.screen.height-185) / 2) +',left='+ parseInt((window.screen.width-210) / 2));
     windowFolderSel.focus();
@@ -347,6 +350,7 @@ function onMouseOutLinkButton(obj)
 }
 function histToggleHistory()
 {
+	var histMenu;
 
 	histMenu = document.getElementById('histMenu');
 	if (histMenuOn) {
@@ -511,6 +515,7 @@ function shiftOptionDown (form, variable, element)
 
 
 function multiSelectPopulate(form, variable, box1, box2) {
+	var field1, newOpt;
 	var i;
 	var n;
 	frm=document.forms[form];
@@ -594,6 +599,7 @@ function multiSelectRemove(form, variable, box)
 
 function jselectall(safrmelement,frmelecount, keyid ) 
 {
+	var ckb, cnam;
 	var c, d, n, i;
  c = 0; d = 0;
  n = frmelecount;
@@ -760,6 +766,7 @@ function rowPointer(tid) {
 
 function statechange(element,ename,frmname,status)
  {
+	var classtype, classtype1, classtype2;
 var en=0;
 var k;
 //alert(element.length);
@@ -964,6 +971,7 @@ document.frm_notification.submit();
 
 function setusername(form1,frm_domain)
 {
+	var dname, dnamef;
 	dnamef = "";
 	dnamef = document.form1.frm_domain.value;
 
@@ -1024,6 +1032,7 @@ if(element.checked == true) {
 
 function changerights(frmname,element,mode,val)
 {
+	var ckall;
 if(mode=='user')  {  txt=frmname.user;  ckall=frmname.userall;  } 
 if(mode=='group') {  txt=frmname.group; ckall=frmname.groupall; } 
 if(mode=='other') {  txt=frmname.other; ckall=frmname.otherall; } 
