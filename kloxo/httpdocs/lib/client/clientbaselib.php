@@ -111,6 +111,8 @@ class ClientBase extends ClientCore
 
 	function updateboxposReset($param)
 	{
+		global $login;
+
 		$login->boxpos = null;
 		$login->setUpdateSubaction();
 		$login->write();

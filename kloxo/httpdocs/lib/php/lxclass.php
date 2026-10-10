@@ -789,6 +789,8 @@ abstract class Lxclass
 
 	function getAllDrivers()
 	{
+		global $gbl;
+
 		$driverapp = $gbl->getSyncClass(null, $this->syncserver, $this->get__table());
 
 		$driver = $gbl->driver['localhost'][$this->syncserver];
@@ -2529,7 +2531,7 @@ abstract class Lxclass
 
 	function object_print()
 	{
-		static $tab;
+		static $tab = '';
 		$tab .= " ";
 		$cl = $this->getBackupChildList();
 
@@ -2567,7 +2569,7 @@ abstract class Lxclass
 	// Not needed now. Was used for databases. but now onwards, the entire cluster single database naming.
 	function changeNnameRewrite()
 	{
-		global $login;
+		global $sgbl, $login;
 
 		$rewrite = get_class_variable($this->get__table(), "__rewrite_nname_const");
 
@@ -5348,7 +5350,7 @@ abstract class Lxclass
 
 	function fix_syncserver_nname_problem()
 	{
-		global $login;
+		global $sgbl, $login;
 		$newserver = null;
 
 		$rewrite = get_class_variable($this->get__table(), "__rewrite_nname_const");

@@ -17,6 +17,8 @@ class Html extends Htmllib
 
 	function ifRemote()
 	{
+		global $gbl;
+
 		if ($gbl->__var_remote == "yes") {
 			return true;
 		}

@@ -1802,6 +1802,8 @@ function randomString($length)
 
 function DBG_GetBacktrace($traceArr)
 {
+	global $sgbl;
+
 	if ($sgbl->dbg < 0) {
 		return;
 	}
@@ -2235,7 +2237,7 @@ function delete_expired_ssessions()
 
 function createTreeObject($name, $img, $imgstr, $url, $open, $help, $alt)
 {
-	static $val;
+	static $val = 0;
 
 	$imgstr = str_replace("'", "\'", $imgstr);
 	$help = str_replace("'", "\'", $help);

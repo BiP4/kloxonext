@@ -1439,7 +1439,7 @@ class Ffile extends Lxclass
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
-		static $st;
+		static $st = 0;
 
 		if (isset($this->download_f) && $this->download_f) {
 			$numlines = 'download';

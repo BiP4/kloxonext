@@ -609,7 +609,7 @@ class lxbackup extends Lxdb
 
 	static function clear_extra_backups($class, $name, $object)
 	{
-		global $sgbl;
+		global $sgbl, $login;
 
 		$bpath = "{$sgbl->__path_program_home}/{$class}/{$name}/__backup";
 		$list = lscandir_without_dot($bpath);

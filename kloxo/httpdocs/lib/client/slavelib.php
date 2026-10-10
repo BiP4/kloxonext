@@ -7,7 +7,7 @@ class Slave extends Lxclient
 
 	function getFfileFromVirtualList($name)
 	{
-		global $login;
+		global $gbl, $login;
 
 		$root = $gbl->getSessionV('ffile_root');
 

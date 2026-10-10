@@ -6355,6 +6355,8 @@ function getDnsReverses($servername)
 
 function setInitialPureftpConfig($nolog = null)
 {
+	global $sgbl;
+
 	log_cleanup("Initialize PureFtp service", $nolog);
 	log_cleanup("- Initialize process", $nolog);
 
@@ -6388,11 +6390,12 @@ function setInitialPureftpConfig($nolog = null)
 	}
 
 	if (!lxfile_exists("/usr/sbin/pure-config.pl")) {
-		$sfile = "{$sgbl->__path_program_root}/file/pure-ftd/usr/sbin/pure-config.pl";
+		$sfile = "{$sgbl->__path_program_root}/file/pure-ftpd/usr/sbin/pure-config.pl";
 		log_cleanup("Copy pure-config.pl to /usr/sbin", $nolog);
 		copy($sfile, "/usr/sbin/pure-config.pl");
-		chown($sfile, "root:root");
-		chmod($sfile, 0755);
+		chown("/usr/sbin/pure-config.pl", "root");
+		chgrp("/usr/sbin/pure-config.pl", "root");
+		chmod("/usr/sbin/pure-config.pl", 0755);
 	}
 
 	if (getServiceType('pure-ftpd') === 'init') {
