@@ -14,6 +14,8 @@ class pserver extends pservercore {
 	static $__acdesc_update_switchprogram = array('', '', 'switch_program', '');
 	static $__acdesc_update_mailqueuedelete = array('', '', 'delete', '');
 	static $__acdesc_update_mailqueueflush = array('', '', 'flush', '');
+	static $__acdesc_update_mailqueue_mailqueuedelete = array('', '', 'delete', '');
+	static $__acdesc_update_mailqueue_mailqueueflush = array('', '', 'flush', '');
 
 	static $__desc_sshconfig_l = array('', '', '', '');
 	static $__desc_phpini_o = array("db", "", "");
@@ -158,19 +160,36 @@ class pserver extends pservercore {
 		}
 	}
 
+	// KloxoNext - the configured mail driver (Postfix), like the queue list itself;
+	// these were hard-wired to qmail and did nothing on Postfix servers
 	function updatemailQueueFlush($param)
 	{
-		rl_exec_get(null, $this->syncserver, array("mailqueue__qmail", 'QueueFlush'), array());
+		rl_exec_in_driver($this, 'mailqueue', 'QueueFlush', array());
+
 		return null;
 	}
 
 	function updatemailQueueDelete($param)
 	{
 		$this->updateAccountSel($param, "mailqueuedelete");
-		rl_exec_get(null, $this->syncserver, array("mailqueue__qmail", 'QueueDelete'),
-			array($this->mailqueuedelete_list));
+		rl_exec_in_driver($this, 'mailqueue', 'QueueDelete', array($this->mailqueuedelete_list));
 
 		return null;
+	}
+
+	// buttons of the Mail Queue list (class 'mailqueue' is 'P': the server gets the action)
+	function updatemailqueue_mailqueueflush($param)
+	{
+		return $this->updatemailQueueFlush($param);
+	}
+
+	function updatemailqueue_mailqueuedelete($param)
+	{
+		if (empty($param['_accountselect'])) {
+			return null;
+		}
+
+		return $this->updatemailQueueDelete($param);
 	}
 
 	function createUsed()

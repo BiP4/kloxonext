@@ -2,7 +2,8 @@
 
 class mailqueue extends lxclass
 {
-	static $__desc = array("", "",  "mail_queue");
+	// 'P': Delete / Flush act on the parent server with the selected ids (KloxoNext)
+	static $__desc = array("P", "",  "mail_queue");
 
 	static $__desc_nname = array("", "",  "id", "a=show");
 	static $__desc_subject = array("", "",  "subject", "a=show");
