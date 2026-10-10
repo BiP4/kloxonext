@@ -1,7 +1,7 @@
 <?php
 // KloxoNext - nexus is the skin of every account
 //
-//   skin-default-nexus.php            once per server (flag etc/flag/skin-default-nexus.flg):
+//   skin-default-nexus.php            once per server (flag etc/flag/skin-default-nexus-v2.flg; v2: the feather and simplicity skins are removed):
 //                                     every account and every "skin for sub-accounts" -> nexus
 //   skin-default-nexus.php --force    the same, again (overrides choices made since)
 //
@@ -12,7 +12,7 @@ include_once "lib/html/include.php";
 
 initProgram('admin');
 
-$flag = "../etc/flag/skin-default-nexus.flg";
+$flag = "../etc/flag/skin-default-nexus-v2.flg";
 $force = in_array('--force', (array)$argv, true);
 
 if (!$force && file_exists($flag)) {

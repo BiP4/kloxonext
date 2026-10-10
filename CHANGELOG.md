@@ -8,6 +8,8 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
   panel (backup and automatic rollback, SSH/panel ports always kept open).
 - Server page: Firewall button in the Security group.
 - nexus is the skin of every account (clients, domains, mail accounts).
+- The old feather and simplicity skins are removed; nexus is the only skin.
+- Panel backup and restore work again on PHP 8 / Postfix / Ubuntu (SonarCloud follow-up).
 - Security hardening: SQL escaping everywhere, shell argument quoting, file manager kept inside
   its root, stricter document root validation.
 - Adding a domain to a client: usage counters no longer break on PHP 8.

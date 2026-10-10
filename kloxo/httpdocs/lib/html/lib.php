@@ -1927,66 +1927,15 @@ function set_login_skin_to_nexus()
 	}
 }
 
+// KloxoNext - the feather and simplicity skins are removed: both set nexus
 function set_login_skin_to_feather()
 {
-	global $sgbl, $login;
-
-	if (!$sgbl->isKloxo()) {
-		return;
-	}
-
-	$obj = $login->getObject('sp_specialplay');
-	$obj->specialplay_b->skin_name = 'feather';
-	$obj->specialplay_b->skin_color = 'default';
-	$obj->specialplay_b->icon_name = 'collage';
-	$obj->specialplay_b->show_direction = 'vertical';
-//	$obj->specialplay_b->skin_background = 'nature_004.jpg';
-	$obj->specialplay_b->skin_background = '';
-	$obj->specialplay_b->button_type = 'font';
-	$obj->setUpdateSubaction();
-	$obj->write();
-
-	$obj = $login->getObject('sp_childspecialplay');
-	$obj->specialplay_b->skin_name = 'feather';
-	$obj->specialplay_b->skin_color = 'default';
-	$obj->specialplay_b->icon_name = 'collage';
-	$obj->specialplay_b->show_direction = 'vertical';
-//	$obj->specialplay_b->skin_background = 'nature_004.jpg';
-	$obj->specialplay_b->skin_background = '';
-	$obj->specialplay_b->button_type = 'font';
-	$obj->setUpdateSubaction();
-	$obj->write();
+	return set_login_skin_to_nexus();
 }
 
 function set_login_skin_to_simplicity()
 {
-	global $sgbl, $login;
-
-	if (!$sgbl->isKloxo()) {
-		return;
-	}
-
-	$obj = $login->getObject('sp_specialplay');
-	$obj->specialplay_b->skin_name = 'simplicity';
-	$obj->specialplay_b->skin_color = 'default';
-	$obj->specialplay_b->icon_name = 'collage';
-	$obj->specialplay_b->show_direction = 'vertical';
-	$obj->specialplay_b->button_type = 'font';
-//	$obj->specialplay_b->skin_background = 'nature_004.jpg';
-	$obj->specialplay_b->skin_background = '';
-	$obj->setUpdateSubaction();
-	$obj->write();
-
-	$obj = $login->getObject('sp_childspecialplay');
-	$obj->specialplay_b->skin_name = 'simplicity';
-	$obj->specialplay_b->skin_color = 'default';
-	$obj->specialplay_b->icon_name = 'collage';
-	$obj->specialplay_b->show_direction = 'vertical';
-	$obj->specialplay_b->button_type = 'font';
-//	$obj->specialplay_b->skin_background = 'nature_004.jpg';
-	$obj->specialplay_b->skin_background = '';
-	$obj->setUpdateSubaction();
-	$obj->write();
+	return set_login_skin_to_nexus();
 }
 
 function get_kloxo_port($type)

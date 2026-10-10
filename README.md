@@ -89,7 +89,8 @@ The repository is recorded in `/usr/local/lxlabs/kloxo/etc/conf/update-source.co
 
 The default skin **nexus** is responsive (sidebar navigation that becomes a drawer on phones),
 has light and dark modes, and keeps every menu entry and permission rule of the original panel.
-The older *simplicity* and *feather* skins remain selectable in *Appearance*.
+It is the only skin: the old *simplicity* and *feather* skins were removed (accounts that used
+them are switched to nexus).
 
 ## Mail
 

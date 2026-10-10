@@ -5333,7 +5333,7 @@ abstract class Lxclass
 		$bname = $name . "_b";
 
 		if (isset($this->$objectname)) {
-			return $this->$objectname->$bname;
+			return self::knSkinExisting($class, $this->$objectname->$bname);
 		}
 
 		$obj = new $class($this->__masterserver, null, $this->getClName());
@@ -5342,7 +5342,29 @@ abstract class Lxclass
 		$this->$objectname = $obj;
 		$obj->$bname->__parent_o = $this;
 
-		return $obj->$bname;
+		return self::knSkinExisting($class, $obj->$bname);
+	}
+
+	// KloxoNext - only the nexus skin is shipped: an account still set to a removed
+	// skin (feather, simplicity ...) is shown with nexus
+	static function knSkinExisting($class, $b)
+	{
+		if (($class !== 'sp_specialplay' && $class !== 'sp_childspecialplay') || !is_object($b)) {
+			return $b;
+		}
+
+		$root = dirname(__DIR__, 2) . '/theme/skin';
+		$name = isset($b->skin_name) ? (string)$b->skin_name : '';
+		$color = isset($b->skin_color) ? (string)$b->skin_color : '';
+
+		if ($name === '' || !preg_match('/^[a-z0-9_-]+$/i', $name) || !is_dir("{$root}/{$name}")) {
+			$b->skin_name = 'nexus';
+			$b->skin_color = 'default';
+		} elseif ($color === '' || !preg_match('/^[a-z0-9_-]+$/i', $color) || !is_dir("{$root}/{$name}/{$color}")) {
+			$b->skin_color = 'default';
+		}
+
+		return $b;
 	}
 
 	function getDeleteChildListFilter()
