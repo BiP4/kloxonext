@@ -4,6 +4,18 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-11
 
+### DNS - subdomains
+- A subdomain added from the panel is published in its domain's zone again (it answered after
+  about 10 seconds in the tests; before, not at all). The parent zone is rewritten at the end
+  of the request, and PHP-FPM runs that step in `/`: the driver list (`../file/driver/...`)
+  was not found and no zone file was written. The same affected the mail maps rebuild and the
+  Cloudflare sync; all three now run in the panel's directory.
+- The DNS page of a domain also lists the records of its subdomains, read only, as they are
+  published in the zone (`www.blog`, `mail.blog`, ...), with a link to each subdomain.
+- The DNS page of a subdomain shows only its own records: NS and ns1-ns4 (never published for
+  a subdomain, the domain's zone has them) are removed, also from older subdomains, and the
+  NS record can no longer be added there.
+
 ### Mail - spam filter
 - SpamAssassin and Bogofilter are now wired into the Postfix + Dovecot mail: every delivered
   message is checked (global Sieve filter at delivery), the account's Sieve script applies its

@@ -104,6 +104,7 @@ function kn_dns_get_subdomain_records($parent)
 
 			$n = clone $o;
 			$n->hostname = $h;
+			$n->__kn_subdomain = $sub;
 
 			$p = (string)$o->param;
 
@@ -137,6 +138,35 @@ function kn_dns_get_subdomain_records($parent)
 	}
 
 	return $ret;
+}
+
+/** Records a subdomain never publishes (the parent zone has the NS data): NS and ns1-ns4 hosts. */
+function kn_dns_is_parent_only_record($o)
+{
+	if (!is_object($o)) {
+		return false;
+	}
+
+	if ($o->ttype === 'ns') {
+		return true;
+	}
+
+	return in_array(strtolower(trim((string)$o->hostname)), array('ns1', 'ns2', 'ns3', 'ns4'), true);
+}
+
+/** Drop them from a subdomain's own record list; true when something was removed. */
+function kn_dns_strip_parent_only_records($dns)
+{
+	$changed = false;
+
+	foreach ((array)$dns->dns_record_a as $k => $o) {
+		if (kn_dns_is_parent_only_record($o)) {
+			unset($dns->dns_record_a[$k]);
+			$changed = true;
+		}
+	}
+
+	return $changed;
 }
 
 /** Parent records plus subdomain records; a parent record with the same type and host wins. */
@@ -196,10 +226,10 @@ function kn_dns_schedule_parent_refresh($parent)
 
 	$queued[$parent] = true;
 
-	register_shutdown_function(function () use ($parent) {
+	kn_register_shutdown(function () use ($parent) {
 		try {
 			kn_dns_refresh_parent_zone($parent);
-		} catch (Exception $e) {
+		} catch (Throwable $e) {
 			log_log("dns_subdomain", "refresh of {$parent} failed: " . $e->getMessage());
 		}
 	});

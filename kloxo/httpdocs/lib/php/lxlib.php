@@ -683,6 +683,24 @@ function myPcntl_fork()
 	return $pid;
 }
 
+/**
+ * KloxoNext - work to do once the request has saved everything. PHP-FPM runs
+ * shutdown functions in '/', while the panel code uses paths relative to httpdocs
+ * ('../file/...', class autoloading): the hook gets the request's directory back.
+ */
+function kn_register_shutdown($fn)
+{
+	$dir = getcwd();
+
+	register_shutdown_function(function () use ($fn, $dir) {
+		if ($dir && (getcwd() !== $dir)) {
+			@chdir($dir);
+		}
+
+		$fn();
+	});
+}
+
 function log_log($file, $mess, $id = null)
 {
 	if (!is_string($mess)) {

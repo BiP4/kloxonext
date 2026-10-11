@@ -77,6 +77,7 @@ $gl_class_array["dnscustom"] = "driver/pserver/dnscustomlib.php";
 $gl_class_array["cfaccount"] = "driver/dns/cfaccountlib.php";
 $gl_class_array["cfdomain"] = "driver/dns/cfdomainlib.php";
 $gl_class_array["fwport"] = "driver/pserver/fwportlib.php";
+$gl_class_array["dnssubrecord"] = "driver/dns/dnssubrecordlib.php";
 $gl_class_array["releasenote"] = "driver/pserver/releasenotelib.php";
 $gl_class_array["anonftpipaddress"] = "driver/ftp/anonftpipaddresslib.php";
 $gl_class_array["firewall"] = "driver/pserver/firewalllib.php";

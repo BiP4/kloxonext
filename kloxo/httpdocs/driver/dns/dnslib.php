@@ -11,6 +11,62 @@ class Dns extends DnsBase
 	static $__acdesc_list = array("", "", "dns");
 	static $__table = 'dns';
 
+	// KloxoNext - records of the subdomains (shown read only on the domain's DNS page)
+	static $__desc_dnssubrecord_l = array("v", "", "virtual");
+
+	/** KloxoNext - parent domain when this DNS belongs to a subdomain */
+	function knSubdomainParent()
+	{
+		$dom = $this->getParentO();
+
+		if (is_object($dom) && isset($dom->dtype) && ($dom->dtype === 'subdomain') && !empty($dom->subdomain_parent)) {
+			return $dom->subdomain_parent;
+		}
+
+		return kn_dns_get_subdomain_parent($this->nname);
+	}
+
+	function createShowClist($subaction)
+	{
+		$clist = parent::createShowClist($subaction);
+
+		// a domain with subdomains: their records too, as published in this zone
+		if (!$this->knSubdomainParent() && kn_dns_get_subdomain_list($this->nname)) {
+			$clist['dnssubrecord'] = null;
+		}
+
+		return $clist;
+	}
+
+	function createShowPropertyList(&$alist)
+	{
+		parent::createShowPropertyList($alist);
+
+		// a subdomain has no NS records of its own (it lives in the parent zone)
+		if ($this->knSubdomainParent() && isset($alist['property'])) {
+			$alist['property'] = array_values(array_filter($alist['property'], function ($u) {
+				return strpos($u, 'dta[val]=ns') === false;
+			}));
+		}
+
+		if (!$this->knSubdomainParent() && kn_dns_get_subdomain_list($this->nname)) {
+			$alist['property'][] = 'a=list&c=dnssubrecord';
+		}
+	}
+
+	function createShowAlist(&$alist, $subaction = null)
+	{
+		$alist = parent::createShowAlist($alist, $subaction);
+
+		// KloxoNext - subdomains created before: drop the NS / ns1-ns4 records they never publish
+		if ($this->knSubdomainParent() && kn_dns_strip_parent_only_records($this)) {
+			$this->setUpdateSubaction();
+			$this->write();
+		}
+
+		return $alist;
+	}
+
 	function createExtraVariablesHyperVM()
 	{
 		global $gbl, $sgbl, $login, $ghtml;
@@ -86,6 +142,9 @@ class Dns extends DnsBase
 		if (is_object($dom) && isset($dom->dtype) && ($dom->dtype === 'subdomain') && !empty($dom->subdomain_parent)) {
 			$this->__var_subdomain_parent = $dom->subdomain_parent;
 			kn_dns_schedule_parent_refresh($dom->subdomain_parent);
+
+			// only the records the subdomain publishes (the template also has NS / ns1, ns2)
+			kn_dns_strip_parent_only_records($this);
 		}
 
 		$mydb = new Sqlite(null, "ipaddress");

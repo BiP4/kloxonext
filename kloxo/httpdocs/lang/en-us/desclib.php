@@ -1504,6 +1504,9 @@ $__description["firewall_port_program"] = array("Listening program");
 $__description["firewall_close_port"] = array("Close");
 $__description["firewall_open_port"] = array("Open");
 
+// KloxoNext - DNS of subdomains
+$__description["dns_subdomain_records"] = array("Subdomain DNS Record");
+
 // KloxoNext - spam filter
 $__description["spam_filter"] = array("Spam Filter");
 $__description["spam_engine"] = array("Spam filter engine");

@@ -531,7 +531,7 @@ function kn_cf_schedule_sync_after_request($domain)
 
 	$queued[$domain] = true;
 
-	register_shutdown_function(function () use ($domain) {
+	kn_register_shutdown(function () use ($domain) {
 		kn_cf_schedule_sync($domain);
 	});
 }

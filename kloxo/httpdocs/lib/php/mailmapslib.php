@@ -41,7 +41,7 @@ final class KnMail
 
 		self::$scheduled = true;
 
-		register_shutdown_function(function () {
+		kn_register_shutdown(function () {
 			try {
 				KnMail::rebuild();
 			} catch (Throwable $e) {
