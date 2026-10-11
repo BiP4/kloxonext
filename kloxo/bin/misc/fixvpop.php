@@ -14,7 +14,8 @@ include_once "lib/html/include.php";
 //}
 
 $pass = slave_get_db_pass();
-$salt = sha1(rand());
+// KloxoNext - the vpopmail database password: cryptographically random (40 hex characters as before)
+$salt = bin2hex(random_bytes(20));
 
 if(isRpmInstalled('qmail-toaster')) {
 	print("Using qmail-toaster - fix '/home/vpopmail/etc/vpopmail.mysql'\n");

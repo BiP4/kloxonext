@@ -90,7 +90,7 @@ if (!$cgi_forgotpwd) {
 			<div class="field">
 				<label for="frm_clientname">Username</label>
 				<input id="frm_clientname" name="frm_clientname" type="text" autocomplete="username"
-					autocapitalize="none" spellcheck="false" required autofocus>
+					autocapitalize="none" spellcheck="false" required data-kn-focus>
 			</div>
 			<div class="field">
 				<label for="frm_password">Password</label>
@@ -99,6 +99,10 @@ if (!$cgi_forgotpwd) {
 			<input type="hidden" name="frm_token" value="<?= $h($_SESSION['frm_token']) ?>">
 			<button type="submit" class="btn" name="login" value="Login"<?= ($blocked_for > 0) ? ' disabled' : '' ?>>Sign in</button>
 		</form>
+		<script>
+			// the cursor in the first field (instead of the autofocus attribute)
+			(function () { var el = document.querySelector('[data-kn-focus]'); if (el) { el.focus(); } })();
+		</script>
 
 		<div class="row">
 			<a href="/login/?frm_forgotpwd=1">Forgot password?</a>
@@ -123,7 +127,7 @@ if (!$cgi_forgotpwd) {
 		<form name="sendmail" action="/login/" method="post">
 			<div class="field">
 				<label for="frm_clientname">Username</label>
-				<input id="frm_clientname" name="frm_clientname" type="text" autocomplete="username" required autofocus>
+				<input id="frm_clientname" name="frm_clientname" type="text" autocomplete="username" required data-kn-focus>
 			</div>
 			<div class="field">
 				<label for="frm_email">Contact e-mail</label>
@@ -132,6 +136,10 @@ if (!$cgi_forgotpwd) {
 			<input type="hidden" name="frm_forgotpwd" value="2">
 			<button type="submit" class="btn" name="forgot" value="Send">Send new password</button>
 		</form>
+		<script>
+			// the cursor in the first field (instead of the autofocus attribute)
+			(function () { var el = document.querySelector('[data-kn-focus]'); if (el) { el.focus(); } })();
+		</script>
 
 		<div class="row"><a href="/login/">&larr; Back to sign in</a><span></span></div>
 	</section>

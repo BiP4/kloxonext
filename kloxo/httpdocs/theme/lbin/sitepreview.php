@@ -31,7 +31,7 @@ function parse_etc_mime()
 	return $res;
 }
 
-$res = parse_etc_mime();
+$mime = parse_etc_mime();
 
 $request = $_SERVER['REQUEST_URI'];
 
@@ -94,7 +94,8 @@ if (substr($request, -5, 5) === ".php/") {
 	$requestclean = $request;
 }
 
-$file = curl_general_get("http://$requestclean");
+// the host is the validated domain, the rest is its path
+$file = curl_general_get("http://{$domain}" . substr($requestclean, strlen($domain)));
 
 // print($file);
 
@@ -106,8 +107,13 @@ $ext = isset($pinfo['extension']) ? $pinfo['extension'] : '';
 // print_r($pinfo);
 // print("<br>");
 
-if (isset($res[$ext]) && $res[$ext] !== 'text/html' && $res[$ext] !== 'text/css') {
-	header("Content-Type  $res[$ext]");
+// KloxoNext - the previewed site is someone else's content: it runs in a sandbox (an
+// opaque origin), never as a page of the panel with the visitor's panel session
+header("Content-Security-Policy: sandbox allow-forms allow-scripts allow-popups");
+header("X-Content-Type-Options: nosniff");
+
+if (isset($mime[$ext]) && $mime[$ext] !== 'text/html' && $mime[$ext] !== 'text/css') {
+	header("Content-Type: {$mime[$ext]}");
 
 	print($file);
 

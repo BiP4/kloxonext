@@ -34,7 +34,7 @@ class ffile__common
 		lfile_put_contents($trashcont, $name . "\n");
 
 	//	$res = new_process_mv_rec($user, $fullpath, "$root/.trash");
-		$res = new_process_mv_rec('__system__', $fullpath, "$root/.trash");
+		new_process_mv_rec('__system__', $fullpath, "$root/.trash");
 
 	//	unlink($f);
 	}

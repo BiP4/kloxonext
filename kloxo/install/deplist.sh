@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+case "${BASH_VERSION:-}" in "") exec /bin/bash "$0" "$@" ;; esac
 
 if [[ "${1}" == "" ]] ; then
 	t='php74'

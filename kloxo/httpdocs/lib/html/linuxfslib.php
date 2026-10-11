@@ -618,7 +618,7 @@ function lxfile_tmp_rm_rec($file)
 	$arglist = array("-rf", $file);
 	$cmd = getShellCommand("'rm'", $arglist);
 
-	return do_exec_system($username, null, $cmd, $out, $err, $ret, null);
+	do_exec_system($username, null, $cmd, $out, $err, $ret, null);
 }
 
 function lxfile_rm_content($dir)
@@ -693,7 +693,7 @@ function lxfile_rm_rec($file)
 	$arglist = array("-rf", $file);
 	$cmd = getShellCommand("'rm'", $arglist);
 
-	return do_exec_system($username, null, $cmd, $out, $err, $ret, null);
+	do_exec_system($username, null, $cmd, $out, $err, $ret, null);
 }
 
 function lxfile_generic_chmod($file, $mod)
@@ -764,7 +764,7 @@ function lxfile_mv_rec($dirsource, $dirdest)
 	$arglist = array("-f", $dirsource, $dirdest);
 	$cmd = getShellCommand("'mv'", $arglist);
 
-	return do_exec_system($username, null, $cmd, $out, $err, $ret, null);
+	do_exec_system($username, null, $cmd, $out, $err, $ret, null);
 }
 
 function lxfile_cp_content_file($dirsource, $dirdest)
@@ -827,7 +827,7 @@ function lxfile_cp_rec($dirsource, $dirdest)
 	$arglist = array("-a", $dirsource, $dirdest);
 	$cmd = getShellCommand("cp", $arglist);
 
-	return do_exec_system($username, null, $cmd, $out, $err, $ret, null);
+	do_exec_system($username, null, $cmd, $out, $err, $ret, null);
 } 
 
 function lxfile_size($file)
@@ -956,16 +956,7 @@ function do_exec_system($username, $dir, $cmd, &$out, &$err, &$ret, $input)
 	global $global_shell_out, $global_shell_error, $global_shell_ret;
 	global $global_dontlogshell;
 
-	$path = "$sgbl->__path_lxmisc";
-
 	$fename = tempnam($sgbl->__path_tmp, "system_errr");
-
-	$execcmd = null;
-
-	if ($username !== '__system__') {
-		$execcmd = "$path -u $username";
-		chmod($path, 0700);
-	}
 
 	$oldpath = null;
 

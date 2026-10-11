@@ -164,9 +164,8 @@ class all_easyinstaller extends Lxclass
 
 		$lowername = strtolower($name);
 
-		foreach($array as $k => $v) {
-			$$k = $v;
-		}
+		// the description fields as variables ($pdesc, $pdetail, ...)
+		extract($array, EXTR_OVERWRITE);
 
 		if (!$pdetail) {
 			$pdetail = $pdesc;

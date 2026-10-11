@@ -1825,7 +1825,7 @@ function print_navigation($navig)
 			$url = "/display.php?$url";
 			$desc = $ghtml->getActionDescr('', $h, $class, $var, $name);
 			$image = $ghtml->get_image($buttonpath, $class, $var, ".gif");
-			$desc['help'] = $ghtml->get_action_or_display_help($desc['help'], 'action');
+			$desc['help'] = null;
 		//	$nname = substr($name, 0, 19);
 			$nname = $name;
 
@@ -1899,7 +1899,7 @@ function print_navigation($navig)
 		$fullimgstr = implode(" ", $imgstr);
 ?>
 
-		<div style="float:left; padding-top: <?= $padd ?>;" id="tnavig<?=$k?>" onMouseOut="changeContent('help', 'helparea');">&nbsp;{<?=$clienttype?><?=trim($description['desc'])?>}<?=$fullimgstr?></div>
+		<div role="note" style="float:left; padding-top: <?= $padd ?>;" id="tnavig<?=$k?>" onMouseOut="changeContent('help', 'helparea');">&nbsp;{<?=$clienttype?><?=trim($description['desc'])?>}<?=$fullimgstr?></div>
 <?php
 
 		$hypervm = null;

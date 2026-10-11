@@ -35,7 +35,7 @@ html body {
 }
 
 /* special event: FTP success page titles */
-#titles ftpsuccess {
+#titles .ftpsuccess {
 	background-color:#00ff00;
 	width:100%;
 }

@@ -539,12 +539,14 @@ function PreparePowerdnsDb($nolog = null)
 	$content = file_get_contents($sfile);
 
 	log_cleanup("- Generate password", $nolog);
-	$pass = randomString(8);
+	$pass = randomString(24);
 
 	$link->query("GRANT ALL ON powerdns.* TO powerdns@localhost IDENTIFIED BY '" . $link->real_escape_string($pass) . "'");
 	$link->query("flush privileges");
 
-	$content = str_replace("gmysql-password=powerdns", "gmysql-password={$pass}", $content);
+	// placeholder of the template; custom copies may still have the old one ('powerdns')
+	$content = str_replace(array("gmysql-password=__PDNS_DB_PASSWORD__", "gmysql-password=powerdns"),
+		"gmysql-password={$pass}", $content);
 
 	log_cleanup("- Add Password to configuration file", $nolog);
 
@@ -585,7 +587,7 @@ function PrepareMyDnsDb($nolog = null)
 	$content = file_get_contents($sfile);
 
 	log_cleanup("- Generate password", $nolog);
-	$pass = randomString(8);
+	$pass = randomString(24);
 
 	$link->query("GRANT ALL ON mydns.* TO mydns@localhost IDENTIFIED BY '" . $link->real_escape_string($pass) . "'");
 	$link->query("flush privileges");
@@ -2797,31 +2799,11 @@ function kn_public_url_ok($url)
 	return true;
 }
 
+// KloxoNext - files of the old LxCenter download server (bug lists, ...). The server
+// is gone and its domain no longer exists (anyone could register it): never fetched.
 function curl_get_file_contents($file)
 {
-	$server = getDownloadServer();
-	$ch = curl_init("$server/$file");
-
-	ob_start();
-
-	curl_setopt($ch, CURLOPT_FAILONERROR, true);
-	kn_curl_internet($ch);
-
-	curl_exec($ch);
-
-	$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-	if ($code !== 200) {
-		return null;
-	}
-
-	dprint(curl_error($ch));
-	curl_close($ch);
-	$retrievedhtml = ob_get_contents();
-
-	ob_end_clean();
-
-	return $retrievedhtml;
+	return null;
 }
 
 function install_if_package_not_exist($name, $nolog = null)
@@ -2838,29 +2820,20 @@ function install_if_package_not_exist($name, $nolog = null)
 	}
 }
 
+// the body of a 200 answer, otherwise null (it left an output buffer open on errors)
 function curl_general_get($url)
 {
 	$ch = curl_init($url);
 
-	ob_start();
-
 	curl_setopt($ch, CURLOPT_FAILONERROR, true);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	kn_curl_internet($ch);
-	curl_exec($ch);
 
+	$body = curl_exec($ch);
 	$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-	if ($code !== 200) {
-		return null;
-	}
-
-	dprint(curl_error($ch));
 	curl_close($ch);
-	$retrievedhtml = ob_get_contents();
 
-	ob_end_clean();
-
-	return $retrievedhtml;
+	return (($body === false) || ($code !== 200)) ? null : $body;
 }
 
 
@@ -2922,26 +2895,6 @@ function getLatestVersion()
 function getInstalledVersion()
 {
 	return trim((string)@file_get_contents('/usr/local/lxlabs/kloxo/bin/kloxoversion'));
-}
-
-function getDownloadServer()
-{
-	global $sgbl;
-
-	$progname = $sgbl->__var_program_name;
-
-	$maj = $sgbl->__ver_major_minor;
-
-	$server = "http://download.lxcenter.org/download/$progname/$maj";
-
-	return $server;
-}
-
-function download_source($file)
-{
-	$server = getDownloadServer();
-
-	download_file("$server/$file");
 }
 
 function download_remote($url, $user, $pass, $localfile = null)
@@ -4372,44 +4325,6 @@ function checkClusterDiskQuota()
 	lxfile_generic_chown("..", "lxlabs");
 }
 
-function find_closest_mirror()
-{
-	// TODO LxCenter: No call to this function found.
-	dprint("find_closest_mirror htmllib>lib>lib.php\n");
-
-	$v = curl_general_get("lxlabs.com/mirrorlist/");
-	$v = trim($v);
-	$vv = explode("\n", $v);
-	$out = null;
-
-	foreach ($vv as $k => $l) {
-		$l = trim($l);
-
-		if (!$l) {
-			continue;
-		}
-
-		$verify = curl_general_get("$l/verify.txt");
-		$verify = trim($verify);
-
-		if (csa($verify, "lxlabs_mirror_verify")) {
-			$out[] = $l;
-		}
-	}
-
-	if (!$out) {
-		return null;
-	}
-
-	foreach ($out as $l) {
-		$hop[$l] = find_hop($l);
-	}
-
-	asort($hop);
-	$v = getFirstKeyFromList($hop);
-
-	return $v;
-}
 
 function find_hop($l)
 {
@@ -5757,7 +5672,7 @@ function setInitialDnsConfig($type, $nolog = null)
 		if (($type === 'nsd') || ($type === 'djbdns')) {
 			$newlist = array("master", "slave", "reverse");
 
-			foreach ($newlist as &$n) {
+			foreach ($newlist as $n) {
 				if (!file_exists("{$path}/{$n}")) {
 					lxfile_mkdir("{$path}/{$n}");
 				}
@@ -5767,7 +5682,7 @@ function setInitialDnsConfig($type, $nolog = null)
 		if ($type === 'yadifa') {
 			$newlist = array("keys", "xfr");
 
-			foreach ($newlist as &$n) {
+			foreach ($newlist as $n) {
 				if (!file_exists("{$path}/{$n}")) {
 					lxfile_mkdir("{$path}/{$n}");
 				}
@@ -5823,7 +5738,7 @@ function setInitialWebConfig($type, $nolog = null)
 	$newlist = array("{$eatpath}/conf.d", "{$htpath}/tpl",
 		"{$htpath}/conf", "{$htpath}/etc", "{$htpath}/etc/conf", "{$htpath}/etc/conf.d");
 
-	foreach ($newlist as &$n) {
+	foreach ($newlist as $n) {
 		if (!lxfile_exists("{$n}")) {
 			log_cleanup("- Create {$n} dir", $nolog);
 
@@ -6702,36 +6617,6 @@ function restart_xinetd_for_pureftp($nolog = null)
 	createRestartFile("xinetd");
 }
 
-function install_bogofilter($nolog = null)
-{
-	log_cleanup("Check for bogofilter", $nolog);
-
-	if (!lxfile_exists("/var/bogofilter")) {
-		log_cleanup("- Create /var/bogofilter dir if needed", $nolog);
-		lxfile_mkdir("/var/bogofilter");
-	}
-
-	$dir = "/var/bogofilter";
-	$wordlist = "$dir/wordlist.db";
-	$kloxo_wordlist = "$dir/kloxo.wordlist.db";
-
-	if (lxfile_exists($kloxo_wordlist)) {
-		log_cleanup("- wordlist.db already exists", $nolog);
-
-		return;
-	} else {
-		log_cleanup("- Prepare and download wordlist.db", $nolog);
-	}
-
-
-	lxfile_mkdir($dir);
-
-	lxfile_rm($wordlist);
-	$content = file_get_contents("http://download.lxcenter.org/download/wordlist.db");
-	file_put_contents($wordlist, $content);
-	lxfile_unix_chown_rec($dir, "lxpopuser:lxpopgroup");
-	lxfile_cp($wordlist, $kloxo_wordlist);
-}
 
 function removeOtherDrivers($class = null, $nolog = null)
 {
@@ -7166,7 +7051,6 @@ function updatecleanup($nolog = null)
 	setPrepareKloxo($nolog);
 
 	// MR -- disable (from 'old' Kloxo style)
-//	install_bogofilter($nolog);
 
 	setRemoveOldDirs($nolog);
 

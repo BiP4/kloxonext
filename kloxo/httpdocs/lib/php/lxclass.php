@@ -1322,7 +1322,7 @@ abstract class Lxclass
 
 	function inNoBackuplist()
 	{
-		global $gbl, $sgbl, $login, $ghtml;
+		return false;
 	}
 
 	function loadBackupAll()
@@ -6308,16 +6308,22 @@ class lxDriverClass extends Lxclass
 	function dbactionDelete()
 	{
 		if_demo_throw_exception();
+
+		return null;
 	}
 
 	function dbactionAdd()
 	{
 		if_demo_throw_exception();
+
+		return null;
 	}
 
 	function dbactionUpdate($subaction)
 	{
 		if_demo_throw_exception();
+
+		return null;
 	}
 
 	function do_backup_cleanup($list) { return; }

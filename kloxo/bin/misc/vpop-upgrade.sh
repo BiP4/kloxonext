@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+case "${BASH_VERSION:-}" in "") exec /bin/bash "$0" "$@" ;; esac
 
 'cp' -a /home/vpopmail ~/vpopmail-backup
 rpm -e courier-imap vpopmail

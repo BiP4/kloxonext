@@ -40,7 +40,17 @@ function swapImage() {
 
 
 function swapImgRestore() { 
-  var i,x,a=document.sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+  var a = document.sr || [];
+
+  for (var i = 0; i < a.length; i++) {
+    var x = a[i];
+
+    if (!x || !x.oSrc) {
+      break;
+    }
+
+    x.src = x.oSrc;
+  }
 }
 
 function changeImageSize(name, size)

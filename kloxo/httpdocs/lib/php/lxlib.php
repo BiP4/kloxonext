@@ -3415,7 +3415,7 @@ function getBasicServiceList()
 
 function getDbvariable($listvar, $mainvar)
 {
-	static $var;
+	static $var = null;
 
 	if (!$var) {
 	//	$var = unserialize(lfile_get_contents("__path_dbschema"));
@@ -3650,11 +3650,6 @@ function if_demo_throw_exception($where = null)
 	}
 }
 
-function get_package_version($name)
-{
-	$cont = curl_general_get("http://download.lxcenter.org/download/version/$name");
-	return trim($cont);
-}
 
 function getClassFromName($cgi_clientname)
 {

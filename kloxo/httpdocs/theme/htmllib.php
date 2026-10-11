@@ -106,12 +106,7 @@ class HtmlLib
 
 				$hvar[$arvar][$arkey] = $arval;
 			} else {
-				if (!is_array($value)) {
-					$hvar[$key] = $value;
-
-				} else {
-					$hvar[$key] = $value;
-				}
+				$hvar[$key] = $value;
 			}
 		}
 
@@ -775,11 +770,11 @@ class HtmlLib
 		$skinget = $login->getSkinDir();
 
 		if ($sel == "des") {
-			$style = $this->print_style_desktop();
+			$this->print_style_desktop();
 		}
 
 		if ($sel == "hom") {
-			$style = $this->print_style_home();
+			$this->print_style_home();
 		}
 ?>
 
@@ -3763,7 +3758,7 @@ class HtmlLib
 
 			$alt = lx_strip_tags($help);
 
-			$help = $this->get_action_or_display_help($help, "notice");
+			$help = null;
 
 			// MR -- need this process to fix title
 			$alt = preg_replace("/_lxspan:([^:]*):([^:]*):/", "$2", $alt);
@@ -3836,7 +3831,7 @@ class HtmlLib
 				}
 
 				$alt = lx_strip_tags($help);
-				$help = $this->get_action_or_display_help($help, "action");
+				$help = null;
 				$urlhelp = "onmouseover=\"changeContent('help',' $help')\" onmouseout=\"changeContent('help','helparea')\"";
 
 				if (strstr($descr[$name][0], "b") != null || csb($name, "abutton")) {
@@ -4568,7 +4563,7 @@ class HtmlLib
 			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="<?= $backgroundstring ?>  border: 1px solid #<?= $col ?>; padding: 10px;">
 				<tr>
 					<td><?php $this->print_list_submit($class, $blist, $unique_name); ?></td>
-					<td><?= $this->print_search($parent, $class) ?></td>
+					<td><?php $this->print_search($parent, $class); ?></td>
 				</tr>
 			</table>
 		</div>
@@ -5390,11 +5385,6 @@ class HtmlLib
 		return $string;
 	}
 
-	function get_help_url()
-	{
-		// TODO: Remove not used function
-	}
-
 	function get_session_vars()
 	{
 		global $gbl, $sgbl, $login, $ghtml;
@@ -5403,11 +5393,6 @@ class HtmlLib
 	}
 
 	function print_defintion($value)
-	{
-		// TODO: Remove not used function
-	}
-
-	function get_action_or_display_help($help, $flag)
 	{
 		// TODO: Remove not used function
 	}
@@ -5560,7 +5545,7 @@ class HtmlLib
 		if (!$header) {
 			$descr = $this->getActionDescr($_SERVER['PHP_SELF'], $this->__http_vars, $class, $var, $identity);
 			$help = $this->get_full_help($descr[2]);
-			$help = $this->get_action_or_display_help($help, "display");
+			$help = null;
 			$this->print_defintion($help);
 		}
 
@@ -5619,7 +5604,7 @@ class HtmlLib
 
 			function jsFindHelpUrl() {
 				if (document.all || document.getElementById) {
-					gl_helpUrl = '<?=$this->get_help_url()?>';
+					gl_helpUrl = '';
 
 					return gl_helpUrl;
 				}
@@ -5777,6 +5762,7 @@ class HtmlLib
 				}
 ?>
 			<head>
+				<title>Redirecting</title>
 				<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
 				<META HTTP-EQUIV="Refresh" CONTENT="0;URL=<?= $redirect_url ?>">
 				<script>location.replace(<?= json_encode($redirect_url) ?>);</script>
@@ -5817,6 +5803,7 @@ class HtmlLib
 ?>
 
 			<head>
+				<title>Redirecting</title>
 				<meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
 				<META HTTP-EQUIV="Refresh" CONTENT="0;URL=<?= $redirect_url ?>">
 			</head>
@@ -6384,7 +6371,7 @@ class HtmlLib
 		$shevron = "{$login->getSkinDir()}/images/shevron_line.gif";
 
 		$help = $this->get_full_help($descr[2]);
-		$help = $this->get_action_or_display_help($help, "action");
+		$help = null;
 
 		$dummyimg = get_image_path() . "/untitled.gif";
 
@@ -6581,7 +6568,7 @@ class HtmlLib
 
 ?>
 
-		<div <?= $idvar ?> <?= $onclickvar ?> class="div_container_icons" onmouseover="getElementById('aaid_<?= $formname ?>').style.textDecoration='none'; this.style.backgroundColor='<?= $selectcolor ?>';" onmouseout="this.style.backgroundColor=''; getElementById('aaid_<?= $formname ?>').style.textDecoration='none'">
+		<div role="button" tabindex="0" <?= $idvar ?> <?= $onclickvar ?> class="div_container_icons" onmouseover="getElementById('aaid_<?= $formname ?>').style.textDecoration='none'; this.style.backgroundColor='<?= $selectcolor ?>';" onmouseout="this.style.backgroundColor=''; getElementById('aaid_<?= $formname ?>').style.textDecoration='none'">
 			<div class="div_icons_image"><span title='<?= $alt ?>'><?= $imgvar ?></span></div>
 			<div class="<?= $cssclass ?>"><span title='<?= $alt ?>'><?= $displayvar ?></span></div>
 		</div>
@@ -6767,7 +6754,7 @@ class HtmlLib
 		$shevron = "{$login->getSkinDir()}/images/shevron_line.gif";
 
 		$help = $this->get_full_help($descr[2]);
-		$help = $this->get_action_or_display_help($help, "action");
+		$help = null;
 
 		$dummyimg = get_image_path() . "/untitled.gif";
 
@@ -7627,7 +7614,7 @@ class HtmlLib
 ?>
 
 			<div id="showimage" style="visibility: hidden; position: absolute; width: 320px; left: 0; top: 300px; right: 0; margin: 0 auto">
-				<div style="background-color: #48c; border: 1px solid #ddd; cursor: pointer" onMousedown="password_initializedrag(event)">
+				<div role="button" aria-label="Move" style="background-color: #48c; border: 1px solid #ddd; cursor: pointer" onMousedown="password_initializedrag(event)">
 					<div id="dragbar" style="padding: 2px; height: 18px">
 						<div style="float:left"><span style="color:#fff"><?= $login->getKeywordUc('password_box') ?>&nbsp;-&nbsp;<?= $login->getKeywordUc('press_esc_to_close') ?></span></div>
 						<div style="float:right"><a href="javascript://" onClick="password_hidebox('showimage')"><span style="color:#fff; padding:2px">&#215;</span></a></div>
@@ -8734,7 +8721,7 @@ function uploadAbort(e) { // upload abort
 
 		<div id="showimage" style="visibility:visible;width:400px; position:absolute; top: 100px; left:0; right:0; margin: 0 auto;">
 			<div style="<?= $style ?>">
-				<div id="dragbar" onmousedown="password_initializedrag(event)" style="background-color: #f00; text-align: right; padding: 2px; height: 18px; border-bottom: 1px solid red; cursor: pointer">
+				<div id="dragbar" role="button" aria-label="Move" onmousedown="password_initializedrag(event)" style="background-color: #f00; text-align: right; padding: 2px; height: 18px; border-bottom: 1px solid red; cursor: pointer">
 					<div style="float:left;color:#fff"><?= $error_box ?><?= $press_esc_to_close ?></div>
 					<div style="float:right"><a href="javascript:hide_a_div_box('showimage')"><!-- <img src="<?= $icondir ?>/close.gif"> -->&#215;</a></div>
 				</div>
@@ -8799,7 +8786,7 @@ function uploadAbort(e) { // upload abort
 
 		$help = $descr[3];
 
-		$help = $this->get_action_or_display_help($help, "action");
+		$help = null;
 
 		$desc = trim($desc);
 		$open = 'false';
@@ -9301,7 +9288,7 @@ function uploadAbort(e) { // upload abort
 		$help = $descr[2];
 
 		$alt = lx_strip_tags($help);
-		$help = $this->get_action_or_display_help($help, "action");
+		$help = null;
 
 		$open = 'false';
 		$name = $file . "_" . $name;
@@ -9319,21 +9306,7 @@ function uploadAbort(e) { // upload abort
 
 		$skindir = $login->getSkinDir();
 
-		foreach ((array)$alist as $k => $a) {
-			if (is_array($a)) {
-				continue;
-
-?>
-
-			window.<?= $name ?><?= $k ?> = new Menu("<?= $mnu ?>", 100);
-<?php
-
-				foreach ($a as $nk => $nv) {
-					$nv = $this->getFullUrl($nv, $base);
-					$this->print_pmenu("$name$k", $nv);
-				}
-			}
-		}
+		// (sub menus of array entries were disabled: they are skipped)
 
 ?>
 
@@ -9404,7 +9377,7 @@ function uploadAbort(e) { // upload abort
 
 		$help = $descr[3];
 
-		$help = $this->get_action_or_display_help($help, "action");
+		$help = null;
 
 		$name = $file . "_" . $name;
 
@@ -9735,7 +9708,7 @@ function uploadAbort(e) { // upload abort
 			}
 ?>
 
-			<span class="tableheadtext" onmouseover="changeContent('help','<b>Message </b>: <br /> <br /> <?= $help ?>')" onmouseout="changeContent('help','helparea')"> <?= $d ?> </span>
+			<span class="tableheadtext" role="note" onmouseover="changeContent('help','<b>Message </b>: <br /> <br /> <?= $help ?>')" onmouseout="changeContent('help','helparea')"> <?= $d ?> </span>
 <?php
 			return;
 		}

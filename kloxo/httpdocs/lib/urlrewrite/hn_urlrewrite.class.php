@@ -658,13 +658,15 @@ class hn_urlRewrite
 			if (csa($url, "http://$domain")) {
 				// MR -- make sure no // at the end
 			//	$url = preg_replace("+http://$domain+", "/sitepreview/$domain/", $url);
-				$url = preg_replace("+http://$domain+", "/sitepreview/$domain", $url);
+				// KloxoNext - literal replace: $domain comes from the request (no regex)
+				$url = str_replace("http://$domain", "/sitepreview/$domain", $url);
 				return $url;
 			}
 			if (csa($url, "http://www.$domain")) {
 				// MR -- make sure no // at the end
 			//	$url = preg_replace("+http://www.$domain+", "/sitepreview/$domain/", $url);
-				$url = preg_replace("+http://www.$domain+", "/sitepreview/$domain", $url);
+				// KloxoNext - literal replace: $domain comes from the request (no regex)
+				$url = str_replace("http://www.$domain", "/sitepreview/$domain", $url);
 				return $url;
 			}
 

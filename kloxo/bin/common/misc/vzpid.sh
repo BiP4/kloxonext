@@ -2,11 +2,12 @@
 veidmark='envID:'
 namemark='Name:'
 
-function getveid()
+# POSIX sh (run as "sh vzpid.sh <pid>")
+getveid()
 {
-    local pid=$1
+    pid=$1
 
-		[ -f /proc/${pid}/status ] || return
+		test -f /proc/${pid}/status || return
 		cat /proc/${pid}/status | \
 		awk -v pid=${pid} 'BEGIN{veid=0} /^'${namemark}'|^'${veidmark}'/{
 			if ($1 == "'${namemark}'") {

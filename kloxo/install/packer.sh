@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+case "${BASH_VERSION:-}" in "") exec /bin/bash "$0" "$@" ;; esac
 
 #    Kloxo - Control Panel
 #
@@ -76,8 +76,8 @@ fi
 if [[ ! -d ./kloxo/httpdocs ]] ; then
 	echo "Download Kloxo git Sources"
 	'rm' -rf ${kloxo_branch}* > /dev/null 2>&1
-	# github answers with a single redirect to codeload.github.com
-	wget --max-redirect=1 https://github.com/${kloxo_fork}/kloxo8/archive/${kloxo_branch}.zip -O kloxo8-${kloxo_branch}.zip
+	# straight from codeload.github.com (where github.com/.../archive/ redirects to): no redirect followed
+	wget --max-redirect=0 "https://codeload.github.com/${kloxo_fork}/kloxo8/zip/refs/heads/${kloxo_branch}" -O "kloxo8-${kloxo_branch}.zip"
 
 	unzip -oq kloxo8-${kloxo_branch}.zip > /dev/null 2>&1
 	'rm' -rf kloxo8-${kloxo_branch}.zip > /dev/null 2>&1

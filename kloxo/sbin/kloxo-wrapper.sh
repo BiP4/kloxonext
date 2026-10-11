@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+case "${BASH_VERSION:-}" in "") exec /bin/bash "$0" "$@" ;; esac
 
 #    KloxoNext - backend daemon of the panel (run by kloxo-wrap.service).
 #    It applies the queued service restarts (etc/.restart) and the background

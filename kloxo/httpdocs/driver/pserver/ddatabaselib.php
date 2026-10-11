@@ -45,9 +45,6 @@ class databasecore extends Lxdb
 			$this->__var_dbadmin = $ret['dbadmin'];
 			$this->__var_dbpassword = $ret['dbpassword'];
 		}
-		if (!isset($this->__var_enc_pass)) {
-			$this->__var_enc_pass = md5($this->dbpassword);
-		}
 	}
 
 	function getQuotaNeedVar()

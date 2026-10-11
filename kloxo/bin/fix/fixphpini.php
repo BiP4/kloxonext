@@ -112,7 +112,9 @@ foreach($plist as $s) {
 		mkdir("/var/lib/php/session");
 	}
 
-	chmod("/var/lib/php/session", 0777);
+	// shared by the PHP pools of every user (PHP writes the files 0600); sticky like /tmp:
+	// nobody can delete the sessions of another user
+	chmod("/var/lib/php/session", 01777);
 	chown("/var/lib/php/session", "apache");
 }
 

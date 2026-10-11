@@ -336,7 +336,9 @@ function send_to_master($object)
 	global $gbl, $sgbl, $login, $ghtml;
 
 	if ($sgbl->is_this_master()) {
-		return master_get_data($object);
+		master_get_data($object);
+
+		return null;
 	}
 
 	$res = new Remote();
@@ -724,8 +726,9 @@ function process_in_master($total)
 	$res = new Remote();
 	$res->message = "Master info";
 	$res->exception = null;
-	$vv = master_get_data($rmt->var);
-	$res->ddata = $vv;
+	// commands only (sendemail): nothing comes back
+	master_get_data($rmt->var);
+	$res->ddata = null;
 	$out = base64_encode(serialize($res));
 
 	return $out;

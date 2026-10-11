@@ -195,7 +195,6 @@ class Sgbl
 		$this->__path_cron_log = $this->__path_log . "/cron";
 		$this->__path_mysql_log = $this->__path_log . "/mysqld.log";
 		$this->__path_vsftpd_log = $this->__path_log . "/vsftpd.log";
-		$this->__path_lxmisc = $this->__path_program_root . "/sbin/lxmisc";
 
 		$this->__var_rolelist = array("web", "mail", "dns", "secondary_master");
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+case "${BASH_VERSION:-}" in "") exec /bin/bash "$0" "$@" ;; esac
 program=$1
 shift
 if [[ $program = 'kloxo' ]] ; then

@@ -112,7 +112,6 @@ $gl_class_array['porthistory'] = "lib/html/monitor/porthistorylib.php";
 $gl_class_array['portstatus'] = "lib/html/monitor/portstatuslib.php";
 $gl_class_array['monitoringserverstatus'] = "lib/html/monitor/monitoringserverstatuslib.php";
 $gl_class_array['ftpsession'] = "driver/ftp/ftpsessionlib.php";
-$gl_class_array['vncviewer'] = "driver/pserver/vncviewerlib.php";
 $gl_class_array['auxiliary'] = "lib/client/auxiliarylib.php";
 $gl_class_array['allowedip'] = "lib/php/allowediplib.php";
 $gl_class_array['blockedip'] = "lib/php/blockediplib.php";

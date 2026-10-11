@@ -14,6 +14,7 @@ function lpanel_main()
 	init_language();
 
 ?>
+<!DOCTYPE html>
 <html lang="en">
 <title>Resources</title>
 <?php
