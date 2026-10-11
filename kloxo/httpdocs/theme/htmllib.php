@@ -7614,7 +7614,7 @@ class HtmlLib
 ?>
 
 			<div id="showimage" style="visibility: hidden; position: absolute; width: 320px; left: 0; top: 300px; right: 0; margin: 0 auto">
-				<div role="button" aria-label="Move" style="background-color: #48c; border: 1px solid #ddd; cursor: pointer" onMousedown="password_initializedrag(event)">
+				<div role="button" tabindex="0" aria-label="Move" style="background-color: #48c; border: 1px solid #ddd; cursor: pointer" onMousedown="password_initializedrag(event)">
 					<div id="dragbar" style="padding: 2px; height: 18px">
 						<div style="float:left"><span style="color:#fff"><?= $login->getKeywordUc('password_box') ?>&nbsp;-&nbsp;<?= $login->getKeywordUc('press_esc_to_close') ?></span></div>
 						<div style="float:right"><a href="javascript://" onClick="password_hidebox('showimage')"><span style="color:#fff; padding:2px">&#215;</span></a></div>
@@ -8721,7 +8721,7 @@ function uploadAbort(e) { // upload abort
 
 		<div id="showimage" style="visibility:visible;width:400px; position:absolute; top: 100px; left:0; right:0; margin: 0 auto;">
 			<div style="<?= $style ?>">
-				<div id="dragbar" role="button" aria-label="Move" onmousedown="password_initializedrag(event)" style="background-color: #f00; text-align: right; padding: 2px; height: 18px; border-bottom: 1px solid red; cursor: pointer">
+				<div id="dragbar" role="button" tabindex="0" aria-label="Move" onmousedown="password_initializedrag(event)" style="background-color: #f00; text-align: right; padding: 2px; height: 18px; border-bottom: 1px solid red; cursor: pointer">
 					<div style="float:left;color:#fff"><?= $error_box ?><?= $press_esc_to_close ?></div>
 					<div style="float:right"><a href="javascript:hide_a_div_box('showimage')"><!-- <img src="<?= $icondir ?>/close.gif"> -->&#215;</a></div>
 				</div>

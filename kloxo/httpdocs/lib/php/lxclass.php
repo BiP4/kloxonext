@@ -5491,48 +5491,7 @@ abstract class Lxclass
 
 	// These are very complex backup/restore functions, and does not really work, 
 	// because the file size is too high.
-	function updateBackupOLD($param)
-	{
-		$bfile = tempnam("/tmp", "backupzip.zip");
-		lunlink($bfile);
-		$vd = createTempDir("/tmp", "backup");
-		$list = $this->doCoreBackup($vd, $param);
-		lxshell_zip($vd, $bfile, $list);
-		lxfile_tmp_rm_rec($vd);
 
-		$fname = $this->getBackupFileNameForObject('out-' . time());
-
-		ob_end_clean();
-		header('Content-Type: application/octet-stream');
-		header("Content-Disposition: attachment; filename={$fname}");
-		slow_print($bfile);
-		flush();
-
-		lunlink($bfile);
-
-		exit;
-	}
-
-	function updateRestoreOLD($param)
-	{
-		global $gbl, $sgbl, $login, $ghtml;
-
-		$gbl->__var_list_flag = false;
-
-		$param['nothing'] = null;
-		$fname = $_FILES['restore_file_f']['tmp_name'];
-
-		if (!lxfile_exists($fname)) {
-			exec_with_all_closed("sh /script/load-wrapper >/dev/null 2>&1 &");
-			throw new lxException($login->getThrow('could_not_get_file'), '', $fname);
-		}
-
-		$param['switchserverlist'] = null;
-		$param['_accountselect'] = array('all');
-		$this->doCoreRestore($fname, $param);
-
-		return null;
-	}
 
 	// These functions are very simple and backups and restores only the internal content 
 	// doesn't restore the kloxo database structure. Useful only for database.
