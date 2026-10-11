@@ -29,6 +29,20 @@ if (!file_exists("{$vsnpath}/fastcgi_temp")) {
 	@exec("chown -R apache:apache {$vsnpath}/fastcgi_temp");
 }
 
+// KloxoNext - pages cached under the old rules (kept up to 7 days, cookies included)
+// are emptied once; the flag is outside the cache directories (nginx owns those)
+$kncacheflag = "/usr/local/lxlabs/kloxo/etc/flag/nginx-cache-v2.flg";
+
+if (!file_exists($kncacheflag)) {
+	foreach (array('/var/cache/nginx-proxy', '/var/cache/nginx-fastcgi') as $kncachedir) {
+		if (is_dir($kncachedir)) {
+			exec("find " . escapeshellarg($kncachedir) . " -mindepth 1 -delete >/dev/null 2>&1");
+		}
+	}
+
+	@touch($kncacheflag);
+}
+
 $vrlw = "/var/run/letsencrypt/.well-known/acme-challenge";
 
 if (!file_exists($vrlw)) {
@@ -117,6 +131,23 @@ if (($webcache === 'none') || (!$webcache)) {
 foreach ($confs as $k => $v) {
 	$custom_conf = getLinkCustomfile($globalspath, "{$k}.conf");
 	copy($custom_conf, "{$globalspath}/{$v}.conf");
+}
+
+// KloxoNext - 'http2 on;' exists since nginx 1.25.1; older ones (AlmaLinux 9: 1.20)
+// refused the whole configuration: there HTTP/2 is 'listen 443 ssl http2'
+$nginxver = array();
+
+if (preg_match('#nginx/([0-9.]+)#', (string)shell_exec("nginx -v 2>&1"), $nginxver) && version_compare($nginxver[1], '1.25.1', '<')) {
+	foreach (array('listen_ssl', 'listen_ssl_default') as $v) {
+		$f = "{$globalspath}/{$v}.conf";
+		$c = (string)@file_get_contents($f);
+
+		if (strpos($c, 'http2 on;') !== false) {
+			$c = str_replace('http2 on;', '', $c);
+			$c = preg_replace('/^(\s*listen\s+\S+\s+ssl)\b/m', '$1 http2', $c);
+			file_put_contents($f, $c);
+		}
+	}
 }
 
 $gzip_base_conf = getLinkCustomfile($globalspath, "gzip.conf");

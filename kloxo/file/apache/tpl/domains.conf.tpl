@@ -185,14 +185,21 @@ if (intval($static_files_expire) > -1) {
 	$static_files_expire_text = "<IfModule mod_expires.c>\n" .
 		"\t\tExpiresActive On\n" .
 		"\t\tExpiresByType image/x-icon \"access plus {$static_files_expire} days\"\n" .
-		"\t\tExpiresByType image/gif \"accesss plus {$static_files_expire} days\"\n" .
+		"\t\tExpiresByType image/gif \"access plus {$static_files_expire} days\"\n" .
 		"\t\tExpiresByType image/png \"access plus {$static_files_expire} days\"\n" .
 		"\t\tExpiresByType image/jpg \"access plus {$static_files_expire} days\"\n" .
 		"\t\tExpiresByType image/jpeg \"access plus {$static_files_expire} days\"\n" .
 		"\t\tExpiresByType text/css \"access plus {$static_files_expire} days\"\n" .
 		"\t\tExpiresByType application/pdf \"access plus {$static_files_expire} days\"\n" .
 		"\t\tExpiresByType text/x-javascript \"access plus {$static_files_expire} days\"\n" .
-		"\t\tExpiresDefault \"access plus {$static_files_expire} days\"\n" .
+		"\t\tExpiresByType text/javascript \"access plus {$static_files_expire} days\"\n" .
+		"\t\tExpiresByType application/javascript \"access plus {$static_files_expire} days\"\n" .
+		"\t\tExpiresByType image/svg+xml \"access plus {$static_files_expire} days\"\n" .
+		"\t\tExpiresByType image/webp \"access plus {$static_files_expire} days\"\n" .
+		"\t\tExpiresByType font/woff2 \"access plus {$static_files_expire} days\"\n" .
+		// KloxoNext - static files only: no ExpiresDefault, pages (HTML, PHP) are not
+		// kept for days by browsers and proxies
+
 		"\t</IfModule>";
 } else {
 	$static_files_expire_text = '# No static files expire';

@@ -4,6 +4,22 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-11
 
+### Web - nginx cache
+- nginx-proxy: an edited page or file is served on the next reload. Apache sent
+  `Expires`/`Cache-Control: max-age` of 7 days for every answer (also HTML pages,
+  `ExpiresDefault`) and nginx kept them that long; it also served the old copy while
+  refreshing an expired one. The micro cache is now really 1 second (Apache's headers
+  still reach the browser for static files), an expired copy is fetched again.
+- Apache sends `Expires` for static files only (images, CSS, JS, fonts), no longer for pages;
+  typo `accesss` for GIF fixed.
+- nginx + PHP-FPM: answers that set a cookie (a login, a session) were cached and the same
+  cookie went to the next visitors within that second - never cached now. Visitors logged in
+  to a site (WordPress, Joomla, shops, PHP sessions, HTTP authentication) bypass the cache;
+  answers marked private / no-store are not stored.
+- nginx on AlmaLinux 9 (1.20) did not start: `http2 on;` needs nginx 1.25.1; older versions
+  get `listen 443 ssl http2`.
+- The nginx caches are emptied once after the update (pages stored under the old rules).
+
 ### DNS - subdomains
 - A subdomain added from the panel is published in its domain's zone again (it answered after
   about 10 seconds in the tests; before, not at all). The parent zone is rewritten at the end
