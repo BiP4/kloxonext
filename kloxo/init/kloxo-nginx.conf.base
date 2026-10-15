@@ -82,7 +82,7 @@ http {
 
 		error_page 401 /error/401.html;
 		error_page 403 /error/403.html;
-		error_page 404 /theme/lbin/sitepreview.php;
+		error_page 404 /error/404.html;
 		error_page 400 /error/400.html;
 		error_page 429 /error/429.html;
 		error_page 500 /error/500.html;
@@ -90,6 +90,18 @@ http {
 		error_page 502 /error/502.html;
 		error_page 503 /error/503.html;
 		error_page 504 /error/504.html;
+
+		# KloxoNext - site preview (/sitepreview/<domain>/...): its own route, so the page
+		# keeps the status of the site (it was served as the 404 error page, always 404)
+		location ^~ /sitepreview/ {
+			include /etc/nginx/fastcgi_params;
+			fastcgi_param SCRIPT_FILENAME $document_root/theme/lbin/sitepreview.php;
+			fastcgi_param SCRIPT_NAME /theme/lbin/sitepreview.php;
+			fastcgi_param HTTPS $https if_not_empty;
+			fastcgi_param HTTP_SCHEME $scheme;
+			fastcgi_read_timeout 120;
+			fastcgi_pass kloxo_panel;
+		}
 
 		location ^~ /.well-known/acme-challenge/ {
 			alias /var/run/acme/acme-challenge/;

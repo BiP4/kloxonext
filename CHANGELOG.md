@@ -2,6 +2,19 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-15
+
+### Site preview (`/sitepreview/<domain>/`)
+- Every preview answered 404: it was served as the panel's 404 error page. It has its own
+  route in the panel web server now and keeps the status of the site (200, or the site's 404).
+- Sites that redirect (http -> https, -> www.) showed an empty page: redirects of the site
+  itself are followed, a redirect to another host is shown and not followed.
+- The page is fetched from this server's IP directly; nothing is written to `/etc/hosts` any
+  more (every preview of a file added a line there and most were never removed - the cleanup
+  removes them).
+- Links written as `https://domain/` or `//domain/` stay inside the preview; the content type
+  comes from the site; an unknown domain answers 404.
+
 ## 2026-10-11
 
 ### Web - nginx cache

@@ -328,6 +328,29 @@ function fill_string($string, $num = 33)
 	return $string;
 }
 
+// KloxoNext - the site preview no longer writes /etc/hosts (it connects to the server's
+// IP itself); lines left by older versions (one per preview of a file) are removed
+function kn_clean_preview_hosts($nolog = null)
+{
+	$hosts = (string)@file_get_contents("/etc/hosts");
+
+	if (strpos($hosts, "#added by kloxo dnsless preview") === false) {
+		return;
+	}
+
+	log_cleanup("- Remove site preview entries from /etc/hosts", $nolog);
+
+	$keep = array();
+
+	foreach (explode("\n", rtrim($hosts, "\n")) as $l) {
+		if (strpos($l, "#added by kloxo dnsless preview") === false) {
+			$keep[] = $l;
+		}
+	}
+
+	file_put_contents("/etc/hosts", implode("\n", $keep) . "\n");
+}
+
 function removeFromEtcHost($request)
 {
 	$comment = "added by kloxo dnsless preview";
@@ -7175,6 +7198,7 @@ function setInitialServices($nolog = null)
 	setActivateDnsServer($nolog);
 
 	setAllWebServerInstall($nolog);
+	kn_clean_preview_hosts($nolog);
 	setAllInactivateWebServer($nolog);
 	setActivateWebServer($nolog);
 
