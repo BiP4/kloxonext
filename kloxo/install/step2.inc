@@ -85,9 +85,17 @@ kloxo_apache_conf() {
 
 	mkdir -p "${tp}"
 
-	for x in fastcgi.conf ssl.conf __version.conf '~lxcenter.conf' ; do
+	for x in ssl.conf __version.conf '~lxcenter.conf' ; do
 		cp -f "${sp}/${x}" "${tp}/${x}"
 	done
+
+	# fastcgi.conf loads mod_fastcgi, not packaged on EL9+: httpd refused to start
+	# (php-fpm is reached through mod_proxy_fcgi, see set-default-phptype.php)
+	if [[ -f /etc/httpd/modules/mod_fastcgi.so ]] ; then
+		cp -f "${sp}/fastcgi.conf" "${tp}/fastcgi.conf"
+	else
+		cp -f "${sp}/_inactive_.conf" "${tp}/fastcgi.conf"
+	fi
 
 	for x in php fcgid ruid2 suphp ; do
 		cp -f "${sp}/_inactive_.conf" "${tp}/${x}.conf"

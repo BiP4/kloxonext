@@ -19,7 +19,8 @@ $kn_sections = array();
 
 if (!$kn_is_mailuser) {
 	ob_start();
-	include getLinkCustomfile(getcwd() . "/theme/skin/simplicity/default", "menu.php");
+	// the menu definition (it lived in the removed simplicity skin: fresh installs had none)
+	include getLinkCustomfile(getcwd() . "/theme/skin/nexus/default", "menu.php");
 	$kn_menu_html = ob_get_clean();
 	$kn_sections = kn_nav_sections($kn_menu_html, $login);
 	$kn_sections = kn_nav_curate($kn_sections);

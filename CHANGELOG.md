@@ -2,6 +2,17 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-17
+
+### Fresh installs (found on AlmaLinux 10.2)
+- The side menu was empty: the nexus menu was built from `menu.php` of the removed simplicity
+  skin; existing servers still had the file, new installs did not. The menu is part of the
+  nexus skin now.
+- Apache (httpd) did not start: the installer enabled `conf.d/fastcgi.conf`, which loads
+  `mod_fastcgi`, a module not packaged on EL9+ (PHP runs through php-fpm / mod_proxy_fcgi).
+  It is enabled only when the module exists; the cleanup disables it on servers installed
+  before.
+
 ## 2026-10-15
 
 ### Site preview (`/sitepreview/<domain>/`)

@@ -298,7 +298,13 @@ class serverweb__ extends lxDriverClass
 		lxfile_rm("{$ehcdpath}/fastcgi.nonconf");
 
 		lxfile_cp(getLinkCustomfile($haecdpath, "_inactive_.conf"), $ehcdpath . "/php.conf");
-		lxfile_cp(getLinkCustomfile($haecdpath, "fastcgi.conf"), $ehcdpath . "/fastcgi.conf");
+
+		// KloxoNext - mod_fastcgi is not packaged on EL9+: httpd would not start
+		if (file_exists('/etc/httpd/modules/mod_fastcgi.so')) {
+			lxfile_cp(getLinkCustomfile($haecdpath, "fastcgi.conf"), $ehcdpath . "/fastcgi.conf");
+		} else {
+			lxfile_cp(getLinkCustomfile($haecdpath, "_inactive_.conf"), $ehcdpath . "/fastcgi.conf");
+		}
 
 	//	lxshell_return("chkconfig", "php-fpm", "on");
 		exec("chkconfig php-fpm on >/dev/null 2>&1");

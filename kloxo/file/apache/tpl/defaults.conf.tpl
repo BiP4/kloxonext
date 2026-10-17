@@ -129,6 +129,14 @@ foreach ($typelist as $k => $v) {
 		$w = $v;
 	}
 
+	// KloxoNext - fastcgi.conf loads mod_fastcgi (not packaged on EL9+): only with the module
+	if (($v === 'fastcgi') && !file_exists('/etc/httpd/modules/mod_fastcgi.so')) {
+		$custom_conf = getLinkCustomfile($srccdpath, "_inactive_.conf");
+		copy($custom_conf, "{$trgtcdpath}/{$v}.conf");
+
+		continue;
+	}
+
 	if (strpos($phptype, "{$w}") !== false) {
 		$custom_conf = getLinkCustomfile($srccdpath, "{$v}.conf");
 		copy($custom_conf, "{$trgtcdpath}/{$v}.conf");

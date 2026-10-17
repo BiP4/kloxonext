@@ -351,6 +351,26 @@ function kn_clean_preview_hosts($nolog = null)
 	file_put_contents("/etc/hosts", implode("\n", $keep) . "\n");
 }
 
+// KloxoNext - installs made before this fix (EL9+) had conf.d/fastcgi.conf loading
+// mod_fastcgi, which is not packaged there: httpd did not start at all
+function kn_fix_missing_mod_fastcgi($nolog = null)
+{
+	$f = '/etc/httpd/conf.d/fastcgi.conf';
+
+	if (!file_exists($f) || file_exists('/etc/httpd/modules/mod_fastcgi.so')) {
+		return;
+	}
+
+	if (!preg_match('/^\s*LoadModule\s+fastcgi_module/m', (string)@file_get_contents($f))) {
+		return;
+	}
+
+	log_cleanup("- Disable conf.d/fastcgi.conf (mod_fastcgi is not installed)", $nolog);
+
+	lxfile_cp(getLinkCustomfile('/opt/configs/apache/etc/conf.d', '_inactive_.conf'), $f);
+	createRestartFile("restart-web");
+}
+
 function removeFromEtcHost($request)
 {
 	$comment = "added by kloxo dnsless preview";
@@ -7199,6 +7219,7 @@ function setInitialServices($nolog = null)
 
 	setAllWebServerInstall($nolog);
 	kn_clean_preview_hosts($nolog);
+	kn_fix_missing_mod_fastcgi($nolog);
 	setAllInactivateWebServer($nolog);
 	setActivateWebServer($nolog);
 
