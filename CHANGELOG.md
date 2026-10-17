@@ -4,6 +4,11 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-17
 
+### Web - nginx-proxy over HTTPS
+- Pages loaded only partly (`ERR_HTTP2_SERVER_REFUSED_STREAM`): the proxy configuration had
+  `keepalive_timeout 0`, so nginx closed the HTTP/2 connection after the first answer and the
+  other files of the page, sent on the same connection, were refused. Now 15 seconds.
+
 ### File operations
 - Remove in Backup / Restore (and every recursive delete, move and copy of the panel: file
   manager trash, temporary backup folders, cleanup of old directories) failed with
