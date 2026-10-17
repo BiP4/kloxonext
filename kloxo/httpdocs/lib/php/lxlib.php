@@ -981,6 +981,9 @@ function getShellCommand($cmd, $arglist)
 	$q = $sgbl->__var_quote_char;
 	$cmd = expand_real_root($cmd);
 	$cmd = str_replace(";", "", $cmd);
+	// callers write "'rm'" / "'mv'" (quoted: no shell alias); the quoting below does the
+	// same - kept, those quotes became part of the name ("'rm': command not found")
+	$cmd = trim($cmd, " '\"");
 	$cmd = "{$q}" . kn_shell_arg($cmd, $q) . "{$q}";
 
 	foreach ($arglist as $a) {

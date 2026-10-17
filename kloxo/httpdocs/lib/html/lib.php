@@ -5743,8 +5743,41 @@ function setInitialDnsConfig($type, $nolog = null)
 	// MR -- remove old dirs
 	if ($type !== 'djbdns') {
 		$htpath_old = "/home/{$type}";
-		lxfile_rm_rec($htpath_old);
+
+		if (kn_is_old_config_dir($htpath_old, $type)) {
+			lxfile_rm_rec($htpath_old);
+		}
 	}
+}
+
+/**
+ * KloxoNext - /home/<driver> was the configuration directory of old Kloxo versions (now
+ * /opt/configs). Removed only when it looks like one (conf/ or tpl/ inside) and it is
+ * nobody's home: a client or system user named like a driver ('nginx', 'pdns' ...) keeps it.
+ */
+function kn_is_old_config_dir($dir, $name, $needconf = true)
+{
+	if (!is_dir($dir) || is_link($dir)) {
+		return false;
+	}
+
+	if ($needconf && !is_dir("{$dir}/conf") && !is_dir("{$dir}/tpl")) {
+		return false;
+	}
+
+	if (exists_in_db(null, 'client', $name)) {
+		return false;
+	}
+
+	foreach ((array)@file('/etc/passwd', FILE_IGNORE_NEW_LINES) as $l) {
+		$f = explode(':', $l);
+
+		if (isset($f[5]) && (rtrim($f[5], '/') === rtrim($dir, '/'))) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 function setInitialAllWebConfigs($nolog = null)
@@ -5820,7 +5853,9 @@ function setInitialWebConfig($type, $nolog = null)
 	// MR -- remove old dirs
 	$htpath_old = "/home/{$type}";
 
-	lxfile_rm_rec($htpath_old);
+	if (kn_is_old_config_dir($htpath_old, $type)) {
+		lxfile_rm_rec($htpath_old);
+	}
 }
 
 function setInitialAllWebCacheConfigs($nolog = null)
@@ -5839,7 +5874,9 @@ function setInitialWebCacheConfig($type, $nolog = null)
 	// MR -- remove old dirs
 	$htpath_old = "/home/{$type}";
 
-	lxfile_rm_rec($htpath_old);
+	if (kn_is_old_config_dir($htpath_old, $type)) {
+		lxfile_rm_rec($htpath_old);
+	}
 }
 
 function setInitialPhpIniConfig($nolog = null)
@@ -7577,7 +7614,7 @@ function setCopyOpenSSLConfFiles($nolog = null)
 	log_cleanup("- Copy to {$pathdrv}", $nolog);
 	exec("'cp' -rf {$pathsrc} /opt/configs");
 
-	if (file_exists("/home/openssl")) {
+	if (kn_is_old_config_dir("/home/openssl", "openssl", false)) {
 		lxfile_rm_rec("/home/openssl");
 	}
 }
@@ -7592,7 +7629,7 @@ function setCopyLetsEncryptConfFiles($nolog = null)
 	log_cleanup("- Copy to {$pathdrv}", $nolog);
 	exec("'cp' -rf {$pathsrc} /opt/configs");
 
-	if (file_exists("/home/letsencrypt")) {
+	if (kn_is_old_config_dir("/home/letsencrypt", "letsencrypt", false)) {
 		lxfile_rm_rec("/home/letsencrypt");
 	}
 }
@@ -7607,7 +7644,7 @@ function setCopyAcmeshConfFiles($nolog = null)
 	log_cleanup("- Copy to {$pathdrv}", $nolog);
 	exec("'cp' -rf {$pathsrc} /opt/configs");
 
-	if (file_exists("/home/acme.sh")) {
+	if (kn_is_old_config_dir("/home/acme.sh", "acme.sh", false)) {
 		lxfile_rm_rec("/home/acme.sh");
 	}
 }
@@ -7622,7 +7659,7 @@ function setCopyStartapishConfFiles($nolog = null)
 	log_cleanup("- Copy to {$pathdrv}", $nolog);
 	exec("'cp' -rf {$pathsrc} /opt/configs");
 
-	if (file_exists("/home/startapi.sh")) {
+	if (kn_is_old_config_dir("/home/startapi.sh", "startapi.sh", false)) {
 		lxfile_rm_rec("/home/startapi.sh");
 	}
 }
@@ -7637,7 +7674,7 @@ function setCopyHttpryConfFiles($nolog = null)
 	log_cleanup("- Copy to {$pathdrv}", $nolog);
 	exec("'cp' -rf {$pathsrc} /opt/configs");
 
-	if (file_exists("/home/httpry")) {
+	if (kn_is_old_config_dir("/home/httpry", "httpry", false)) {
 		lxfile_rm_rec("/home/httpry");
 	}
 }

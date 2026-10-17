@@ -4,6 +4,15 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-17
 
+### File operations
+- Remove in Backup / Restore (and every recursive delete, move and copy of the panel: file
+  manager trash, temporary backup folders, cleanup of old directories) failed with
+  `'rm': command not found` since the shell quoting hardening: the program name, written
+  `'rm'` by the callers, was quoted a second time. Fixed in `getShellCommand()`.
+- The cleanup removes the old configuration folders `/home/<driver>` (nginx, bind, ...) only
+  when they look like one and are nobody's home directory (a client or system user named like
+  a driver keeps theirs).
+
 ### Fresh installs (found on AlmaLinux 10.2)
 - The side menu was empty: the nexus menu was built from `menu.php` of the removed simplicity
   skin; existing servers still had the file, new installs did not. The menu is part of the
