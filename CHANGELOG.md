@@ -4,6 +4,12 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-17
 
+### Webmail - Roundcube 1.7 behind nginx
+- Roundcube 1.7 serves its scripts, styles and images as `static.php/...`. The nginx PHP
+  location only matched paths ending in `.php`, so those requests fell through to the webmail
+  index page: Roundcube showed an unstyled page that did not work. The PHP location now also
+  takes `script.php/extra/path` (PATH_INFO), and runs only PHP files that exist.
+
 ### Web - nginx: random 500 on images / JS / CSS
 - nginx builds of the distributions patched for CVE-2026-42533 evaluate a `root` given by a
   variable twice and, depending on memory contents, fail with `[alert] no buffer space in
