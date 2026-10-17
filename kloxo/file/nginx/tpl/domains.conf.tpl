@@ -198,7 +198,6 @@ if (intval($static_files_expire) > -1) {
 	$static_files_expire_text = "\tlocation ~* ^.+\.(?:jpe?g|gif|png|ico|css|pdf|js)$ {\n" .
 		"\t\texpires {$static_files_expire}d;\n" .
 		"\t\taccess_log off;\n" .
-		"\t\troot \$var_rootdir;\n" .
 		"\t}";
 } else {
 	$static_files_expire_text = "\t# No static files expire";
@@ -254,7 +253,7 @@ server {
 	set $var_domain 'cp.<?=$domainname;?>';
 	set $var_rootdir '<?=$cpdocroot;?>';
 
-	root $var_rootdir;
+	root '<?=$cpdocroot;?>';
 
 	set $var_user 'apache';
 	set $var_fpmport '<?=$fpmportapache;?>';
@@ -303,7 +302,7 @@ server {
 	set $var_domain 'stats.<?=$domainname;?>';
 	set $var_rootdir '<?=$statsdocroot;?>';
 
-	root $var_rootdir;
+	root '<?=$statsdocroot;?>';
 
 	set $var_user 'apache';
 	set $var_fpmport '<?=$fpmportapache;?>';
@@ -364,7 +363,7 @@ server {
 	set $var_domain 'webmail.<?=$domainname;?>';
 	set $var_rootdir '<?=$webmaildocroot;?>';
 
-	root $var_rootdir;
+	root '<?=$webmaildocroot;?>';
 
 	set $var_user 'apache';
 	set $var_fpmport '<?=$fpmportapache;?>';
@@ -514,9 +513,21 @@ server {
 	set $var_rootdir '<?=$webdocroot;?>';
 <?php
 		}
+
+		// KloxoNext - a literal root: 'root $var_rootdir' made the distribution nginx builds
+		// patched for CVE-2026-42533 fail at random ("no buffer space in script copy", 500)
+		if ($wildcards) {
 ?>
 
 	root $var_rootdir;
+<?php
+		} else {
+?>
+
+	root '<?=$webdocroot;?>';
+<?php
+		}
+?>
 <?php
 		if ($enablecgi) {
 ?>
@@ -746,7 +757,7 @@ server {
 	set $var_domain '<?=$redirdomainname;?>';
 	set $var_rootdir '<?=$redirfullpath;?>';
 
-	root $var_rootdir;
+	root '<?=$redirfullpath;?>';
 <?php
 
 					if ($enablecgi) {
@@ -836,7 +847,7 @@ server {
 
 	set $var_rootdir '<?=$redirfullpath;?>';
 
-	root $var_rootdir;
+	root '<?=$redirfullpath;?>';
 <?php
 					if ($enablecgi) {
 ?>

@@ -4,6 +4,14 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-17
 
+### Web - nginx: random 500 on images / JS / CSS
+- nginx builds of the distributions patched for CVE-2026-42533 evaluate a `root` given by a
+  variable twice and, depending on memory contents, fail with `[alert] no buffer space in
+  script copy` and HTTP 500 (mostly static files over HTTP/2). The generated configurations
+  write the document root literally (`root '/home/user/domain';`) instead of
+  `root $var_rootdir;` - except wildcard domains, whose root follows the host name; the static
+  files location inherits the server's root.
+
 ### Web - nginx-proxy over HTTPS
 - Pages loaded only partly (`ERR_HTTP2_SERVER_REFUSED_STREAM`): the proxy configuration had
   `keepalive_timeout 0`, so nginx closed the HTTP/2 connection after the first answer and the

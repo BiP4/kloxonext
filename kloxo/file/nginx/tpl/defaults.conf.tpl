@@ -197,7 +197,7 @@ server {
 	set $var_domain '';
 	set $var_rootdir '<?=$defaultdocroot;?>';
 
-	root $var_rootdir;
+	root '<?=$defaultdocroot;?>';
 
 	set $var_user 'apache';
 	set $var_fpmport '<?=$fpmportapache;?>';
