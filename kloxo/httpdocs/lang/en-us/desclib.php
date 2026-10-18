@@ -1537,7 +1537,10 @@ $__description["cloudflare_disconnect"] = array("Disconnect this Cloudflare acco
 $__description["cloudflare_connect"] = array("Cloudflare Account");
 $__description["cloudflare_dns"] = array("Cloudflare DNS");
 $__description["cloudflare_use"] = array("Use Cloudflare as DNS service for this domain");
-$__description["cloudflare_proxied"] = array("Proxied host names (orange cloud), one per line: @ = the domain");
+$__description["cloudflare_proxied"] = array("Proxied by default (records without their own choice), one per line: @ = the domain");
+$__description["cloudflare_proxy"] = array("Cloudflare proxy (orange cloud)");
+$__description["cloudflare_proxy_on"] = array("Proxy On");
+$__description["cloudflare_proxy_off"] = array("Proxy Off (DNS only)");
 $__description["cloudflare_zone"] = array("Cloudflare zone");
 $__description["cloudflare_nameservers"] = array("Cloudflare nameservers");
 $__description["cloudflare_last_sync"] = array("Last synchronisation");

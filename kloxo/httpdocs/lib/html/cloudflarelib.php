@@ -252,7 +252,7 @@ function kn_cf_map_records($domain, $records, $proxied, $ttl)
 	$ttl = max(60, (int)$ttl);
 	$out = array();
 
-	foreach ((array)$records as $o) {
+	foreach ((array)$records as $rk => $o) {
 		$t = strtolower((string)$o->ttype);
 		$name = $fq(isset($o->hostname) ? $o->hostname : '');
 		$p = isset($o->param) ? (string)$o->param : '';
@@ -315,15 +315,150 @@ function kn_cf_map_records($domain, $records, $proxied, $ttl)
 			continue;
 		}
 
-		$px = in_array($r['type'], array('A', 'AAAA', 'CNAME'), true) && in_array($rel($name), (array)$proxied, true);
+		// KloxoNext - the proxy choice of the record itself (DNS page), else the default list
+		$canpx = in_array($r['type'], array('A', 'AAAA', 'CNAME'), true);
+		$own = isset($o->cf_proxied) ? (string)$o->cf_proxied : '';
+		$explicit = $canpx && (($own === 'on') || ($own === 'off'));
+		$px = $canpx && ($explicit ? ($own === 'on') : in_array($rel($name), (array)$proxied, true));
+
 		$r['proxied'] = $px;
 		$r['ttl'] = $px ? 1 : $ttl;
 		$r['comment'] = KN_CF_COMMENT;
+
+		// panel side of the record (never sent to the API): where to write the state back
+		$r['_canpx'] = $canpx;
+		$r['_explicit'] = $explicit;
+		$r['_ttl'] = $ttl;
+		$r['_src'] = array(isset($o->__kn_subdomain) ? $o->__kn_subdomain : $domain,
+			isset($o->__kn_key) ? $o->__kn_key : $rk);
 
 		$out[] = $r;
 	}
 
 	return $out;
+}
+
+/** the record as sent to the API (without the panel-side keys) */
+function kn_cf_api_record($w)
+{
+	foreach (array_keys($w) as $k) {
+		if ($k[0] === '_') {
+			unset($w[$k]);
+		}
+	}
+
+	return $w;
+}
+
+/** record types Cloudflare can proxy (panel types) */
+function kn_cf_proxyable_type($ttype)
+{
+	return in_array(strtolower((string)$ttype), array('a', 'aaaa', 'cn', 'cname', 'fcname'), true);
+}
+
+/** the Cloudflare zone a DNS page belongs to: the domain itself or, for a subdomain, its parent ('' = local DNS) */
+function kn_cf_zone_for($dnsname)
+{
+	if (!kn_cf_valid_name($dnsname)) {
+		return '';
+	}
+
+	if (kn_cf_uses_cloudflare($dnsname)) {
+		return $dnsname;
+	}
+
+	$p = function_exists('kn_dns_get_subdomain_parent') ? kn_dns_get_subdomain_parent($dnsname) : null;
+
+	return ($p && kn_cf_uses_cloudflare($p)) ? $p : '';
+}
+
+/**
+ * Proxy state of a record that already exists in Cloudflare: a change made in the Cloudflare
+ * dashboard is kept (and written back to the panel), a change made on the panel DNS page is
+ * sent. $last: the state the previous sync left (null: unknown).
+ */
+function kn_cf_decide_proxy(&$w, $h, $last)
+{
+	if (empty($w['_canpx'])) {
+		return;
+	}
+
+	$cf = !empty($h['proxied']);
+
+	if (!$w['_explicit']) {
+		// no choice on the panel yet: what Cloudflare has
+		$w['proxied'] = $cf;
+	} elseif (($last !== null) && ($cf !== $last) && ($w['proxied'] === $last)) {
+		// changed in the Cloudflare dashboard since the last sync, not on the panel
+		$w['proxied'] = $cf;
+	}
+
+	$w['ttl'] = $w['proxied'] ? 1 : $w['_ttl'];
+}
+
+/** Write the proxy state of the records back to their panel DNS pages (database only, no new sync) */
+function kn_cf_write_back($changes)
+{
+	foreach ($changes as $dnsname => $list) {
+		$d = new Dns(null, null, $dnsname);
+		$d->get();
+
+		if (($d->dbaction === 'add') || empty($d->dns_record_a)) {
+			continue;
+		}
+
+		$dirty = false;
+
+		foreach ($list as $key => $v) {
+			if (isset($d->dns_record_a[$key]) && (!isset($d->dns_record_a[$key]->cf_proxied) || ($d->dns_record_a[$key]->cf_proxied !== $v))) {
+				$d->dns_record_a[$key]->cf_proxied = $v;
+				$dirty = true;
+			}
+		}
+
+		if ($dirty) {
+			$d->setUpdateSubaction();
+			$d->write();
+		}
+	}
+}
+
+/** Cloudflare turned off for a domain: the panel records in the zone back to 'DNS only' */
+function kn_cf_all_dns_only($domain)
+{
+	$cfg = kn_cf_domain($domain);
+	$acc = kn_cf_read('accounts', $cfg['client']);
+
+	if (empty($acc['token']) || empty($cfg['zone_id'])) {
+		return 'OK: nothing to change';
+	}
+
+	$api = new KnCloudflare($acc['token']);
+	$have = $api->listRecords($cfg['zone_id']);
+
+	if ($have === null) {
+		return 'ERROR: ' . $api->error;
+	}
+
+	$n = 0;
+	$errors = array();
+
+	foreach ($have as $h) {
+		if (empty($h['proxied']) || !isset($h['comment']) || ($h['comment'] !== KN_CF_COMMENT)) {
+			continue;
+		}
+
+		if ($api->request('PATCH', "/zones/{$cfg['zone_id']}/dns_records/{$h['id']}", array('proxied' => false, 'ttl' => 3600)) === null) {
+			$errors[] = "{$h['type']} {$h['name']}: {$api->error}";
+		} else {
+			$n++;
+		}
+	}
+
+	unset($cfg['px_last']);
+	kn_cf_write('domains', $domain, $cfg);
+
+	return ($errors ? 'ERROR: ' . implode(' | ', $errors) . ' - ' : 'OK: ') . "{$n} records back to DNS only";
 }
 
 /** identity of a record for matching desired vs existing */
@@ -422,6 +557,8 @@ function kn_cf_sync_domain($domain)
 	$created = $updated = $deleted = 0;
 	$errors = array();
 	$todo = array();
+	$final = array();
+	$last = isset($cfg['px_last']) ? (array)$cfg['px_last'] : array();
 
 	// 1. identical records: keep, or update proxy / TTL / priority
 	foreach ($want as $w) {
@@ -439,11 +576,14 @@ function kn_cf_sync_domain($domain)
 			unset($managed[$k]);
 		}
 
+		kn_cf_decide_proxy($w, $h, array_key_exists($k, $last) ? (bool)$last[$k] : null);
+		$final[] = $w;
+
 		$same = ((bool)$h['proxied'] === $w['proxied']) && ((int)$h['ttl'] === $w['ttl'])
 			&& (!isset($w['priority']) || ((int)(isset($h['priority']) ? $h['priority'] : -1) === $w['priority']));
 
 		if (!$same) {
-			if ($api->request('PATCH', "/zones/{$zone['id']}/dns_records/{$h['id']}", $w) === null) {
+			if ($api->request('PATCH', "/zones/{$zone['id']}/dns_records/{$h['id']}", kn_cf_api_record($w)) === null) {
 				$errors[] = "{$w['type']} {$w['name']}: {$api->error}";
 			} else {
 				$updated++;
@@ -473,7 +613,11 @@ function kn_cf_sync_domain($domain)
 
 		$h = array_shift($left[$tn]);
 
-		if ($api->request('PATCH', "/zones/{$zone['id']}/dns_records/{$h['id']}", $w) === null) {
+		// same name, new value: the record keeps its proxy state unless the panel chose one
+		kn_cf_decide_proxy($w, $h, null);
+		$final[] = $w;
+
+		if ($api->request('PATCH', "/zones/{$zone['id']}/dns_records/{$h['id']}", kn_cf_api_record($w)) === null) {
 			$errors[] = "{$w['type']} {$w['name']}: {$api->error}";
 		} else {
 			$updated++;
@@ -493,12 +637,29 @@ function kn_cf_sync_domain($domain)
 
 	// 4. new records
 	foreach ($create as $w) {
-		if ($api->request('POST', "/zones/{$zone['id']}/dns_records", $w) === null) {
+		$final[] = $w;
+
+		if ($api->request('POST', "/zones/{$zone['id']}/dns_records", kn_cf_api_record($w)) === null) {
 			$errors[] = "{$w['type']} {$w['name']}: {$api->error}";
 		} else {
 			$created++;
 		}
 	}
+
+	// remember the proxy states and show them on the panel DNS pages
+	$cfg['px_last'] = array();
+	$back = array();
+
+	foreach ($final as $w) {
+		if (empty($w['_canpx'])) {
+			continue;
+		}
+
+		$cfg['px_last'][kn_cf_record_key($w)] = $w['proxied'];
+		$back[$w['_src'][0]][$w['_src'][1]] = $w['proxied'] ? 'on' : 'off';
+	}
+
+	kn_cf_write_back($back);
 
 	$cfg['synced'] = date('Y-m-d H:i:s');
 	$cfg['status'] = ($errors ? 'ERROR: ' . implode(' | ', array_slice($errors, 0, 5)) . ' - ' : 'OK: ')

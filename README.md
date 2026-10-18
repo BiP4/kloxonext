@@ -169,9 +169,11 @@ installed (pinned and checksummed).
   (`sh /script/dns-custom list|save|delete|apply`).
 * **Cloudflare** – a client chooses, per domain, whether the DNS is served locally or by
   Cloudflare. With a Cloudflare API token (*Cloudflare account*) the domain's records are pushed
-  to its Cloudflare zone through the API on every DNS change, and the names to proxy (orange
-  cloud: `@`, `www`, ...) are set from the panel. Manual push:
-  `lxphp.exe ../bin/misc/cloudflare-sync.php <domain>|--all` (from `httpdocs`).
+  to its Cloudflare zone through the API on every DNS change. The proxy (orange cloud) is chosen
+  per record on the DNS page (column *Cloudflare proxy*, buttons *Proxy On* / *Proxy Off*, the
+  record's edit form; subdomains too). A proxy change made in the Cloudflare dashboard is kept
+  and shown on the DNS page; turning Cloudflare off puts the records back to *DNS only*.
+  Manual push: `lxphp.exe ../bin/misc/cloudflare-sync.php <domain>|--all` (from `httpdocs`).
 
 ## Servers (master / slave)
 

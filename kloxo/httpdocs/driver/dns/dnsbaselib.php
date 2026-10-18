@@ -26,6 +26,51 @@ class dns_record_a extends LxDnsClass
 	static $__desc_weight = array("n", "", "weight");
 	static $__desc_port = array("n", "", "port");
 
+	// KloxoNext - Cloudflare proxy of the record (domains whose DNS service is Cloudflare)
+	static $__desc_cf_proxied = array("f", "", "cloudflare_proxy");
+
+	/** the Cloudflare zone of the DNS page $dns belongs to ('' = local DNS) */
+	static function knCfZone($dns)
+	{
+		if (!is_object($dns) || !isset($dns->nname) || !function_exists('kn_cf_zone_for')) {
+			return '';
+		}
+
+		// DNS templates have no Cloudflare service
+		if (method_exists($dns, 'get__table') && ($dns->get__table() !== 'dns')) {
+			return '';
+		}
+
+		return kn_cf_zone_for($dns->nname);
+	}
+
+	/** proxied? ('on' / 'off'), the record's own choice or the default list of the domain */
+	function knCfState()
+	{
+		if (isset($this->cf_proxied) && (($this->cf_proxied === 'on') || ($this->cf_proxied === 'off'))) {
+			return $this->cf_proxied;
+		}
+
+		$dns = $this->getParentO();
+		$zone = self::knCfZone($dns);
+
+		if (!$zone) {
+			return 'off';
+		}
+
+		$h = isset($this->hostname) ? rtrim((string)$this->hostname, '.') : '';
+		$h = (($h === '') || ($h === '__base__') || ($h === $dns->nname)) ? '' : str_replace('.__base__', '', $h);
+
+		// relative to the zone: a subdomain's 'www' is 'www.<label>'
+		$label = ($dns->nname === $zone) ? '' : substr($dns->nname, 0, -strlen(".{$zone}"));
+		$rel = trim($h . (($h !== '' && $label !== '') ? '.' : '') . $label, '.');
+		$rel = ($rel === '') ? '@' : $rel;
+
+		$cfg = kn_cf_domain($zone);
+
+		return in_array($rel, (array)$cfg['proxied'], true) ? 'on' : 'off';
+	}
+
 	function isSelect()
 	{
 		if ($this->nname === 'a___base__') {
@@ -42,6 +87,12 @@ class dns_record_a extends LxDnsClass
 	function updateform($subaction, $param)
 	{
 		$vlist['hostname'] = array('M', null);
+
+		// KloxoNext - Cloudflare proxy (orange cloud) for A / AAAA / CNAME
+		if (self::knCfZone($this->getParentO()) && kn_cf_proxyable_type($this->ttype)) {
+			$this->cf_proxied = $this->knCfState();
+			$vlist['cf_proxied'] = null;
+		}
 
 		if ($this->ttype === 'txt') {
 			$vlist['param'] = array("t", "");
@@ -72,9 +123,28 @@ class dns_record_a extends LxDnsClass
 		$nlist['hostname'] = '20%';
 		$nlist['ttype'] = '5%';
 		$nlist['priority'] = '5%';
-		$nlist['param'] = '70%';
+
+		if (self::knCfZone($parent)) {
+			$nlist['param'] = '55%';
+			$nlist['cf_proxied'] = '15%';
+		} else {
+			$nlist['param'] = '70%';
+		}
 
 		return $nlist;
+	}
+
+	// KloxoNext - Cloudflare: proxy on / off for the selected records
+	static function createListBlist($parent, $class)
+	{
+		$blist[] = array("a=delete&c={$class}");
+
+		if (self::knCfZone($parent)) {
+			$blist[] = array("a=update&sa=cf_proxy_on");
+			$blist[] = array("a=update&sa=cf_proxy_off");
+		}
+
+		return $blist;
 	}
 
 	static function perPage()
@@ -94,6 +164,14 @@ class dns_record_a extends LxDnsClass
 
 		if ($var === 'ttype') {
 			return strtoupper($this->$var);
+		}
+
+		if ($var === 'cf_proxied') {
+			if (!kn_cf_proxyable_type($this->ttype)) {
+				return '-';
+			}
+
+			return ($this->knCfState() === 'on') ? 'Proxied' : 'DNS only';
 		}
 
 		if ($var === 'param') {

@@ -991,5 +991,8 @@ $__information['cfaccount_updateform_connect_pre'] = "<p>Connect your Cloudflare
 	"(add <b>Zone - Zone - Edit</b> to let the panel create new zones). The token is kept on the server only and is never shown again.</p>";
 $__information['cfdomain_updateform_service_pre'] = "<p>With Cloudflare the records of the DNS page of this domain (and of its subdomains) are kept in sync with the Cloudflare zone automatically. " .
 	"Only records created by the panel are changed; records you add yourself in Cloudflare are left alone. " .
-	"Proxy (orange cloud) only web host names: mail, ftp, cp and webmail must stay DNS only.</p>";
+	"Proxy (orange cloud) only web host names: mail, ftp, cp and webmail must stay DNS only.</p>" .
+	"<p>The proxy is chosen per record on the <b>DNS page</b> (column <b>Cloudflare proxy</b>, buttons <b>Proxy On</b> / <b>Proxy Off</b>, or the record's edit form). " .
+	"A change made in the Cloudflare dashboard is kept and shown on the DNS page. The list below is only the default for records without their own choice. " .
+	"Turning Cloudflare off puts the panel records of the zone back to <b>DNS only</b>.</p>";
 $__information['cfdomain_updateform_sync_pre'] = "<p>Set the Cloudflare nameservers below at your domain registrar. Press Update to synchronise now.</p>";

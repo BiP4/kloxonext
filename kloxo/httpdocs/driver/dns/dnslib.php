@@ -14,6 +14,40 @@ class Dns extends DnsBase
 	// KloxoNext - records of the subdomains (shown read only on the domain's DNS page)
 	static $__desc_dnssubrecord_l = array("v", "", "virtual");
 
+	// KloxoNext - Cloudflare proxy of the selected records (DNS page buttons)
+	static $__acdesc_update_cf_proxy_on = array("", "", "cloudflare_proxy_on");
+	static $__acdesc_update_cf_proxy_off = array("", "", "cloudflare_proxy_off");
+
+	function updateCf_proxy_on($param)
+	{
+		return $this->knSetCfProxy($param, 'on');
+	}
+
+	function updateCf_proxy_off($param)
+	{
+		return $this->knSetCfProxy($param, 'off');
+	}
+
+	function knSetCfProxy($param, $v)
+	{
+		global $login;
+
+		if (!kn_cf_zone_for($this->nname)) {
+			throw new lxException($login->getThrow("cloudflare_error"), '', "the DNS service of this domain is not Cloudflare");
+		}
+
+		foreach ((array)(isset($param['_accountselect']) ? $param['_accountselect'] : array()) as $k) {
+			if (isset($this->dns_record_a[$k]) && kn_cf_proxyable_type($this->dns_record_a[$k]->ttype)) {
+				$this->dns_record_a[$k]->cf_proxied = $v;
+			}
+		}
+
+		// saved, zone re-rendered, Cloudflare synchronised after the request (createExtraVariables)
+		$this->setUpdateSubaction('domain');
+
+		return null;
+	}
+
 	/** KloxoNext - parent domain when this DNS belongs to a subdomain */
 	function knSubdomainParent()
 	{
@@ -135,8 +169,11 @@ class Dns extends DnsBase
 		$dom = $this->getParentO();
 
 		// KloxoNext - DNS service Cloudflare: push the records once this request has saved them
-		if (kn_cf_uses_cloudflare($this->nname)) {
-			kn_cf_schedule_sync_after_request($this->nname);
+		// (a subdomain's records live in the zone of its parent)
+		$cfzone = kn_cf_zone_for($this->nname);
+
+		if ($cfzone) {
+			kn_cf_schedule_sync_after_request($cfzone);
 		}
 
 		if (is_object($dom) && isset($dom->dtype) && ($dom->dtype === 'subdomain') && !empty($dom->subdomain_parent)) {

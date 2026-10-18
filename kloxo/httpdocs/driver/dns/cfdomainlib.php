@@ -135,7 +135,13 @@ class Cfdomain extends lxClass
 				throw new lxException($login->getThrow("cloudflare_error"), '', substr($r, 7));
 			}
 		} else {
-			// the Cloudflare zone is left untouched; point the registrar back to the server NS
+			// KloxoNext - back to normal: the panel records in the zone lose the proxy
+			// ('DNS only'); the zone stays, point the registrar back to the server NS
+			if ($cfg['provider'] === 'cloudflare') {
+				kn_cf_all_dns_only($domain);
+				$cfg = kn_cf_domain($domain);
+			}
+
 			$cfg['provider'] = 'local';
 			kn_cf_write('domains', $domain, $cfg);
 		}

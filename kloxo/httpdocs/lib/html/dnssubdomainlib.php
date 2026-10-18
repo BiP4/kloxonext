@@ -105,6 +105,7 @@ function kn_dns_get_subdomain_records($parent)
 			$n = clone $o;
 			$n->hostname = $h;
 			$n->__kn_subdomain = $sub;
+			$n->__kn_key = $k;
 
 			$p = (string)$o->param;
 

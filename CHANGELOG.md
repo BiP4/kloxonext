@@ -2,6 +2,20 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-18
+
+### DNS - Cloudflare proxy per record
+- The proxy (orange cloud) is chosen per record on the DNS page of a domain whose DNS service
+  is Cloudflare: new column *Cloudflare proxy*, buttons *Proxy On* / *Proxy Off* for the
+  selected records, a check box in the record's edit form (A, AAAA, CNAME). Subdomains too:
+  their records are in the zone of the parent domain.
+- The proxy state set in Cloudflare is kept: a record changed in the Cloudflare dashboard keeps
+  that state at the next synchronisation and the DNS page shows it; a change on the DNS page
+  is sent to Cloudflare. (Before, every sync put the proxy back to the panel's name list.)
+- The name list of the domain's Cloudflare page is now only the default for records without
+  their own choice.
+- Turning Cloudflare off for a domain puts the panel records of the zone back to *DNS only*.
+
 ## 2026-10-17
 
 ### Webmail - Roundcube 1.7 behind nginx
