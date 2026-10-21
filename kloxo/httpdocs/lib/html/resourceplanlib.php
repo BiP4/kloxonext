@@ -53,6 +53,12 @@ class resourceplan extends resourcecore
 		
 		if ($sgbl->isKloxo()) {
 			$this->dnstemplate_list = domainBase::getDnsTemplateList($parent);
+
+			// KloxoNext - a plan added without the form (sh /script/add) has no list yet
+			if (!is_object($this->listpriv)) {
+				$this->listpriv = new ListPriv(null, null, $this->nname);
+			}
+
 			$this->listpriv->ipaddress_list = $parent->getIpaddress('localhost');
 		}
 	}

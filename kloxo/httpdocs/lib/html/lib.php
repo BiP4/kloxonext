@@ -985,7 +985,9 @@ function validate_plan_name($name)
 {
 	global $login;
 
-	if (!preg_match('/^([a-z]){1,1}([_a-z0-9]){0,29}([a-z0-9]){1,1}$/', $name)) {
+	// KloxoNext - a display name ('Unlimited', 'Basic 10GB'): starts with a letter, then
+	// letters, digits, space, _ - . (stored with _ for anything not a word character)
+	if (!preg_match('/^[A-Za-z][A-Za-z0-9 _.-]{0,30}$/', trim((string)$name))) {
 		throw new lxException($login->getThrow('invalid_plan_name'), '', $name);
 	}
 }

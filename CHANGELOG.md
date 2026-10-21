@@ -4,6 +4,12 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-21
 
+### Resource plans
+- Adding a plan named with capitals (`Unlimited`) failed with *Invalid plan name*: only
+  lower case was accepted. A plan name starts with a letter and may have letters, digits,
+  spaces, `_`, `-` and `.` (stored with `_` instead of spaces), up to 31 characters.
+- `sh /script/add --class=resourceplan` no longer stops on PHP 8 (no IP list yet).
+
 ### Lists - paging
 - Every list of the panel (domains, mail accounts, clients, ...) showed one page only: the
   row count query had become `select lx_count(*)` (a PHP helper name, not SQL) and failed, so
