@@ -1594,13 +1594,13 @@ abstract class Lxclass
 
 		//	$db->rawquery("begin;");
 
-			$countres = $db->rawquery("select lx_count(*) from {$table} {$countquery}");
+			$countres = $db->rawquery("select count(*) from {$table} {$countquery}");
 			if ($sgbl->__var_database_type === 'mysql') {
-				$countres = $countres[0]['lx_count(*)'];
+				$countres = $countres[0]['count(*)'];
 			} else if ($sgbl->__var_database_type === 'mssql') {
 				$countres = $countres[0]['computed'];
 			} else {
-				$countres = $countres[0]['lx_count(*)'];
+				$countres = $countres[0]['count(*)'];
 			}
 
 		//	print_time('count', "CountResult");

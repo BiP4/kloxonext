@@ -4,6 +4,12 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
 
 ## 2026-10-21
 
+### Lists - paging
+- Every list of the panel (domains, mail accounts, clients, ...) showed one page only: the
+  row count query had become `select lx_count(*)` (a PHP helper name, not SQL) and failed, so
+  the total was empty. Fixed there, in the count of database rows and in the LxGuard hit
+  totals.
+
 ### Mail - DKIM per domain
 - Mail of domains added or restored while *domain key* was off in the server mail settings
   went out unsigned (OpenDKIM: `no signing table match`): only a new domain, or saving that

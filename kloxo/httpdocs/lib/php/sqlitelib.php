@@ -417,9 +417,9 @@ class Sqlite
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
-		$countres = $this->rawquery("select lx_count(*) from $this->__sqtable where $query");
+		$countres = $this->rawquery("select count(*) from $this->__sqtable where $query");
 	
-		$countres = $countres[0]['lx_count(*)'];
+		$countres = $countres[0]['count(*)'];
 	
 		return $countres;
 	}
