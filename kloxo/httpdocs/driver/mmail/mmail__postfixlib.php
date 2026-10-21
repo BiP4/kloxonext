@@ -96,6 +96,11 @@ class Mmail__Postfix extends lxDriverClass
 			@mkdir($dir, 0750, true);
 			exec("opendkim-genkey -b 2048 -d " . escapeshellarg($domain) . " -D " . escapeshellarg($dir) . " -s private >/dev/null 2>&1");
 			exec("chown -R opendkim:opendkim " . escapeshellarg($dir));
+			@unlink("{$dir}/disabled");
+			exec("sh /script/fixmail-dkim >/dev/null 2>&1");
+		} elseif (file_exists("{$dir}/disabled")) {
+			// signing switched on again: same key, so the published record stays valid
+			@unlink("{$dir}/disabled");
 			exec("sh /script/fixmail-dkim >/dev/null 2>&1");
 		}
 
@@ -110,5 +115,23 @@ class Mmail__Postfix extends lxDriverClass
 		$joined = implode('', $m[1]);
 
 		return preg_match('/p=([A-Za-z0-9+\/=]+)/', $joined, $p) ? $p[1] : null;
+	}
+
+	// KloxoNext - DKIM off for the domain: the key is kept (marked 'disabled') and left out
+	// of the OpenDKIM tables, so mail of the domain is no longer signed
+	static function disableDKey($domain)
+	{
+		if (!preg_match('/^[a-z0-9.-]+$/i', $domain)) {
+			return null;
+		}
+
+		$dir = "/etc/opendkim/keys/{$domain}";
+
+		if (file_exists("{$dir}/private.private") && !file_exists("{$dir}/disabled")) {
+			@touch("{$dir}/disabled");
+			exec("sh /script/fixmail-dkim >/dev/null 2>&1");
+		}
+
+		return null;
 	}
 }

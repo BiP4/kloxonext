@@ -1360,6 +1360,7 @@ CREATE TABLE IF NOT EXISTS `mmail` (
   `exclude_all` varchar(255) DEFAULT NULL,
   `text_spf_domain` longtext DEFAULT '',
   `text_spf_ip` longtext DEFAULT '',
+  `enable_dkim_flag` varchar(255) DEFAULT NULL,
   `oldsyncserver` varchar(255) DEFAULT NULL,
   `olddeleteflag` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`nname`),

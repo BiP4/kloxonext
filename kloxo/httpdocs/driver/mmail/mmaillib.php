@@ -21,6 +21,7 @@ class Mmail extends Lxdb
 	static $__desc_webmailprog = array("", "", "webmail_application");
 
 	static $__desc_domainkey_f = array("", "", "domainkeys");
+	static $__desc_enable_dkim_flag = array("f", "", "enable_DKIM");
 	static $__desc_status_v_off = array("", "", "disabled");
 	static $__desc_mailinglist_num = array("q", "", "number_of_mailing_lists");
 	static $__desc_logo_manage_flag = array("q", "", "can_change_logo");
@@ -58,6 +59,21 @@ class Mmail extends Lxdb
 	static $__acdesc_update_webmail_select = array("", "", "webmail_application");
 	static $__acdesc_update_redirect_domain = array("", "", "Redirect Mail Domain");
 	static $__acdesc_show = array("", "", "mail");
+
+	// KloxoNext - DKIM signing of the domain: its own choice ('on' / 'off'), otherwise the
+	// server mail setting 'domain key'
+	static function knDkimOn($mmail)
+	{
+		$v = (is_object($mmail) && isset($mmail->enable_dkim_flag)) ? $mmail->enable_dkim_flag : '';
+
+		if (($v === 'on') || ($v === 'off')) {
+			return ($v === 'on');
+		}
+
+		$server = (is_object($mmail) && $mmail->syncserver) ? $mmail->syncserver : 'localhost';
+
+		return isOn(db_get_value('servermail', $server, 'domainkey_flag'));
+	}
 
 	function createExtraVariables()
 	{
@@ -346,6 +362,12 @@ class Mmail extends Lxdb
 			unset($dns->dns_record_a[$nn]);
 		}
 
+		// KloxoNext - DKIM: key created (or signing stopped) now, the records go into the zone
+		// saved with the rest of this form
+		$this->enable_dkim_flag = (isset($param['enable_dkim_flag']) && ($param['enable_dkim_flag'] === 'on')) ? 'on' : 'off';
+		$param['enable_dkim_flag'] = $this->enable_dkim_flag;
+		$this->getParentO()->generateDomainKey(true);
+
 		$dns->setUpdateSubaction('full_update');
 
 		return $param;
@@ -375,14 +397,12 @@ class Mmail extends Lxdb
 				return $vlist;
 
 			case "authentication":
-				$domkey = db_get_value("servermail", $this->syncserver, "domainkey_flag");
+				// KloxoNext - DKIM per domain (default: the server mail setting)
+				$this->setDefaultValue('enable_dkim_flag', self::knDkimOn($this) ? 'on' : 'off');
+				$vlist['enable_dkim_flag'] = null;
 
-				if (!$domkey) {
-					$domkey = 'off';
-				}
-
-				$domkey .= " (Server Wide Value)";
-				$vlist['domainkey_f'] = array('M', $domkey);
+				$dkrec = self::knDkimOn($this) ? $this->getParentO()->getObject('dns')->knDkimRecord() : '';
+				$vlist['domainkey_f'] = array('M', $dkrec ? "private._domainkey.{$this->nname} TXT \"{$dkrec}\"" : '-');
 				$vlist['enable_spf_flag'] = null;
 				$this->setDefaultValue('spf_protocol', 'spf1');
 				$vlist['spf_protocol'] = null;

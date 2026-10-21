@@ -99,8 +99,11 @@ Postfix + Dovecot from the distribution (qmail-toaster is not packaged for these
 * SMTP 25, submission 587 (STARTTLS) and 465 (TLS) with authentication through Dovecot
 * IMAP/POP3 with TLS, delivery through Dovecot LMTP, Sieve, per-mailbox quota
 * mailboxes in `/home/vmail/<domain>/<user>/Maildir` (user `vmail`)
-* forwards, catch-all, alias domains and autoresponders from the panel; DKIM through OpenDKIM
-  when *domain key* is enabled in the server mail settings
+* forwards, catch-all, alias domains and autoresponders from the panel
+* DKIM through OpenDKIM (selector `private`), on or off per domain in *Mail > Authentication*,
+  which also shows the DNS record; *domain key* in the server mail settings is the default for
+  domains without their own choice. `sh /script/fixdomainkey` (run by cleanup) creates missing
+  keys and records
 
 Every change made in the panel regenerates `/etc/postfix/kloxo/*` and `/etc/dovecot/kloxo/users`
 from the Kloxo database (see `httpdocs/lib/php/mailmapslib.php`). `sh /script/setup-mail`

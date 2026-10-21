@@ -2,6 +2,18 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-21
+
+### Mail - DKIM per domain
+- Mail of domains added or restored while *domain key* was off in the server mail settings
+  went out unsigned (OpenDKIM: `no signing table match`): only a new domain, or saving that
+  server page, created a key. The cleanup now creates the missing keys and DNS records.
+- *Mail > Authentication* of a domain has *Sign outgoing mail with DKIM* and shows the DKIM
+  record published in DNS (`private._domainkey`). Off: the domain's mail is no longer signed
+  and the record leaves the zone; the key is kept, so switching it on again publishes the
+  same key. The server setting is the default for domains without their own choice.
+- The zone of a domain is rewritten only when its DKIM records change.
+
 ## 2026-10-18
 
 ### DNS - Cloudflare proxy per record

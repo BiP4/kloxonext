@@ -16,6 +16,12 @@ class Mmail__Qmail extends lxDriverClass
 		return array($mailpath, $list, 'backup');
 	}
 
+	// KloxoNext - per-domain DKIM is managed by the Postfix driver only
+	static function disableDKey($domain)
+	{
+		return null;
+	}
+
 	static function generateDKey($domain)
 	{
 		$pfile = "/var/qmail/control/domainkeys/$domain/public.txt";

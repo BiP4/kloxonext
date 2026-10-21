@@ -492,22 +492,57 @@ abstract class Dnsbase extends Lxdb
 		$this->setUpdateSubaction('subdomain');
 	}
 
+	// KloxoNext - returns true when the records changed (otherwise the zone is left alone)
 	function addDomainKey($key)
 	{
-		$this->addRec("txt", "_domainkey", "t=y; o=-; r=admin@{$this->nname}");
-	//	$this->addRec("txt", "private._domainkey", "k=rsa; p=$key");
-		$this->addRec("txt", "private._domainkey", "v=DKIM1; g=*; k=rsa; p=$key");
+		$want = array(
+			'_domainkey' => "t=y; o=-; r=admin@{$this->nname}",
+		//	'private._domainkey' => "k=rsa; p=$key",
+			'private._domainkey' => "v=DKIM1; g=*; k=rsa; p=$key",
+		);
+
+		$changed = false;
+
+		foreach ($want as $name => $param) {
+			$cur = isset($this->dns_record_a["txt_{$name}"]) ? $this->dns_record_a["txt_{$name}"] : null;
+
+			if ($cur && ($cur->ttype === 'txt') && ($cur->hostname === $name) && ($cur->param === $param)) {
+				continue;
+			}
+
+			$this->addRec("txt", $name, $param);
+			$changed = true;
+		}
+
+		return $changed;
 	}
 
 	function RemoveDomainKey()
 	{
-		foreach ($this->dns_record_a as $k => $v) {
+		$changed = false;
+
+		foreach ((array)$this->dns_record_a as $k => $v) {
 			if ($v->ttype === 'txt' && ($v->hostname === "_domainkey" || $v->hostname === 'private._domainkey')) {
 				dprint("removing domainkey for $this->nname\n");
 
 				unset($this->dns_record_a[$k]);
+				$changed = true;
 			}
 		}
+
+		return $changed;
+	}
+
+	/** the published DKIM key record ('' when there is none) */
+	function knDkimRecord()
+	{
+		foreach ((array)$this->dns_record_a as $v) {
+			if (($v->ttype === 'txt') && ($v->hostname === 'private._domainkey')) {
+				return $v->param;
+			}
+		}
+
+		return '';
 	}
 
 	function getIpForBaseDomain()

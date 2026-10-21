@@ -1,9 +1,9 @@
 #!/bin/bash
 [ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
-VQCPATH="/var/qmail/control"
-DMKYPATH="${VQCPATH}/domainkeys"
-echo "Set '${DMKYPATH}' for 755 permissions"
-chmod 755 ${DMKYPATH}
+
+#    KloxoNext - DKIM keys and DNS records of every domain, following its DKIM setting
+#    (Mail > Authentication; default: 'domain key' of the server mail settings).
+#    Options: --client=a,b --domain=x,y --server=all|name --nolog
 
 . /script/directory
-lxphp.exe ../bin/fix/domainkey.php $*
+lxphp.exe ../bin/fix/domainkey.php "$@"

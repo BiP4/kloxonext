@@ -3,6 +3,8 @@
 include_once "lib/html/include.php"; 
 initProgram('admin');
 
+$list = parse_opt($argv);
+
 $server = (isset($list['server'])) ? $list['server'] : 'localhost';
 $client = (isset($list['client'])) ? $list['client'] : null;
 $domain = (isset($list['domain'])) ? $list['domain'] : null;

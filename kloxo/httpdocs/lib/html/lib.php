@@ -6533,6 +6533,13 @@ function setInstallMailserver($nolog = null)
 		log_cleanup("- Set up the spam filter (sh /script/setup-spam)", $nolog);
 		exec("sh /script/setup-spam apply >/dev/null 2>&1");
 	}
+
+	// KloxoNext - DKIM key + DNS record for every domain that signs (domains added or restored
+	// while 'domain key' was off had none, so their mail went out unsigned)
+	if (is_dir("/etc/opendkim") && is_dir("/etc/postfix/kloxo")) {
+		log_cleanup("- DKIM keys of the domains (sh /script/fixdomainkey)", $nolog);
+		exec("sh /script/fixdomainkey --nolog=yes >/dev/null 2>&1");
+	}
 }
 
 function setInitialServer($nolog = null)

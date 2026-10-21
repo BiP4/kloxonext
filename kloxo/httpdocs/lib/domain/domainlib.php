@@ -845,30 +845,23 @@ class Domaind extends DomainBase
 		$mmail = $this->getObject('mmail');
 		$dns = $this->getObject('dns');
 
-		$domainkeyflag = db_get_value('servermail', $mmail->syncserver, 'domainkey_flag');
+		// KloxoNext - DKIM per domain (Mail > Authentication); a domain without its own choice
+		// follows 'domain key' of the server mail settings
+		if (!Mmail::knDkimOn($mmail)) {
+			$changed = $dns->RemoveDomainKey();
+			rl_exec_in_driver($mmail, 'mmail', 'disableDKey', array($this->nname));
+		} else {
+			$dkey = rl_exec_in_driver($mmail, 'mmail', 'generateDKey', array($this->nname));
 
-		if (!isOn($domainkeyflag)) {
-			$dns->RemoveDomainKey();
-			
-			if ($dontwasflag) {
+			if (!$dkey) {
 				return;
 			}
-			
-			$dns->setUpdateSubaction('full_update');
-			$dns->was();
-			
-			return;
+
+			$changed = $dns->addDomainKey($dkey);
 		}
 
-		$dkey = rl_exec_in_driver($mmail, 'mmail', 'generateDKey', array($this->nname));
-
-		if (!$dkey) {
-			return;
-		}
-
-		$dns->addDomainKey($dkey);
-		
-		if ($dontwasflag) {
+		// the zone is rewritten only when its DKIM records changed
+		if ($dontwasflag || !$changed) {
 			return;
 		}
 

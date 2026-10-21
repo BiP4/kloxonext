@@ -1376,6 +1376,7 @@ CREATE TABLE "mmail" (
   "text_spf_domain" longtext,
   "enable_spf_autoip" varchar(255) DEFAULT NULL,
   "text_spf_ip" longtext,
+  "enable_dkim_flag" varchar(255) DEFAULT NULL,
   "spf_protocol" varchar(255) DEFAULT NULL,
   "enable_dmarc_flag" varchar(255) DEFAULT NULL,
   "percentage_filtering" varchar(255) DEFAULT NULL,
