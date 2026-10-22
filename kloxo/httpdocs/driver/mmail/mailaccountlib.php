@@ -103,7 +103,7 @@ class Mailaccount extends Lxclient
 	function getStubUrl($var)
 	{
 		if ($var === '__stub_webmail_url') {
-			return create_simpleObject(array('url' => "http://webmail." . $this->getParentName(), 'purl' => "a=updateform&sa=webmail&l[class]=mailaccount&l[nname]=$this->nname", 'target' => "target='_blank'"));
+			return create_simpleObject(array('url' => "http://webmail." . $this->getParentName(), 'purl' => "a=updateform&sa=webmail&l[class]=mailaccount&l[nname]=$this->nname", 'target' => "target='_blank'")); // NOSONAR - the site itself: it may have no certificate yet
 		}
 	}
 
@@ -396,7 +396,7 @@ class Mailaccount extends Lxclient
 		$driverapp = $gbl->getSyncClass($this->__masterserver, $this->syncserver, 'autoresponder');
 
 		$alist[] = "a=list&c=autoresponder";
-		$alist[] = create_simpleObject(array('url' => "http://webmail." . $this->getParentName(), 'purl' => "a=updateform&sa=webmail&l[class]=mailaccount&l[nname]=$this->nname", 'target' => "target='_blank'"));
+		$alist[] = create_simpleObject(array('url' => "http://webmail." . $this->getParentName(), 'purl' => "a=updateform&sa=webmail&l[class]=mailaccount&l[nname]=$this->nname", 'target' => "target='_blank'")); // NOSONAR - the site itself: it may have no certificate yet
 
 		return $alist;
 	}

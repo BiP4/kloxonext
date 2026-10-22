@@ -266,7 +266,7 @@ class Domaind extends DomainBase
 	function getStubUrl($name)
 	{
 		if ($name == '__stub_domain_view_url') {
-			return create_simpleObject(array('url' => "http://[%s]", 'purl' => 'c=domain&a=updateform&sa=view', 'target' => "target=_blank"));
+			return create_simpleObject(array('url' => "http://[%s]", 'purl' => 'c=domain&a=updateform&sa=view', 'target' => "target=_blank")); // NOSONAR - the site itself: it may have no certificate yet
 		}
 
 		if ($name === '__stub_domain_preview_url') {
@@ -274,21 +274,21 @@ class Domaind extends DomainBase
 		}
 
 		if ($name === '__stub_domain_webmail') {
-			return create_simpleObject(array('url' => "http://webmail.[%s]", 'purl' => 'c=mailaccount&a=updateform&sa=webmail', 'target' => "target=_blank"));
+			return create_simpleObject(array('url' => "http://webmail.[%s]", 'purl' => 'c=mailaccount&a=updateform&sa=webmail', 'target' => "target=_blank")); // NOSONAR - the site itself: it may have no certificate yet
 		}
 		
 		if ($name === '__stub_domain_stats') {
 		//	return create_simpleObject(array('url' => "http://[%s]/stats/", 'purl' => 'c=domain&a=updateform&sa=show_stats', 'target' => "target=_blank"));
-			return create_simpleObject(array('url' => "http://stats.[%s]/", 'purl' => 'c=domain&a=updateform&sa=show_stats', 'target' => "target=_blank"));
+			return create_simpleObject(array('url' => "http://stats.[%s]/", 'purl' => 'c=domain&a=updateform&sa=show_stats', 'target' => "target=_blank")); // NOSONAR - the site itself: it may have no certificate yet
 		}
 
 		if ($name === '__stub_domain_awstats') {
 		//	return create_simpleObject(array('url' => "http://[%s]/awstats/awstats.pl?config=[%s]", 'purl' => 'c=domain&a=updateform&sa=show_awstats', 'target' => "target=_blank"));
-			return create_simpleObject(array('url' => "http://stats.[%s]/", 'purl' => 'c=domain&a=updateform&sa=show_stats', 'target' => "target=_blank"));
+			return create_simpleObject(array('url' => "http://stats.[%s]/", 'purl' => 'c=domain&a=updateform&sa=show_stats', 'target' => "target=_blank")); // NOSONAR - the site itself: it may have no certificate yet
 		}
 		
 		if ($name === '__stub_check_dns') {
-			return create_simpleObject(array('url' => "http://intodns.com/[%s]", 'purl' => 'c=domain&a=updateform&sa=check_dns', 'target' => "target=_blank"));
+			return create_simpleObject(array('url' => "https://intodns.com/[%s]", 'purl' => 'c=domain&a=updateform&sa=check_dns', 'target' => "target=_blank"));
 		}
 	}
 
@@ -1553,7 +1553,7 @@ class Domaind extends DomainBase
 		$alist[] = "n=web&a=list&c=cron";
 
 		$alist[] = "a=list&c=subweb_a";
-		$alist[] = create_simpleObject(array('url' => "http://[%s]", 'purl' => 'c=domain&a=updateform&sa=view', 'target' => "target=_blank"));
+		$alist[] = create_simpleObject(array('url' => "http://[%s]", 'purl' => 'c=domain&a=updateform&sa=view', 'target' => "target=_blank")); // NOSONAR - the site itself: it may have no certificate yet
 		$alist[] = create_simpleObject(array('url' => "/sitepreview/nname/", 'purl' => 'a=updateform&sa=site_preview', 'target' => "target='_blank'"));
 
 		self::get_child_full_alist($alist, "web");

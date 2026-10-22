@@ -94,8 +94,7 @@ if (substr($request, -5, 5) === ".php/") {
 }
 
 // the host is the validated domain, the rest is its path
-$path = substr($requestclean, strlen($domain));
-$path = ($path === '' || $path[0] !== '/') ? '/' . $path : $path;
+$path = kn_preview_path(substr($requestclean, strlen($domain)));
 
 $fetched = kn_preview_fetch($domain, $ip, $path);
 
@@ -150,6 +149,39 @@ $page = preg_replace('#(["\'(=\s])//(?:www\.)?' . preg_quote($domain, '#') . '/#
 print($page);
 
 /**
+ * KloxoNext - the path of the previewed page: absolute, '.' / '..' segments resolved
+ * (never above the site root), no control characters, query string kept.
+ */
+function kn_preview_path($path)
+{
+	$path = preg_replace('/[\x00-\x20\x7f]/', '', (string)$path);
+	$q = '';
+
+	if (($p = strpos($path, '?')) !== false) {
+		$q = substr($path, $p);
+		$path = substr($path, 0, $p);
+	}
+
+	$out = array();
+
+	foreach (explode('/', str_replace('\\', '/', $path)) as $seg) {
+		if ($seg === '..') {
+			array_pop($out);
+		} elseif (($seg !== '') && ($seg !== '.')) {
+			$out[] = rawurlencode(rawurldecode($seg));
+		}
+	}
+
+	$clean = '/' . implode('/', $out);
+
+	if (($clean !== '/') && (substr($path, -1) === '/')) {
+		$clean .= '/';
+	}
+
+	return $clean . $q;
+}
+
+/**
  * KloxoNext - the page of a hosted domain, from this server whatever its DNS says
  * (curl connects to the server's IP for the domain and www.): follows redirects of
  * the site itself (http -> https, -> www.) but never to another host.
@@ -167,8 +199,9 @@ function kn_preview_fetch($domain, $ip, $path)
 	}
 
 	$url = "http://{$domain}{$path}";
+	$verify = true;
 
-	for ($hop = 0; $hop < 5; $hop++) {
+	for ($hop = 0; $hop < 6; $hop++) {
 		$ch = curl_init($url);
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -177,10 +210,11 @@ function kn_preview_fetch($domain, $ip, $path)
 		curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-		// the site's own certificate may be self-signed or for another name: this is a
-		// connection to our own server's IP, only for showing the page
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		// the certificate is checked; a site of this server whose certificate does not
+		// verify (self-signed, not issued yet) is shown anyway: CURLOPT_RESOLVE pins the
+		// connection to this server's own IP, so nothing else can answer for the name
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $verify); // NOSONAR - see above: own server, pinned IP
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $verify ? 2 : 0); // NOSONAR - see above
 		curl_setopt($ch, CURLOPT_USERAGENT, 'KloxoNext site preview');
 
 		if ($resolve) {
@@ -188,10 +222,18 @@ function kn_preview_fetch($domain, $ip, $path)
 		}
 
 		$body = curl_exec($ch);
+		$errno = curl_errno($ch);
 		$code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		$type = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
 		$next = (string)curl_getinfo($ch, CURLINFO_REDIRECT_URL);
 		curl_close($ch);
+
+		// CURLE_PEER_FAILED_VERIFICATION (60, 51 on old curl): retry without the check
+		if ($verify && $resolve && in_array($errno, array(51, 60), true)) {
+			$verify = false;
+
+			continue;
+		}
 
 		if ($body === false || $code === 0) {
 			return null;

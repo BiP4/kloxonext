@@ -44,17 +44,7 @@ class Dnscustom extends lxClass
 
 	static function run($args, &$ok = null)
 	{
-		$cmd = "sh /script/dns-custom";
-
-		foreach ((array)$args as $a) {
-			$cmd .= " " . escapeshellarg((string)$a);
-		}
-
-		$out = array();
-		exec("{$cmd} 2>&1", $out, $rc);
-		$ok = ($rc === 0);
-
-		return $out;
+		return kn_script_run('dns-custom', $args, $ok);
 	}
 
 	static function zones()
@@ -85,26 +75,12 @@ class Dnscustom extends lxClass
 
 	static function checkAccess()
 	{
-		global $login;
-
-		if (!$login->isAdmin()) {
-			throw new lxException($login->getThrow("no_permission"));
-		}
+		kn_admin_only();
 	}
 
 	static function fail($out)
 	{
-		global $login;
-
-		$msg = '';
-
-		foreach ((array)$out as $l) {
-			if (strpos($l, 'ERROR=') === 0) {
-				$msg = substr($l, 6);
-			}
-		}
-
-		throw new lxException($login->getThrow("dnscustom_error"), '', $msg ? $msg : implode(' ', (array)$out));
+		kn_script_fail($out, 'dnscustom_error');
 	}
 
 	function redirectTo($zone)

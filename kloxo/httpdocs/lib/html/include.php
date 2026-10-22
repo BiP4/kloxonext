@@ -25,7 +25,7 @@ include_once "$dir/lib/define.php";
 include_once "$dir/lib/driver_define.php";
 // TODO: Do we really need to include sgbl.php twice ?
 include_once "$dir/lib/sgbl.php";
-//include_once "$dir/lib/common.inc";//include_once "$dir/lib/html/xmlinclude.php";
+//include_once "$dir/lib/common.inc";
 // This is the program specific common lib. There is no need dump everything lib/html/lib.php which has become too large.
 // include_once "$dir/lib/programlib.php";
 

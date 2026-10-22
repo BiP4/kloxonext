@@ -206,7 +206,7 @@ class ippool extends Lxdb
 		$vlist['lastip'] = null;
 		$vlist['nameserver'] = null;
 		$vlist['networkgateway'] = null;
-		if (!$this->networknetmask) { $this->networknetmask = "255.255.255.0"; }
+		if (!$this->networknetmask) { $this->networknetmask = "255.255.255.0"; } // NOSONAR - default netmask of a /24
 		$vlist['networknetmask'] = null;
 		$pslist = get_namelist_from_objectlist($this->getParentO()->getRealPserverList('vps'));
 

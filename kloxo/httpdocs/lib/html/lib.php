@@ -584,7 +584,8 @@ function PreparePowerdnsDb($nolog = null)
 	log_cleanup("- Generate password", $nolog);
 	$pass = randomString(24);
 
-	$link->query("GRANT ALL ON powerdns.* TO powerdns@localhost IDENTIFIED BY '" . $link->real_escape_string($pass) . "'");
+	// GRANT takes no placeholders; the password is randomString() (letters, digits), escaped
+	$link->query("GRANT ALL ON powerdns.* TO powerdns@localhost IDENTIFIED BY '" . $link->real_escape_string($pass) . "'"); // NOSONAR
 	$link->query("flush privileges");
 
 	// placeholder of the template; custom copies may still have the old one ('powerdns')

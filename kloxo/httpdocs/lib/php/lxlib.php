@@ -701,6 +701,86 @@ function kn_register_shutdown($fn)
 	});
 }
 
+/**
+ * KloxoNext - the admin pages driven by a helper script (/script/firewall, setup-spam,
+ * dns-custom): run it with quoted arguments, read its KEY=VALUE status, refuse
+ * non-admins / other servers, turn its ERROR= line into the page's message.
+ */
+function kn_script_run($script, $args, &$ok = null)
+{
+	$cmd = "sh /script/{$script}";
+
+	foreach ((array)$args as $a) {
+		$cmd .= " " . escapeshellarg((string)$a);
+	}
+
+	$out = array();
+	exec("{$cmd} 2>&1", $out, $rc);
+
+	$ok = ($rc === 0);
+
+	return $out;
+}
+
+function kn_script_status($script)
+{
+	static $cache = array();
+
+	if (!isset($cache[$script])) {
+		$cache[$script] = array();
+
+		foreach (kn_script_run($script, 'status') as $l) {
+			$p = strpos($l, '=');
+
+			if ($p !== false) {
+				$cache[$script][substr($l, 0, $p)] = trim(substr($l, $p + 1));
+			}
+		}
+	}
+
+	return $cache[$script];
+}
+
+function kn_admin_only()
+{
+	global $login;
+
+	if (!$login->isAdmin()) {
+		throw new lxException($login->getThrow("no_permission"));
+	}
+}
+
+function kn_local_only($obj, $throwkey)
+{
+	global $login;
+
+	$p = $obj->getParentO();
+
+	if ($p && isset($p->nname) && ($p->nname !== 'localhost')) {
+		throw new lxException($login->getThrow($throwkey), '', "only the local server is managed here");
+	}
+}
+
+/** @param int $tail lines of the output shown when there is no ERROR= line (0 = all) */
+function kn_script_fail($out, $throwkey, $tail = 0)
+{
+	global $login;
+
+	$msg = '';
+
+	foreach ((array)$out as $l) {
+		if (strpos($l, 'ERROR=') === 0) {
+			$msg = substr($l, 6);
+		}
+	}
+
+	if ($msg === '') {
+		$msg = implode(' ', $tail ? array_slice((array)$out, -$tail) : (array)$out);
+	}
+
+	throw new lxException($login->getThrow($throwkey), '', $msg);
+}
+
 function log_log($file, $mess, $id = null)
 {
 	if (!is_string($mess)) {

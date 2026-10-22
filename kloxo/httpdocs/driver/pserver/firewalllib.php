@@ -85,39 +85,12 @@ class Firewall extends lxClass
 
 	static function run($args, &$ok = null)
 	{
-		$cmd = "sh /script/firewall";
-
-		foreach ((array)$args as $a) {
-			$cmd .= " " . escapeshellarg((string)$a);
-		}
-
-		$out = array();
-		exec("{$cmd} 2>&1", $out, $rc);
-
-		$ok = ($rc === 0);
-
-		return $out;
+		return kn_script_run('firewall', $args, $ok);
 	}
 
 	static function status()
 	{
-		static $st = null;
-
-		if ($st !== null) {
-			return $st;
-		}
-
-		$st = array();
-
-		foreach (self::run('status') as $l) {
-			$p = strpos($l, '=');
-
-			if ($p !== false) {
-				$st[substr($l, 0, $p)] = trim(substr($l, $p + 1));
-			}
-		}
-
-		return $st;
+		return kn_script_status('firewall');
 	}
 
 	function isCsf()
@@ -129,37 +102,17 @@ class Firewall extends lxClass
 
 	static function checkAccess()
 	{
-		global $login;
-
-		if (!$login->isAdmin()) {
-			throw new lxException($login->getThrow("no_permission"));
-		}
+		kn_admin_only();
 	}
 
 	function checkLocal()
 	{
-		global $login;
-
-		$p = $this->getParentO();
-
-		if ($p && isset($p->nname) && ($p->nname !== 'localhost')) {
-			throw new lxException($login->getThrow("firewall_error"), '', "only the local server is managed here");
-		}
+		kn_local_only($this, 'firewall_error');
 	}
 
 	static function fail($out)
 	{
-		global $login;
-
-		$msg = '';
-
-		foreach ((array)$out as $l) {
-			if (strpos($l, 'ERROR=') === 0) {
-				$msg = substr($l, 6);
-			}
-		}
-
-		throw new lxException($login->getThrow("firewall_error"), '', $msg ? $msg : implode(' ', (array)$out));
+		kn_script_fail($out, 'firewall_error');
 	}
 
 	// ------------------------------------------------------------ forms

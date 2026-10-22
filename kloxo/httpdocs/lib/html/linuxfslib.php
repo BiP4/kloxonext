@@ -1056,7 +1056,7 @@ function lxftp_connect($ftp_server)
 	if (strpos($ftp_server, '://') !== false) {
 		// no action
 	} else {
-		$ftp_server = 'ftp://' . $ftp_server;
+		$ftp_server = 'ftp://' . $ftp_server; // NOSONAR - default scheme of a server written without one
 	}
 
 	$list = parse_url($ftp_server);
@@ -1070,7 +1070,8 @@ function lxftp_connect($ftp_server)
 	} elseif ($scheme === 'ftpes') {
 		// MR -- still unfinished
 	} else {
-		return ftp_connect($host, $port);
+		// plain FTP only for a server the admin wrote as ftp:// (ftps:// connects with TLS)
+		return ftp_connect($host, $port); // NOSONAR
 	}
 }
 

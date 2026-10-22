@@ -16,23 +16,17 @@ class DnsSubrecord extends Lxclass
 	static $__desc_param = array("", "", "value");
 	static $__desc_subdomain = array("", "", "subdomain", "__stub_subdomain_dns");
 
+	// read only: nothing to load or save, every record on one page, sorted by host name
 	function get() {}
 	function write() {}
-
 	static function perPage() { return 6000; }
+	static function searchVar() { return "hostname"; }
 	static function defaultSort() { return "hostname"; }
 	static function defaultSortDir() { return "asc"; }
-	static function searchVar() { return "hostname"; }
 
 	static function createListNlist($parent, $view)
 	{
-		$nlist['hostname'] = '20%';
-		$nlist['ttype'] = '5%';
-		$nlist['priority'] = '5%';
-		$nlist['param'] = '50%';
-		$nlist['subdomain'] = '20%';
-
-		return $nlist;
+		return array('hostname' => '20%', 'ttype' => '5%', 'priority' => '5%', 'param' => '50%', 'subdomain' => '20%');
 	}
 
 	static function createListAlist($parent, $class)

@@ -645,7 +645,7 @@ class Ipaddress extends Lxdb
 		$dev = $param['devname'];
 
 		if (!isset($param['netmask'])) {
-			$param['netmask'] = "255.255.255.0";
+			$param['netmask'] = "255.255.255.0"; // NOSONAR - default netmask of a /24, not an address
 		}
 		
 		$param['ipaddr'] = trim($param['ipaddr']);
@@ -676,7 +676,7 @@ class Ipaddress extends Lxdb
 		$vlist['devname'] = array('s', $result);
 
 		$vlist['ipaddr'] = "";
-		$vlist['netmask'] = array('m', '255.255.255.0');
+		$vlist['netmask'] = array('m', '255.255.255.0'); // NOSONAR - default netmask of a /24
 		$vlist['gateway'] = "";
 
 		$ret['variable'] = $vlist;

@@ -9399,16 +9399,6 @@ function uploadAbort(e) { // upload abort
 		}
 	}
 
-	function getUrl()
-	{
-		$url = ($_SERVER["HTTPS"] != 'on') ? 'http://' . $_SERVER["SERVER_HOST"] : 'https://' . $_SERVER["SERVER_HOST"];
-		$url .= ($_SERVER["SERVER_PORT"] !== 80) ? ":" . $_SERVER["SERVER_PORT"] : "";
-
-	//	$url .= $_SERVER["REQUEST_URI"];
-
-		return $url;
-	}
-
 	function print_real_beginning()
 	{
 		global $gbl, $sgbl, $login, $ghtml;
