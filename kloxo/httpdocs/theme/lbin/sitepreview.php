@@ -86,15 +86,16 @@ if (!$login->isAdmin()) {
 $server = $res[0]['syncserver'];
 $ip = getOneIPForServer($server);
 
+// from here on the name stored in the panel, not the one of the request
+$path = substr($request, strlen($domain));
+$domain = (string)$res[0]['nname'];
+
 // MR -- hiawatha need remove /
-if (substr($request, -5, 5) === ".php/") {
-	$requestclean = rtrim($request, "/");
-} else {
-	$requestclean = $request;
+if (substr($path, -5, 5) === ".php/") {
+	$path = rtrim($path, "/");
 }
 
-// the host is the validated domain, the rest is its path
-$path = kn_preview_path(substr($requestclean, strlen($domain)));
+$path = kn_preview_path($path);
 
 $fetched = kn_preview_fetch($domain, $ip, $path);
 
@@ -158,7 +159,19 @@ function kn_preview_path($path)
 	$q = '';
 
 	if (($p = strpos($path, '?')) !== false) {
-		$q = substr($path, $p);
+		// every name and value of the query encoded again (nothing raw reaches the URL)
+		$parts = array();
+
+		foreach (explode('&', substr($path, $p + 1)) as $kv) {
+			if ($kv === '') {
+				continue;
+			}
+
+			$e = explode('=', $kv, 2);
+			$parts[] = rawurlencode(rawurldecode($e[0])) . (isset($e[1]) ? '=' . rawurlencode(rawurldecode($e[1])) : '');
+		}
+
+		$q = $parts ? '?' . implode('&', $parts) : '';
 		$path = substr($path, 0, $p);
 	}
 
