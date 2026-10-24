@@ -3,3 +3,7 @@
 nbproject/
 *.bak
 desktop.ini
+
+# RPM build output (rpm/build-rpm.sh)
+/rpm/SOURCES/
+/rpm/RPMS/

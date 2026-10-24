@@ -17,4 +17,4 @@ for xy in $(php_available_branches) ; do
 	sh /script/phpm-installer "php${xy}m" "$@"
 done
 
-php_set_branch "$(php_latest_installed)"
+php_set_branch "$(php_default_branch)"

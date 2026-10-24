@@ -1,0 +1,337 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - migrate a Kloxo Next Generation (8.x) server to KloxoNext
+#    (started by the kloxonext RPM; can be run again: finished steps are skipped).
+#
+#      sh /script/kloxong-migrate [--yes] [--force]
+#
+#    1. backup (/var/backups/kloxong-migrate/<date>): kloxo database, panel etc/, qmail
+#       control files, repositories, package list
+#    2. mail: every mailbox of the panel copied from vpopmail to /home/vmail/<domain>/<user>
+#       (originals left in place), DKIM keys of qmail -> OpenDKIM (same selector 'private')
+#    3. qmail-toaster, vpopmail, spamdyke, courier/dovecot-toaster removed (files of the
+#       mailboxes are not touched), KloxoNG add-on packages released
+#    4. install/setup.sh --migrate: repositories, PHP 8 for the panel and the websites,
+#       Postfix + Dovecot, OpenDKIM, spam filter, nginx panel server, third-party apps
+#    5. cleanup: database structure, web / DNS / mail configurations of every domain
+#
+#    Log: /var/log/kloxong-migrate.log
+
+ppath=/usr/local/lxlabs/kloxo
+flagdir="${ppath}/etc/flag"
+log=/var/log/kloxong-migrate.log
+
+OPT_YES=""
+OPT_FORCE=""
+
+for a in "$@" ; do
+	case "${a}" in
+		--yes|-y) OPT_YES=1 ;;
+		--force)  OPT_FORCE=1 ;;
+		--help)   sed -n '4,22p' "$0" ; exit 0 ;;
+	esac
+done
+
+touch "${log}"
+chmod 600 "${log}"
+exec > >(tee -a "${log}") 2>&1
+
+. /script/os.inc
+
+step() { echo ; echo -e "\e[1;34m>>> $* \e[0m" ; }
+die()  { echo -e "\e[31m*** $* \e[0m" ; exit 1 ; }
+done_flag() { touch "${flagdir}/kloxong-migrate-$1.flg" ; }
+is_done()   { [ -f "${flagdir}/kloxong-migrate-$1.flg" ] ; }
+
+# ---------------------------------------------------------------------------
+step "Pre-flight checks"
+
+[ "$(id -u)" -eq 0 ] || die "Run as root"
+os_is_el || die "The migration is for AlmaLinux / Rocky Linux 9 and 10"
+[ "${OS_MAJOR}" -ge 9 ] 2>/dev/null || die "${OS_ID} ${OS_VERSION}: upgrade to EL 9 first (ELevate), then install KloxoNext"
+[ -d /var/lib/mysql/kloxo ] || die "No Kloxo database (/var/lib/mysql/kloxo): nothing to migrate - install with install/setup.sh"
+
+if [ -f "${flagdir}/kloxonext-migrated.flg" ] && [ -z "${OPT_FORCE}" ] ; then
+	echo "This server is migrated already (${flagdir}/kloxonext-migrated.flg). Use --force to run again."
+	exit 0
+fi
+
+[ "$(hostname -f 2>/dev/null)" != "$(hostname -s 2>/dev/null)" ] || die "Hostname '$(hostname)' is not a FQDN (hostnamectl set-hostname server1.example.com)"
+
+mkdir -p "${flagdir}"
+
+echo "  Kloxo Next Generation -> KloxoNext on ${OS_ID} ${OS_VERSION} ($(hostname -f))"
+echo "  The web sites stay online for most of it; mail is stopped while the mailboxes move."
+
+if [ -z "${OPT_YES}" ] && [ -t 0 ] ; then
+	read -r -p "Continue? [y/N] " a
+	[[ "${a}" =~ ^[Yy]$ ]] || exit 1
+fi
+
+# database access: no password (root socket), the panel's root password, or the kloxo user
+db_args=()
+
+if ! mysql -e 'select 1' >/dev/null 2>&1 ; then
+	rp="$(cd "${ppath}/httpdocs" && lxphp.exe ../bin/common/mp.php 2>/dev/null | tail -1)"
+
+	if [ -n "${rp}" ] && mysql -uroot -p"${rp}" -e 'select 1' >/dev/null 2>&1 ; then
+		db_args=(-uroot "-p${rp}")
+	elif [ -f "${ppath}/etc/conf/kloxo.pass" ] ; then
+		db_args=(-ukloxo "-p$(cat "${ppath}/etc/conf/kloxo.pass")")
+	fi
+fi
+
+q() { mysql "${db_args[@]}" -N -B kloxo -e "$1" ; }
+
+q 'select 1' >/dev/null 2>&1 || die "Cannot read the kloxo database"
+
+# ---------------------------------------------------------------------------
+step "Backup"
+
+bk="$(cat "${flagdir}/kloxong-migrate-backup.dir" 2>/dev/null)"
+
+if [ -z "${bk}" ] || [ ! -d "${bk}" ] ; then
+	bk="/var/backups/kloxong-migrate/$(date +%Y%m%d-%H%M%S)"
+	mkdir -p "${bk}"
+	chmod 700 /var/backups/kloxong-migrate "${bk}"
+
+	mysqldump "${db_args[@]}" --single-transaction --routines kloxo > "${bk}/kloxo.sql" || die "mysqldump of the kloxo database failed"
+	tar -czf "${bk}/kloxo-etc.tar.gz" -C "${ppath}" etc 2>/dev/null
+	tar -czf "${bk}/system-etc.tar.gz" /etc/yum.repos.d /etc/httpd /etc/nginx /etc/named.conf \
+		/var/qmail/control /etc/dovecot /etc/pure-ftpd 2>/dev/null
+	rpm -qa | sort > "${bk}/packages.txt"
+	q 'select nname from mailaccount' > "${bk}/mailaccounts.txt"
+
+	echo "${bk}" > "${flagdir}/kloxong-migrate-backup.dir"
+fi
+
+echo "  ${bk}"
+ls -l "${bk}" | tail -n +2 | awk '{print "   ", $5, $9}'
+
+# ---------------------------------------------------------------------------
+step "Mail: mailboxes from vpopmail to /home/vmail"
+
+os_compat_accounts
+
+# where vpopmail keeps a mailbox (vuserinfo knows custom paths), else the Kloxo default
+vp_dir() {
+	local d=""
+
+	[ -x /home/vpopmail/bin/vuserinfo ] && d="$(/home/vpopmail/bin/vuserinfo -d "$1" 2>/dev/null | head -1)"
+	[ -n "${d}" ] && [ -d "${d}" ] || d="/home/lxadmin/mail/domains/${1#*@}/${1%@*}"
+
+	echo "${d}"
+}
+
+if ! is_done mail ; then
+	# nothing may arrive in the old boxes while they are copied
+	service qmail stop >/dev/null 2>&1
+	n=0
+	m=0
+
+	while read -r addr ; do
+		[ -n "${addr}" ] || continue
+
+		user="${addr%@*}"
+		dom="${addr#*@}"
+		src="$(vp_dir "${addr}")"
+		dst="/home/vmail/${dom}/${user}"
+
+		mkdir -p "${dst}"
+
+		if [ -d "${src}/Maildir" ] ; then
+			# old index / uid files are kept: IMAP clients do not download everything again
+			rsync -a "${src}/Maildir/" "${dst}/Maildir/"
+			c=$(find "${dst}/Maildir" -type f \( -path '*/cur/*' -o -path '*/new/*' \) | wc -l)
+			m=$((m + c))
+			echo "  ${addr}: ${c} messages"
+		else
+			mkdir -p "${dst}/Maildir/cur" "${dst}/Maildir/new" "${dst}/Maildir/tmp"
+			echo "  ${addr}: no mailbox in vpopmail (${src}), empty one created"
+		fi
+
+		n=$((n + 1))
+	done < <(q 'select nname from mailaccount')
+
+	chown -R vmail:vmail /home/vmail
+	chmod 0750 /home/vmail
+	echo "  ${n} mailboxes, ${m} messages (originals stay in /home/lxadmin/mail)"
+
+	done_flag mail
+fi
+
+step "Mail: DKIM keys of qmail to OpenDKIM"
+
+if ! is_done dkim ; then
+	for k in /var/qmail/control/domainkeys/*/private ; do
+		[ -f "${k}" ] || continue
+
+		d="$(basename "$(dirname "${k}")")"
+		kd="/etc/opendkim/keys/${d}"
+
+		[ -f "${kd}/private.private" ] && continue
+
+		mkdir -p "${kd}"
+		cp -f "${k}" "${kd}/private.private"
+		chmod 600 "${kd}/private.private"
+
+		# public part in the format of opendkim-genkey (the panel reads it for the DNS record)
+		pub="$(openssl rsa -in "${k}" -pubout 2>/dev/null | grep -v '^-----' | tr -d '\n')"
+
+		if [ -n "${pub}" ] ; then
+			printf 'private._domainkey\tIN\tTXT\t( "v=DKIM1; k=rsa; "\n\t  "p=%s" )  ; ----- DKIM key private for %s\n' "${pub}" "${d}" > "${kd}/private.txt"
+			echo "  ${d}"
+		fi
+	done
+
+	done_flag dkim
+fi
+
+# ---------------------------------------------------------------------------
+step "Remove qmail-toaster and the KloxoNG packages"
+
+if ! is_done packages ; then
+	service qmail stop >/dev/null 2>&1
+	svc_stop dovecot
+
+	# daemontools tree of qmail-toaster (smtp, submission, send, pop3/imap of courier)
+	pkill -x svscanboot >/dev/null 2>&1
+	pkill -x svscan >/dev/null 2>&1
+	pkill -x supervise >/dev/null 2>&1
+	pkill -x tcpserver >/dev/null 2>&1
+	pkill -f '^qmail-' >/dev/null 2>&1
+	pkill -x multilog >/dev/null 2>&1
+	# dovecot-toaster was started by its own init script, not by the dovecot unit
+	pkill -x dovecot >/dev/null 2>&1
+	sleep 2
+	pkill -9 -x dovecot >/dev/null 2>&1
+	rm -f /run/dovecot/master.pid /var/run/dovecot/master.pid
+
+	# without their scripts: they would remove the vpopmail user and its folders
+	mailpk="$(rpm -qa --qf '%{NAME}\n' | grep -E '^(qmail|vpopmail|spamdyke|simscan|ripmime|courier-authlib|courier-imap|dovecot|autorespond|ezmlm|maildrop|libdomainkeys|libsrs2|control-panel|squirrelmail|qmailadmin|qmailmrtg|daemontools|ucspi-tcp)(-toaster)?(-.*)?$' | grep -E 'toaster|^spamdyke|^daemontools|^ucspi-tcp|^vpopmail' | sort -u)"
+
+	if [ -n "${mailpk}" ] ; then
+		echo "  removed: $(echo ${mailpk})"
+		rpm -e --nodeps --noscripts ${mailpk} 2>&1 | grep -v 'warning:' | head -5
+	fi
+
+	rm -f /etc/rc.d/init.d/qmail /etc/init.d/qmail
+	sed -i '/svscanboot/d' /etc/inittab /etc/rc.d/rc.local 2>/dev/null
+	systemctl daemon-reload
+
+	# add-ons whose files are now part of KloxoNext (or replaced by the third-party
+	# updater): forgotten by the package database, files kept until replaced
+	addons="$(rpm -qa --qf '%{NAME}\n' | grep -E '^kloxo-(addon|editor|lang|panel|thirdparty|stats|webmail)-|^kloxong-webmail-|^kloxo-release$|^kloxong-(release|testing)$' | sort -u)"
+
+	if [ -n "${addons}" ] ; then
+		echo "  released: $(echo ${addons})"
+		rpm -e --justdb --nodeps --noscripts ${addons} 2>&1 | grep -v 'warning:' | head -5
+	fi
+
+	# KloxoNG repositories: their qmail / php / curl builds conflict with the distribution
+	for r in /etc/yum.repos.d/kloxo*.repo /etc/yum.repos.d/kloxong*.repo ; do
+		[ -f "${r}" ] && mv -f "${r}" "${r}.disabled"
+	done
+
+	done_flag packages
+fi
+
+# ---------------------------------------------------------------------------
+step "Panel: stop the KloxoNG panel server"
+
+# kloxo-web of KloxoNG is hiawatha; KloxoNext installs its nginx unit (cleanup)
+if [ -x "${ppath}/init/kloxo-hiawatha" ] || systemctl cat kloxo-web 2>/dev/null | grep -q hiawatha ; then
+	svc_stop kloxo-web
+	rm -f /usr/lib/systemd/system/kloxo-web.service /etc/systemd/system/kloxo-web.service
+	cp -f "${ppath}/init/kloxo-web.service" /usr/lib/systemd/system/kloxo-web.service
+	systemctl daemon-reload
+fi
+
+# ---------------------------------------------------------------------------
+step "PHP of the websites"
+
+# the sites keep the PHP they ran on: the default of KloxoNG (the distribution's php) and
+# every 'PHP Selected' branch are installed from Remi; the default stays the default
+phpf="${flagdir}/kloxong-migrate-php.txt"
+
+if [ ! -f "${phpf}" ] ; then
+	old_default=""
+
+	if [ -x /usr/bin/php ] && rpm -qf /usr/bin/php >/dev/null 2>&1 ; then
+		old_default="$(/usr/bin/php -n -r 'echo PHP_MAJOR_VERSION . PHP_MINOR_VERSION;' 2>/dev/null)"
+	fi
+
+	selected="$(q 'select distinct php_selected from web' 2>/dev/null | grep -oE '^php[0-9]{2}m$' | cut -c4-5 | sort -u | tr '\n' ' ')"
+
+	printf 'DEFAULT=%s\nADD=%s\n' "${old_default}" "${selected}" > "${phpf}"
+
+	# PHP layouts of KloxoNG (extracted packages) under the names KloxoNext uses
+	for d in /opt/php[0-9][0-9]m ; do
+		[ -d "${d}" ] && [ ! -L "${d}" ] && [ ! -f "${d}/native" ] && mv -f "${d}" "${d}.kloxong"
+	done
+fi
+
+old_default="$(sed -n 's/^DEFAULT=//p' "${phpf}")"
+php_add="$(sed -n 's/^ADD=//p' "${phpf}")"
+echo "  default PHP of the sites: ${old_default:-newest}   'PHP Selected' branches: ${php_add:-none}"
+
+# ---------------------------------------------------------------------------
+step "Install KloxoNext (install/setup.sh --migrate)"
+
+if ! is_done setup ; then
+	bash "${ppath}/install/setup.sh" --yes --migrate --no-firewall --php-add="${php_add}" --php-default="${old_default}" 		|| die "install/setup.sh failed - see ${log}; fix and run 'sh /script/kloxong-migrate' again"
+	done_flag setup
+fi
+
+# ---------------------------------------------------------------------------
+step "Apache modules"
+
+# KloxoNG switched modules off by replacing their conf.modules.d files; mod_proxy_fcgi
+# (PHP through php-fpm) and mod_proxy_http2 are needed: the package's files come back
+# (fcgid stays off, as on every KloxoNext server)
+if [ -d /etc/httpd/conf.modules.d ] ; then
+	for f in /etc/httpd/conf.modules.d/*.conf ; do
+		grep -q 'not uninstalled but inactive' "${f}" 2>/dev/null || continue
+		case "$(basename "${f}")" in *fcgid*) continue ;; esac
+
+		pk="$(rpm -qf --qf '%{NAME}\n' "${f}" 2>/dev/null | head -1)"
+		[ -n "${pk}" ] || continue
+
+		mv -f "${f}" "${f}.kloxong"
+		dnf -y -q reinstall "${pk}" >/dev/null 2>&1
+
+		if [ -f "${f}" ] ; then
+			echo "  $(basename "${f}") (${pk}) restored"
+		else
+			mv -f "${f}.kloxong" "${f}"
+		fi
+	done
+fi
+
+# ---------------------------------------------------------------------------
+step "Configurations of every domain (cleanup)"
+
+sh /script/cleanup
+
+# mail maps / users / sieve scripts of every account from the panel database
+(cd "${ppath}/httpdocs" && lxphp.exe -r 'include_once "lib/html/include.php"; initProgram("admin"); KnMail::rebuild(); echo "  mail maps rebuilt\n";')
+
+sh /script/fixdomainkey --nolog=yes >/dev/null 2>&1
+
+touch "${flagdir}/kloxonext-migrated.flg"
+
+# ---------------------------------------------------------------------------
+step "Result"
+
+for s in kloxo-web kloxo-php mariadb named postfix dovecot opendkim pure-ftpd httpd nginx php-fpm ; do
+	systemctl list-unit-files "${s}.service" >/dev/null 2>&1 || continue
+	systemctl is-enabled --quiet "${s}" 2>/dev/null || [ "${s}" = kloxo-web ] || continue
+	printf "  %-10s %s\n" "${s}" "$(systemctl is-active "${s}")"
+done
+
+echo
+echo "  Panel:   https://$(hostname -f):7777"
+echo "  Backup:  ${bk}"
+echo "  Old mailboxes (not used any more): /home/lxadmin/mail - remove them once mail works"
+echo "  Log:     ${log}"

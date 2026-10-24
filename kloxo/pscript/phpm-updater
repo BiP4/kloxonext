@@ -28,4 +28,4 @@ for d in /opt/php[0-9][0-9][ms] ; do
 done
 
 # 'php' branch always follows the newest installed version
-php_set_branch "$(php_latest_installed)"
+php_set_branch "$(php_default_branch)"

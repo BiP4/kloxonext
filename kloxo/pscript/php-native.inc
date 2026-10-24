@@ -126,6 +126,22 @@ php_latest_installed() {
 	echo "${last}"
 }
 
+# Branch of the default 'php' (domains without 'PHP Selected'): the one pinned by the admin
+# (sh /script/php-branch-installer phpXY) or by a migration, when it is installed; otherwise
+# the newest installed. 'sh /script/php-branch-installer' without a branch removes the pin.
+PHP_DEFAULT_PIN="${KLOXO_PATH:-/usr/local/lxlabs/kloxo}/etc/conf/php-default-branch"
+
+php_default_branch() {
+	local pin
+	pin="$(tr -dc '0-9' < "${PHP_DEFAULT_PIN}" 2>/dev/null | cut -c1-2)"
+
+	if [ -n "${pin}" ] && [ -d "/opt/php${pin}m" ] && php_native_installed "${pin}" ; then
+		echo "${pin}"
+	else
+		php_latest_installed
+	fi
+}
+
 # Highest branch the repositories provide
 php_latest_available() {
 	local b

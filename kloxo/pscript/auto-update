@@ -28,7 +28,7 @@ if [ -f "${flag}/auto-install-new-php.flg" ] ; then
 	if [ -n "${latest}" ] && [ ! -d "/opt/php${latest}m" ] ; then
 		echo "- New PHP branch $(php_dotted "${latest}") available, installing php${latest}m"
 		sh /script/phpm-installer "php${latest}m"
-		php_set_branch "${latest}"
+		php_set_branch "$(php_default_branch)"
 		sh /script/fixphp >/dev/null 2>&1
 	fi
 fi

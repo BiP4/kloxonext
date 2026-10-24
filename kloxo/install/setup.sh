@@ -24,10 +24,14 @@ case "${BASH_VERSION:-}" in "") exec /bin/bash "$0" "$@" ;; esac
 #
 # Options:
 #   --php="84 85"         PHP branches for domains (default: 8.4 + newest available)
+#   --php-add="74 80"     PHP branches installed besides the default ones
+#   --php-default=80      default PHP of the domains (default: the newest installed)
 #   --admin-password=XXX  password for 'admin' (default: random, printed at the end)
 #   --install-type=slave  install as slave node
 #   --no-firewall         do not open the ports / switch on the firewall
 #   --yes                 do not ask for confirmation
+#   --migrate             existing Kloxo server (sh /script/kloxong-migrate): keep its web and
+#                         DNS drivers, move the mail drivers to Postfix + Dovecot
 #
 
 ppath="/usr/local/lxlabs/kloxo"
@@ -53,6 +57,9 @@ OPT_PHP=""
 OPT_ADMIN_PASS=""
 OPT_YES=""
 OPT_FIREWALL=1
+OPT_MIGRATE=""
+OPT_PHP_ADD=""
+OPT_PHP_DEFAULT=""
 
 if [[ -f "${ppath}/etc/conf/slave-db.db" ]] ; then
 	APP_TYPE='slave'
@@ -67,6 +74,9 @@ for arg in "$@" ; do
 		--install-type=*)   APP_TYPE="${arg#*=}" ;;
 		--yes|-y)           OPT_YES=1 ;;
 		--no-firewall)      OPT_FIREWALL="" ;;
+		--migrate)          OPT_MIGRATE=1 ;;
+		--php-add=*)        OPT_PHP_ADD="${arg#*=}" ;;
+		--php-default=*)    OPT_PHP_DEFAULT="${arg#*=}" ;;
 	esac
 done
 
@@ -164,7 +174,13 @@ else
 fi
 
 step "Install database server (MariaDB)"
-pkg_install_logical mariadb-server mariadb-client
+# a server of an older Kloxo may run MariaDB from mariadb.org (MariaDB-server) or MySQL:
+# kept, the distribution package would conflict with it
+if pkg_installed MariaDB-server || pkg_installed mysql-server || pkg_installed mysql-community-server ; then
+	echo "- keeping the database server already installed"
+else
+	pkg_install_logical mariadb-server mariadb-client
+fi
 mkdir -p /var/lib/mysqltmp
 chown mysql:mysql /var/lib/mysqltmp
 sh /script/set-mysql-default
@@ -220,6 +236,8 @@ if [[ -z "${OPT_PHP}" ]] ; then
 	OPT_PHP="${PHP_PANEL_BRANCH} $(php_latest_available)"
 fi
 
+OPT_PHP="${OPT_PHP} ${OPT_PHP_ADD} ${OPT_PHP_DEFAULT}"
+
 step "Install PHP for domains: $(for x in $(echo "${OPT_PHP}" | tr ' ' '\n' | sort -u) ; do echo -n "$(php_dotted "${x}") " ; done)"
 
 # multiple PHP is always on: every phpXYm gets its php-fpm service (per-domain 'PHP Selected')
@@ -229,7 +247,13 @@ for xy in $(echo "${OPT_PHP}" | tr ' ' '\n' | sort -u) ; do
 	sh /script/phpm-installer "php${xy}m"
 done
 
-php_set_branch "$(php_latest_installed)"
+# the default branch asked for (the PHP the sites ran on before a migration), when installed
+# (pinned: PHP updates do not move it, see php_default_branch)
+if [[ -n "${OPT_PHP_DEFAULT}" ]] && [[ -d "/opt/php${OPT_PHP_DEFAULT}m" ]] ; then
+	echo "${OPT_PHP_DEFAULT}" > "${PHP_DEFAULT_PIN}"
+fi
+
+php_set_branch "$(php_default_branch)"
 sh /script/enable-php-fpm
 
 sh /script/fixlxphpexe "php${PHP_PANEL_BRANCH}s"
@@ -249,7 +273,18 @@ admin_password="${OPT_ADMIN_PASS:-$(os_random_password 16)}"
 # ---------------------------------------------------------------------------
 
 step "Select default drivers"
-if os_is_el ; then
+if [[ -n "${OPT_MIGRATE}" ]] ; then
+	# the web / DNS servers chosen on this server stay; mail is Postfix + Dovecot now
+	sh /script/setdriver --server=localhost --class=smtp --driver=postfix >/dev/null 2>&1
+	sh /script/setdriver --server=localhost --class=pop3 --driver=dovecot >/dev/null 2>&1
+	sh /script/setdriver --server=localhost --class=mmail --driver=postfix >/dev/null 2>&1
+
+	# Apache without a PHP type of its own: php-fpm through mod_proxy_fcgi (mod_php,
+	# suPHP, ruid2 ... are not packaged for EL9+)
+	if sh /script/setdriver --server=localhost --class=web 2>/dev/null | grep -q 'apache' ; then
+		(cd "${ppath}/httpdocs" && lxphp.exe ../bin/misc/set-default-phptype.php)
+	fi
+elif os_is_el ; then
 	sh /script/setdriver --server=localhost --class=web --driver=apache >/dev/null 2>&1
 	chkconfig httpd on >/dev/null 2>&1
 	# php-fpm through mod_proxy_fcgi: enables the per-domain 'PHP Selected'
@@ -259,9 +294,11 @@ else
 	sh /script/setdriver --server=localhost --class=web --driver=nginx >/dev/null 2>&1
 	chkconfig nginx on >/dev/null 2>&1
 fi
-sh /script/setdriver --server=localhost --class=webcache --driver=none >/dev/null 2>&1
-sh /script/setdriver --server=localhost --class=dns --driver=bind >/dev/null 2>&1
-sh /script/setdriver --server=localhost --class=spam --driver=bogofilter >/dev/null 2>&1
+if [[ -z "${OPT_MIGRATE}" ]] ; then
+	sh /script/setdriver --server=localhost --class=webcache --driver=none >/dev/null 2>&1
+	sh /script/setdriver --server=localhost --class=dns --driver=bind >/dev/null 2>&1
+	sh /script/setdriver --server=localhost --class=spam --driver=bogofilter >/dev/null 2>&1
+fi
 
 sh /script/skin-set-for-all >/dev/null 2>&1
 (cd "${ppath}/httpdocs" && lxphp.exe ../bin/misc/skin-default-nexus.php --force)

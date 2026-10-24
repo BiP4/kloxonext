@@ -1,0 +1,56 @@
+#!/bin/bash
+[ -z "$BASH_VERSION" ] && exec /bin/bash "$0" "$@"
+
+#    KloxoNext - the work after the RPM package is installed (started by its %post as the
+#    service 'kloxonext-setup', or by hand):
+#
+#      sh /script/kloxonext-rpm-setup migrate   Kloxo Next Generation -> KloxoNext
+#      sh /script/kloxonext-rpm-setup update    KloxoNext updated by the package (cleanup)
+#      sh /script/kloxonext-rpm-setup install   new server
+#
+#    Log: /var/log/kloxonext-setup.log
+
+mode="${1:-update}"
+log=/var/log/kloxonext-setup.log
+ppath=/usr/local/lxlabs/kloxo
+
+touch "${log}"
+chmod 600 "${log}"
+exec > >(tee -a "${log}") 2>&1
+
+echo "=== $(date '+%F %T') KloxoNext ${mode} ($(cat ${ppath}/etc/conf/package-version 2>/dev/null))"
+
+# started from the package: dnf still holds the rpm database until its transaction ends
+for i in $(seq 1 600) ; do
+	if ! pgrep -x dnf >/dev/null 2>&1 && ! pgrep -x yum >/dev/null 2>&1 && ! pgrep -x rpm >/dev/null 2>&1 \
+		&& ! pgrep -f 'dnf-automatic|packagekitd' >/dev/null 2>&1 ; then
+		break
+	fi
+
+	[ "${i}" -eq 1 ] && echo "- waiting for the package manager to finish"
+	sleep 2
+done
+
+[ -f /script/programname ] || echo 'kloxo' > /script/programname
+
+case "${mode}" in
+	migrate)
+		sh /script/kloxong-migrate --yes
+		rc=$?
+		;;
+	install)
+		bash "${ppath}/install/setup.sh" --yes
+		rc=$?
+		;;
+	update)
+		sh /script/cleanup
+		rc=$?
+		;;
+	*)
+		echo "usage: sh /script/kloxonext-rpm-setup migrate|update|install"
+		exit 2
+		;;
+esac
+
+echo "=== $(date '+%F %T') KloxoNext ${mode} finished (exit ${rc})"
+exit ${rc}

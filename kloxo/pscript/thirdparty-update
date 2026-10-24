@@ -76,13 +76,16 @@ fetch() {
 github_latest() {
 	# prints: <tag> <asset-url> <sha256-or-empty> for the first asset matching $2
 	local repo="$1" pattern="$2" json
+	# the newest release that has the asset: a release can be published before (or without)
+	# its files (SnappyMail 2.38.2.1 has none) - 'latest' alone gave the URL 'null'
 	json="$(curl -fsSL --retry 3 -H 'Accept: application/vnd.github+json' -A "KloxoNext-updater" \
-		"https://api.github.com/repos/${repo}/releases/latest")" || return 1
+		"https://api.github.com/repos/${repo}/releases?per_page=15")" || return 1
 
 	echo "${json}" | jq -r --arg p "${pattern}" '
-		.tag_name as $t
-		| [.assets[] | select(.name | test($p))][0]
-		| "\($t) \(.browser_download_url) \((.digest // "") | sub("^sha256:"; ""))"'
+		[.[] | select((.draft | not) and (.prerelease | not))
+			| .tag_name as $t
+			| (.assets[] | select(.name | test($p)))
+			| "\($t) \(.browser_download_url) \((.digest // "") | sub("^sha256:"; ""))"][0] // empty' | grep . || return 1
 }
 
 verify_sha256() {
@@ -245,7 +248,8 @@ update_roundcube() {
 	if [ -f "${target}/index.php" ] ; then
 		# upstream upgrade path: copies files and migrates the database
 		cp -a "${target}" "${target}.previous.tmp"
-		if "${php}" "${src}/bin/installto.sh" -y "${target}" >> "${LOG}" 2>&1 ; then
+		# the PHP of the sites disables system(), which installto.sh needs
+		if "${php}" -d disable_functions= "${src}/bin/installto.sh" -y "${target}" >> "${LOG}" 2>&1 ; then
 			rm -rf "${target}.previous" && mv "${target}.previous.tmp" "${target}.previous"
 		else
 			rm -rf "${target}" && mv "${target}.previous.tmp" "${target}"

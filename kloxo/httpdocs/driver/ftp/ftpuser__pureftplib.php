@@ -18,6 +18,7 @@ class ftpuser__pureftp extends lxDriverClass
 		if (!$pass) { $pass = randomString(8); }
 
 		lxshell_input("$pass\n$pass\n", "pure-pw", "useradd",  $this->main->nname, "-u", $this->main->__var_username, "-d",  $dir, "-m");
+		$this->knUseStoredHash(true);
 
 		$this->setQuota();
 
@@ -57,6 +58,43 @@ class ftpuser__pureftp extends lxDriverClass
 			lxshell_input("$pass\n$pass\n", "pure-pw", "useradd",  $nname, "-u", $username, "-d", $dir, "-N", $q, "-z", $z);
 		} else {
 			lxshell_input("$pass\n$pass\n", "pure-pw", "useradd",  $nname, "-u", $username, "-d", $dir, "-z", $z);
+		}
+
+		// fixftpuser builds the .pdb once at the end
+		$this->knUseStoredHash(false);
+	}
+
+	// KloxoNext - accounts of an older Kloxo may keep only the password hash (no clear
+	// password in the panel): that hash (crypt() format, which pure-ftpd checks) replaces
+	// the random password the account was created with
+	function knUseStoredHash($mkdb)
+	{
+		$hash = (string)$this->main->password;
+
+		if ($this->main->realpass || !preg_match('/^\$(1|2[aby]|5|6)\$[^:\s]+$/', $hash)) {
+			return;
+		}
+
+		$file = '/etc/pure-ftpd/pureftpd.passwd';
+		$lines = @file($file, FILE_IGNORE_NEW_LINES);
+
+		if (!$lines) {
+			return;
+		}
+
+		foreach ($lines as $i => $l) {
+			$f = explode(':', $l);
+
+			if ((count($f) > 2) && ($f[0] === $this->main->nname)) {
+				$f[1] = $hash;
+				$lines[$i] = implode(':', $f);
+			}
+		}
+
+		file_put_contents($file, implode("\n", $lines) . "\n");
+
+		if ($mkdb) {
+			exec("pure-pw mkdb");
 		}
 	}
 

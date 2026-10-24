@@ -42,6 +42,37 @@ SSH (its configured port) and the panel 7777/7778; a slave also gets 7779. Ports
 stay open. On an installed server: `sh /script/firewall install-defaults master|slave`.
 A provider firewall / security group must allow the same ports.
 
+## Upgrading a Kloxo Next Generation server
+
+A server running Kloxo Next Generation 8.x on AlmaLinux / Rocky Linux 9 or 10 is upgraded with
+the KloxoNext package - from a GitHub release (built by `.github/workflows/rpm.yml` for every
+`v*` tag, `el9` and `el10`) or built locally with `bash rpm/build-rpm.sh`:
+
+```bash
+dnf install https://github.com/BiP4/kloxonext/releases/download/v9.0.0/kloxonext-9.0.0-1.el9.noarch.rpm
+journalctl -fu kloxonext-setup        # the migration runs once dnf has finished
+```
+
+The package replaces `kloxo` and `kloxo-release`; the migration (`sh /script/kloxong-migrate`,
+log in `/var/log/kloxong-migrate.log`) then:
+
+* backs up the kloxo database, the panel's `etc/`, the service configurations and the package
+  list to `/var/backups/kloxong-migrate/<date>`;
+* copies every mailbox from vpopmail (`/home/lxadmin/mail/domains`) to `/home/vmail` - the
+  passwords, forwards, catch-all and autoresponders of the panel are kept, the old mailboxes
+  stay on disk; the DKIM keys of qmail move to OpenDKIM (same selector, the DNS records
+  stay valid);
+* removes qmail-toaster, vpopmail, spamdyke, courier / dovecot-toaster and the KloxoNG
+  repositories;
+* installs PHP 8 for the panel and keeps the PHP the sites ran on (default and every
+  *PHP Selected* branch, from Remi), Postfix + Dovecot, OpenDKIM, the spam filter, the nginx
+  panel server and the third-party applications; the web and DNS servers stay the same;
+* rewrites the configuration of every domain (cleanup).
+
+A failed step can be fixed and the migration started again: finished steps are skipped.
+EL 7 / 8 servers are upgraded to EL 9 first (ELevate); the package refuses to install there.
+`KLOXONEXT_NO_AUTO=1 dnf install ...` installs the package without starting the migration.
+
 ## PHP
 
 * **Panel** – PHP 8.4 (`/opt/php84s`, `lxphp.exe`). Where 8.4 is not packaged (Ubuntu 26.04)

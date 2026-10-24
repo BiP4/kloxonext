@@ -1,0 +1,43 @@
+# KloxoNext - build the kloxonext RPM (AlmaLinux 9 and 10).
+# Every push / manual run: the RPMs are kept as workflow artifacts.
+# A tag 'v*' (git tag v9.0.0 && git push --tags): they are attached to its GitHub release.
+name: RPM
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths: ['kloxo/**', 'rpm/**', '.github/workflows/rpm.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rpm:
+    strategy:
+      matrix:
+        el: ['9', '10']
+    runs-on: ubuntu-latest
+    container: almalinux:${{ matrix.el }}
+    steps:
+      - name: Build tools
+        run: dnf -y -q install git rpm-build tar gzip
+
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          bash rpm/build-rpm.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kloxonext-el${{ matrix.el }}
+          path: rpm/RPMS/*.rpm
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: rpm/RPMS/*.rpm

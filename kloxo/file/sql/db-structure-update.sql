@@ -142,4 +142,4 @@ CREATE TABLE IF NOT EXISTS `sendmailban` (
   KEY `parent_clname_sendmailban` (`parent_clname`)
 ) DEFAULT CHARSET=latin1;
 
-ALTER TABLE `serverftp` ADD `passiveip` VARCHAR(255) NULL DEFAULT NULL AFTER `lowport`;
+ALTER TABLE `serverftp` ADD COLUMN IF NOT EXISTS `passiveip` VARCHAR(255) NULL DEFAULT NULL AFTER `lowport`;

@@ -6381,6 +6381,30 @@ function setInitialPureftpConfig($nolog = null)
 		lxshell_return("pure-pw", "mkdb");
 	}
 
+	// KloxoNext - the configuration of the panel (virtual users in PureDB, passive ports, TLS)
+	// was written only when Server > FTP settings were saved: until then pure-ftpd ran with
+	// the distribution's file and refused every FTP account of the panel
+	$conf = (string)@file_get_contents("/etc/pure-ftpd/pure-ftpd.conf");
+
+	if (!preg_match('/^\s*PureDB\s+\/etc\/pure-ftpd\/pureftpd\.pdb/m', $conf)) {
+		log_cleanup("- Write pure-ftpd.conf of the panel (PureDB users)", $nolog);
+
+		$sf = new Serverftp(null, 'localhost', 'localhost');
+		$sf->get();
+
+		// no settings saved yet: the defaults of the FTP page are stored first
+		if ($sf->dbaction === 'add') {
+			$sf->setDefault();
+			$sf->was();
+			$sf = new Serverftp(null, 'localhost', 'localhost');
+			$sf->get();
+		}
+
+		$sf->setDefault();
+		$sf->setUpdateSubaction('update');
+		$sf->was();
+	}
+
 	// MR -- pure-ftpd high version (1.0.47+) pure-config.pl didn't exists
 
 	if (is_link("/usr/sbin/pure-config.pl")) {

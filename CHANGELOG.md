@@ -2,6 +2,24 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-10-24
+
+### Upgrade from Kloxo Next Generation (RPM)
+- New package `kloxonext` (`bash rpm/build-rpm.sh`): installed on a Kloxo Next Generation 8.x
+  server (AlmaLinux / Rocky 9 or 10) it replaces `kloxo` / `kloxo-release` and migrates the
+  server once dnf has finished (`sh /script/kloxong-migrate`, see README). On a KloxoNext
+  server it is an update (cleanup), on a new server an installation. EL 7 / 8: refused.
+- Mail moves from qmail-toaster / vpopmail to Postfix + Dovecot: mailboxes copied (old ones
+  kept), passwords, forwards, catch-all, autoresponders and DKIM keys kept.
+- The sites keep their PHP version (installed from Remi, stays the default).
+- `install/setup.sh --migrate`, `--php-add`, `--php-default`; the database server already
+  installed (MariaDB from mariadb.org, MySQL) is kept.
+
+### FTP
+- FTP accounts of the panel were refused on new servers: `pure-ftpd.conf` (PureDB users,
+  passive ports) was written only when *Server > FTP* settings were saved. Cleanup writes it.
+- An FTP account known only by its password hash (older Kloxo) keeps that password.
+
 ## 2026-10-21
 
 ### Resource plans

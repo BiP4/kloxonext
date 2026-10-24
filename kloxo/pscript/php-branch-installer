@@ -19,6 +19,15 @@ if [ "${1}" == "--help" ] ; then
 fi
 
 xy="$(echo "${1}" | tr -dc '0-9' | cut -c1-2)"
+
+# a branch given: it stays the default (updates do not move it); none: follow the newest
+if [ -n "${xy}" ] ; then
+	mkdir -p "$(dirname "${PHP_DEFAULT_PIN}")"
+	echo "${xy}" > "${PHP_DEFAULT_PIN}"
+else
+	rm -f "${PHP_DEFAULT_PIN}"
+fi
+
 [ -z "${xy}" ] && xy="$(php_latest_installed)"
 [ -z "${xy}" ] && xy="$(php_latest_available)"
 
