@@ -72,6 +72,8 @@ log in `/var/log/kloxong-migrate.log`) then:
 A failed step can be fixed and the migration started again: finished steps are skipped.
 EL 7 / 8 servers are upgraded to EL 9 first (ELevate); the package refuses to install there.
 `KLOXONEXT_NO_AUTO=1 dnf install ...` installs the package without starting the migration.
+If dnf answers *No match for argument* for the downloaded package, an `exclude=` line of the old
+panel (`/etc/dnf/dnf.conf`, `/etc/yum.conf`) hides it: `dnf install --disableexcludes=all <url>`.
 
 ## PHP
 
