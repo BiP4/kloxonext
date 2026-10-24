@@ -24,14 +24,14 @@ jobs:
       - name: Build tools
         run: dnf -y -q install git rpm-build tar gzip
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           bash rpm/build-rpm.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: kloxonext-el${{ matrix.el }}
           path: rpm/RPMS/*.rpm
