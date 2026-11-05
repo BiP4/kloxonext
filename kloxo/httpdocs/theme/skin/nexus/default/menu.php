@@ -363,6 +363,8 @@ $kn_pair($kn_t("a=updateform&sa=default_domain&o=client"), "frm_action=updatefor
 
 $kn_b($kn_k('ftpmaildatabase'));
 
+$kn_pair($kn_t("a=show&o=mysqlmanager"), "frm_action=show&{O}mysqlmanager");
+
 foreach (array('ftpuser', 'mailaccount', 'mysqldb', 'mysqluser') as $c) {
 	$kn_pair($kn_t("a=list&c={$c}"), "frm_action=list&{C}frm_o_cname={$c}");
 }

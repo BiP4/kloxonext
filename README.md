@@ -220,6 +220,9 @@ creates on it are handled locally.
 
 ## Databases
 
+* *Manage My Databases* - everything on one page, like cPanel: create databases (with or
+  without a user), check / repair, sizes and users with access, add users, add a user to
+  one or more databases with chosen privileges, change passwords, phpMyAdmin per user.
 * *MySQL Databases* - a database with its own user (as before) or alone.
 * *MySQL Users* - users apart from the databases, given access to any database of the
   client with chosen privileges (several databases per user, several users per database);

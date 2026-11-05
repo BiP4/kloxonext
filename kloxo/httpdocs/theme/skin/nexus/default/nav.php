@@ -191,6 +191,7 @@ function kn_nav_curate($sections)
 			array('Whitelist IPs', array('c' => 'mail_graylist_wlist_a')),
 		)),
 		'Databases' => array('db', array(
+			array('Manage My Databases', array('a' => 'show', 'o0' => 'mysqlmanager')),
 			array('All Databases', array('c' => 'all_mysqldb')),
 			array('MySQL Databases', array('a' => 'list', 'c' => 'mysqldb')),
 			array('MySQL Users', array('a' => 'list', 'c' => 'mysqluser')),

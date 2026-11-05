@@ -6,6 +6,8 @@ class Client extends ClientBase
 	static $__desc_mysqldb_l = array("qdB", "", "");
 	// KloxoNext - MySQL users apart from the databases (driver/pserver/mysqluserlib.php)
 	static $__desc_mysqluser_l = array("db", "", "");
+	// KloxoNext - every MySQL setting on one page, like cPanel (driver/pserver/mysqlmanagerlib.php)
+	static $__desc_mysqlmanager_o = array('', '', '', '');
 	static $__desc_domain_l = array("RqdtB", "", "");
 	static $__desc_domaina_l = array("", "", "");
 	static $__desc_maindomain_l = array("", "", "");
@@ -573,6 +575,7 @@ class Client extends ClientBase
 	//	if ($this->isNotCustomer()) {
 			$alist['__title_domain_rec'] = $login->getKeywordUc('domain');
 			$alist[] = "a=list&c=ftpuser";
+			$alist[] = "a=show&o=mysqlmanager";
 			$this->getListActions($alist, 'mysqldb');
 			$alist[] = "a=list&c=mysqluser";
 			$this->getMysqlDbAdmin($alist);

@@ -100,6 +100,7 @@ $gl_class_array["mysqldbuser"] = "driver/pserver/ddatabaseuserlib.php";
 $gl_class_array["mysqluser"] = "driver/pserver/mysqluserlib.php";
 $gl_class_array["mysqlgrant"] = "driver/pserver/mysqluserlib.php";
 $gl_class_array["mysqldbaccess"] = "driver/pserver/mysqluserlib.php";
+$gl_class_array["mysqlmanager"] = "driver/pserver/mysqlmanagerlib.php";
 $gl_class_array["resourceplan"] = "lib/html/resourceplanlib.php";
 $gl_class_array["ippool"] = "lib/html/ippoollib.php";
 $gl_class_array["mssqldbuser"] = "driver/pserver/ddatabaseuserlib.php";

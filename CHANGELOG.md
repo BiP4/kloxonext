@@ -19,6 +19,15 @@ All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCom
   results. A crontab refused by cron is an error of the form (it was a task that never ran).
 - *All Cron Tasks* (administrator): the tasks of every client.
 
+### MySQL - Manage My Databases (one page, like cPanel)
+- *Databases > Manage My Databases* (also on the client's page): create a database with a user
+  of the same name or alone, check / repair a database (every table), the databases with their
+  size and the users that may use them (remove a user from a database), phpMyAdmin, delete;
+  add a user (password strength, generator), add a user to a database with all or chosen
+  privileges (again on the same database: its privileges change), the users with their
+  databases, change password, phpMyAdmin logged in as that user, delete. The user of a
+  database is listed too (its password can be changed, it goes with its database).
+
 ### MySQL - users apart from databases
 - New *MySQL Users* (client page, menu *Databases*): users created on their own (prefixed
   with the client's name), each given access to any of the client's databases with the

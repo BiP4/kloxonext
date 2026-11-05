@@ -1117,6 +1117,7 @@ $__description["webmail_application"] = array("Webmail Application");
 $__description["domainkeys"] = array("DKIM record (DNS)");
 $__description["enable_DKIM"] = array("Sign outgoing mail with DKIM");
 $__description["mysql_user"] = array("MySQL User");
+$__description["mysql_manager"] = array("Manage My Databases");
 $__description["mysql_user_name"] = array("MySQL User");
 $__description["mysql_user_databases"] = array("Databases (privileges)");
 $__description["mysql_database_access"] = array("Database Access");
