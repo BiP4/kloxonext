@@ -120,6 +120,10 @@ class Cron extends Lxdb
 	{
 		global $login;
 
+		if (!is_array($param)) {
+			return;
+		}
+
 		$ranges = array('minute' => array(0, 59), 'hour' => array(0, 23), 'ddate' => array(1, 31),
 			'weekday' => array(1, 7), 'month' => array(1, 12));
 
@@ -356,7 +360,11 @@ class Cron extends Lxdb
 	function update($subaction, $param)
 	{
 		self::knCheckAllowed($this->getParentO());
-		self::knValidate($param, $this->getParentO());
+
+		// a form: its values are checked (a delete comes here without one)
+		if (is_array($param)) {
+			self::knValidate($param, $this->getParentO());
+		}
 
 		$param['minute'] = self::convertToAllIfExists($param['minute']);
 		$param['hour'] = self::convertToAllIfExists($param['hour']);
