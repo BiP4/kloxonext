@@ -529,13 +529,7 @@ class General extends Lxdb
 				$vlist['generalmisc_b-ticket_url'] = null;
 				$vlist['login_pre'] = null;
 
-				$this->enable_cronforall = null;
-
-				$vlist['enable_cronforall'] = array('f', array('on', 'off'));
-
-				if (file_exists("../etc/flag/enablecronforall.flg")) {
-					$this->setDefaultValue('enable_cronforall', 'on');
-				}
+				// KloxoNext - cron for clients follows their plan ('Cron Manage'), see Cron::knAllowed()
 
 				break;
 

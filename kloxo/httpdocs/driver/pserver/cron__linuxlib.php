@@ -108,13 +108,13 @@ class cron__Linux extends lxDriverClass
 			return;
 		}
 
-		try {
-		//	lxshell_return("/usr/bin/crontab", "-u", $this->main->username, $tfile);
-			exec("/usr/bin/crontab -u " . escapeshellarg($this->main->username) . " " . escapeshellarg($tfile));
-		} catch (Exception $e) {
-			throw new lxException($e);
-		}
-
+		// KloxoNext - a crontab refused by cron is an error of the form, not a task that never runs
+		$out = array();
+		exec("/usr/bin/crontab -u " . escapeshellarg($this->main->username) . " " . escapeshellarg($tfile) . " 2>&1", $out, $rc);
 		lunlink($tfile);
+
+		if ($rc !== 0) {
+			throw new lxException($login->getThrow("cron_invalid_command"), '', trim(implode(' ', $out)));
+		}
 	}
 }

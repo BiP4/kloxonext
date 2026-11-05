@@ -143,3 +143,32 @@ CREATE TABLE IF NOT EXISTS `sendmailban` (
 ) DEFAULT CHARSET=latin1;
 
 ALTER TABLE `serverftp` ADD COLUMN IF NOT EXISTS `passiveip` VARCHAR(255) NULL DEFAULT NULL AFTER `lowport`;
+
+-- KloxoNext - MySQL users of the clients and their access to databases
+CREATE TABLE IF NOT EXISTS `mysqluser` (
+  `nname` varchar(255) NOT NULL,
+  `parent_clname` varchar(255) DEFAULT NULL,
+  `parent_cmlist` text DEFAULT '',
+  `username` varchar(255) DEFAULT NULL,
+  `dbpassword` varchar(255) DEFAULT NULL,
+  `syncserver` varchar(255) DEFAULT NULL,
+  `oldsyncserver` varchar(255) DEFAULT NULL,
+  `olddeleteflag` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`nname`),
+  KEY `parent_clname_mysqluser` (`parent_clname`)
+) DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `mysqlgrant` (
+  `nname` varchar(255) NOT NULL,
+  `parent_clname` varchar(255) DEFAULT NULL,
+  `parent_cmlist` text DEFAULT '',
+  `username` varchar(255) DEFAULT NULL,
+  `dbname` varchar(255) DEFAULT NULL,
+  `privileges` varchar(1024) DEFAULT NULL,
+  `syncserver` varchar(255) DEFAULT NULL,
+  `oldsyncserver` varchar(255) DEFAULT NULL,
+  `olddeleteflag` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`nname`),
+  KEY `parent_clname_mysqlgrant` (`parent_clname`),
+  KEY `dbname_mysqlgrant` (`dbname`)
+) DEFAULT CHARSET=latin1;

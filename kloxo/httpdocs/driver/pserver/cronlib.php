@@ -81,14 +81,173 @@ class Cron extends Lxdb
 		return $x;
 	}
 
+	/**
+	 * KloxoNext - who manages the cron tasks of $parent: the administrator (every client,
+	 * the server), a client whose plan has 'Cron Manage' (its own tasks and, for a reseller,
+	 * its clients'). Replaces the server-wide 'enable cron for all' switch.
+	 */
+	static function knAllowed($parent)
+	{
+		global $login;
+
+		if ($login->isAdmin()) {
+			return true;
+		}
+
+		if (!is_object($parent) || $parent->isClass('pserver')) {
+			return false;
+		}
+
+		$client = $parent->isClass('client') ? $parent : $parent->getClientParentO();
+
+		return is_object($client) && isset($client->priv) && $client->priv->isOn('cron_manage_flag');
+	}
+
+	static function knCheckAllowed($parent)
+	{
+		global $login;
+
+		if (!self::knAllowed($parent)) {
+			throw new lxException($login->getThrow("cron_not_allowed"));
+		}
+	}
+
+	/**
+	 * KloxoNext - a cron task is checked before it reaches the crontab: the schedule (values in
+	 * range), the command (one line, its program exists) and the e-mail address of the results.
+	 */
+	static function knValidate($param, $parent)
+	{
+		global $login;
+
+		$ranges = array('minute' => array(0, 59), 'hour' => array(0, 23), 'ddate' => array(1, 31),
+			'weekday' => array(1, 7), 'month' => array(1, 12));
+
+		foreach ($ranges as $f => $r) {
+			if (!isset($param[$f])) {
+				continue;
+			}
+
+			foreach ((array)$param[$f] as $v) {
+				foreach (explode(',', (string)$v) as $x) {
+					$x = trim($x);
+
+					if (($x === '') || ($x === '--all--')) {
+						continue;
+					}
+
+					// weekday / month come as names from the lists
+					if (($f === 'weekday') && ($k = array_search(strtolower($x), array_map('strtolower', (array)self::$weekdaylist), true)) !== false) {
+						$x = (string)$k;
+					}
+
+					if (($f === 'month') && ($k = array_search(strtolower($x), array_map('strtolower', (array)self::$monthlist), true)) !== false) {
+						$x = (string)$k;
+					}
+
+					if (!ctype_digit($x) || ((int)$x < $r[0]) || ((int)$x > $r[1])) {
+						throw new lxException($login->getThrow("cron_invalid_schedule"), '', "{$f}: {$x}");
+					}
+				}
+			}
+		}
+
+		if (isset($param['simple_cron']) && !in_array($param['simple_cron'], array('every-minute', 'every-hour', 'every-day'), true)) {
+			throw new lxException($login->getThrow("cron_invalid_schedule"), '', $param['simple_cron']);
+		}
+
+		if (isset($param['cron_day_hour']) && ($param['cron_day_hour'] !== '')
+			&& (!ctype_digit((string)$param['cron_day_hour']) || ((int)$param['cron_day_hour'] > 23))) {
+			throw new lxException($login->getThrow("cron_invalid_schedule"), '', "hour: {$param['cron_day_hour']}");
+		}
+
+		if (array_key_exists('command', $param)) {
+			self::knValidateCommand((string)$param['command'], $parent);
+		}
+	}
+
+	static function knValidateCommand($command, $parent)
+	{
+		global $login;
+
+		$c = trim($command);
+
+		if ($c === '') {
+			throw new lxException($login->getThrow("cron_invalid_command"), '', "the command is empty");
+		}
+
+		// one crontab line: a line break would add other tasks (or variables) to the crontab
+		if (preg_match('/[\x00-\x08\x0a-\x1f\x7f]/', $c)) {
+			throw new lxException($login->getThrow("cron_invalid_command"), '', "one line only, no control characters");
+		}
+
+		if (strlen($c) > 1000) {
+			throw new lxException($login->getThrow("cron_invalid_command"), '', "longer than 1000 characters");
+		}
+
+		// the program of every part of the command line (a; b && c | d) must exist
+		$home = (is_object($parent) && isset($parent->username) && ($pw = posix_getpwnam((string)$parent->username))) ? $pw['dir'] : '';
+		$builtins = array('cd', 'echo', 'test', '[', 'true', 'false', 'export', 'source', '.', 'exec', 'sleep',
+			'if', 'then', 'else', 'fi', 'for', 'do', 'done', 'while', 'until', 'case', 'esac', 'nice', 'ionice',
+			'timeout', 'flock', 'env', 'umask', 'set', 'unset', 'exit', 'printf', 'read', 'eval', 'time', '!', '{', '}', '(', ')');
+		$path = array('/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin');
+
+		foreach (preg_split('/\s*(?:&&|\|\||;|\|)\s*/', $c) as $part) {
+			$words = preg_split('/\s+/', trim($part));
+
+			// VAR=value prefixes, redirections
+			while ($words && (preg_match('/^[A-Za-z_][A-Za-z0-9_]*=/', $words[0]) || preg_match('/^\d*[<>]/', $words[0]))) {
+				array_shift($words);
+			}
+
+			if (!$words || ($words[0] === '')) {
+				continue;
+			}
+
+			$prog = trim($words[0], "\"'");
+
+			if (in_array($prog, $builtins, true) || (strpos($prog, '$') !== false) || (strpos($prog, '`') !== false)) {
+				continue;
+			}
+
+			if (($prog[0] === '~') && $home) {
+				$prog = $home . substr($prog, 1);
+			}
+
+			if (strpos($prog, '/') !== false) {
+				if (($prog[0] !== '/') && $home) {
+					$prog = "{$home}/{$prog}";
+				}
+
+				if (!is_file($prog)) {
+					throw new lxException($login->getThrow("cron_invalid_command"), '', "{$prog} does not exist");
+				}
+
+				continue;
+			}
+
+			$found = false;
+
+			foreach ($path as $d) {
+				if (is_file("{$d}/{$prog}") && is_executable("{$d}/{$prog}")) {
+					$found = true;
+
+					break;
+				}
+			}
+
+			if (!$found) {
+				throw new lxException($login->getThrow("cron_invalid_command"), '', "program '{$prog}' not found (use its full path)");
+			}
+		}
+	}
+
 	static function createListAlist($parent, $class)
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
-		if ($parent->getClass() !== 'pserver') {
-			if (!file_exists("../etc/flag/enablecronforall.flg")) {
-				return;
-			}
+		if (!self::knAllowed($parent)) {
+			return;
 		}
 
 		$alist[] = "a=list&c=$class";
@@ -196,6 +355,9 @@ class Cron extends Lxdb
 
 	function update($subaction, $param)
 	{
+		self::knCheckAllowed($this->getParentO());
+		self::knValidate($param, $this->getParentO());
+
 		$param['minute'] = self::convertToAllIfExists($param['minute']);
 		$param['hour'] = self::convertToAllIfExists($param['hour']);
 		$param['ddate'] = self::convertToAllIfExists($param['ddate']);
@@ -209,12 +371,11 @@ class Cron extends Lxdb
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
-		// MR --- for security reason, only enable for admin
-		if (!file_exists("../etc/flag/enablecronforall.flg")) {
-			if ($login->nname !== 'admin') { return; }
-		}
-
 		$parent = $this->getParentO();
+
+		if (!self::knAllowed($parent)) {
+			return;
+		}
 
 		// This is a hack to fix the cron migrated from web to client.
 		if ($this->parent_clname !== $parent->getClName()) {
@@ -256,11 +417,10 @@ class Cron extends Lxdb
 	{
 		global $gbl, $sgbl, $login, $ghtml;
 
-		// MR --- for security reason, only enable for admin
-		if (!file_exists("../etc/flag/enablecronforall.flg")) {
-			if ($login->nname !== 'admin') { return; }
+		if (!self::knAllowed($parent)) {
+			return;
 		}
-		
+
 		// This is to make sure that the static variables 'monthlist, weekdaylist' etc, are initialized. 
 		// There is no other way to do it.
 		$tmp = new Cron($parent->__masterserver, $parent->__readserver, '__tmp__');
@@ -397,6 +557,12 @@ class Cron extends Lxdb
 
 	static function add($parent, $class, $param)
 	{
+		self::knCheckAllowed($parent);
+
+		// the value lists (weekday / month names) used by the checks
+		new Cron($parent->__masterserver, $parent->__readserver, '__tmp__');
+		self::knValidate($param, $parent);
+
 		$param['minute'] = self::convertToAllIfExists($param['minute']);
 		$param['hour'] = self::convertToAllIfExists($param['hour']);
 		$param['ddate'] = self::convertToAllIfExists($param['ddate']);

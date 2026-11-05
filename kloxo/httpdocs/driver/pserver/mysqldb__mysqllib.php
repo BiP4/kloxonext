@@ -51,6 +51,13 @@ class Mysqldb__mysql extends lxDriverClass
 		$rdb->query("create database {$this->qdb()};");
 		$this->log_error_messages();
 
+		// KloxoNext - a database without its own user
+		if ((string)$this->main->username === '') {
+			$rdb->query("flush privileges;");
+
+			return;
+		}
+
 		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'%' identified by '{$this->qs($this->main->dbpassword)}';");
 		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'localhost' identified by '{$this->qs($this->main->dbpassword)}';");
 
@@ -91,10 +98,20 @@ class Mysqldb__mysql extends lxDriverClass
 
 		$this->log_error_messages(false);
 
+		// KloxoNext - the access of MySQL Users to it goes too (a new database of the same
+		// name must not open to them)
+		$res = $rdb->query("SELECT DISTINCT User, Host FROM mysql.db WHERE Db = '{$this->qs($this->main->dbname)}'");
+
+		while ($res && ($r = $res->fetch_assoc())) {
+			$rdb->query("REVOKE ALL PRIVILEGES ON {$this->qdb()}.* FROM '{$this->qs($r['User'])}'@'{$this->qs($r['Host'])}'");
+		}
+
 		// MR -- fix delete database username
 	//	$rdb->query("delete from mysql.user where user = '{$this->qs($this->main->username)}';");
-		$rdb->query("drop user '{$this->qs($this->main->username)}'@'%';");
-		$rdb->query("drop user '{$this->qs($this->main->username)}'@'localhost';");
+		if ((string)$this->main->username !== '') {
+			$rdb->query("drop user if exists '{$this->qs($this->main->username)}'@'%';");
+			$rdb->query("drop user if exists '{$this->qs($this->main->username)}'@'localhost';");
+		}
 
 		$this->log_error_messages(false);
 
@@ -105,7 +122,14 @@ class Mysqldb__mysql extends lxDriverClass
 	{
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
-		$rdb->query("update mysql.user set password = PASSWORD('{$this->qs($this->main->dbpassword)}') where user = '{$this->qs($this->main->username)}';");
+		if ((string)$this->main->username === '') {
+			return;
+		}
+
+		// KloxoNext - mysql.user is a view on MariaDB 10.4+ (UPDATE ... SET password changed nothing)
+		foreach (array('localhost', '%') as $h) {
+			$rdb->query("ALTER USER '{$this->qs($this->main->username)}'@'{$h}' IDENTIFIED BY '{$this->qs($this->main->dbpassword)}'");
+		}
 
 		$this->log_error_messages();
 
@@ -271,6 +295,10 @@ class Mysqldb__mysql extends lxDriverClass
 
 	function fix_grant_all()
 	{
+		if ((string)$this->main->username === '') {
+			return;
+		}
+
 		$rdb = $this->lx_mysql_connect('localhost', $this->main->__var_dbadmin, $this->main->__var_dbpassword);
 
 		$rdb->query("grant all on {$this->qdb()}.* to '{$this->qs($this->main->username)}'@'%'");

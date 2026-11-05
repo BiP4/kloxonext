@@ -114,7 +114,25 @@ class Gbllib  extends Lxclass
 
 			return $pgm->$class_var;
 		}
-		
+
+		// KloxoNext - a class added after the server was installed has no entry of its own:
+		// when file/driver gives it a single driver (no choice to make), that one is used
+		static $defaults = null;
+
+		if ($defaults === null) {
+			$driver = array();
+			include "../file/driver/rhel.inc";
+			$defaults = $driver;
+		}
+
+		$k = strtolower($class);
+
+		if (isset($defaults[$k]) && is_string($defaults[$k])) {
+			$d = $defaults[$k];
+
+			return csb($d, "__v_") ? $this->getSyncClass($master, $syncserver, strfrom($d, "__v_")) : $d;
+		}
+
 		return null;
 	}
 

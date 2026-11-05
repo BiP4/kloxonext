@@ -4,6 +4,8 @@ class Client extends ClientBase
 {
 	static $__table = "client";
 	static $__desc_mysqldb_l = array("qdB", "", "");
+	// KloxoNext - MySQL users apart from the databases (driver/pserver/mysqluserlib.php)
+	static $__desc_mysqluser_l = array("db", "", "");
 	static $__desc_domain_l = array("RqdtB", "", "");
 	static $__desc_domaina_l = array("", "", "");
 	static $__desc_maindomain_l = array("", "", "");
@@ -321,6 +323,18 @@ class Client extends ClientBase
 
 	function updateCron_mailto($param)
 	{
+		global $login;
+
+		// KloxoNext - written into the crontab as MAILTO=: an address (or nothing), one line
+		$m = isset($param['cron_mailto']) ? trim((string)$param['cron_mailto']) : '';
+
+		if (($m !== '') && !filter_var($m, FILTER_VALIDATE_EMAIL)) {
+			throw new lxException($login->getThrow("invalid_email"), '', $m);
+		}
+
+		$param['cron_mailto'] = $m;
+		$this->cron_mailto = $m;
+
 		$cronlist = $this->getList('cron');
 		
 		if ($cronlist) {
@@ -442,12 +456,9 @@ class Client extends ClientBase
 		$alist['__v_dialog_info'] = "a=updateform&sa=information";
 
 		if ($this->priv->isOn('webhosting_flag')) {
-			if ($this->priv->isOn('cron_manage_flag') && $this->isCustomer()) {
-				if (file_exists("../etc/flag/enablecronforall.flg")) {
-					$alist[] = "a=list&c=cron";
-				}
-		//	} else {
-		//		$alist[] = "a=list&c=cron";
+			// KloxoNext - the plan's 'Cron Manage' (or the administrator), see Cron::knAllowed()
+			if ($this->isCustomer() && Cron::knAllowed($this)) {
+				$alist[] = "a=list&c=cron";
 			}
 		}
 
@@ -563,11 +574,12 @@ class Client extends ClientBase
 			$alist['__title_domain_rec'] = $login->getKeywordUc('domain');
 			$alist[] = "a=list&c=ftpuser";
 			$this->getListActions($alist, 'mysqldb');
+			$alist[] = "a=list&c=mysqluser";
 			$this->getMysqlDbAdmin($alist);
 			$alist[] = "a=show&l[class]=ffile&l[nname]=/";
 			$alist['__v_dialog_defd'] = "a=updateform&sa=default_domain";
 
-			if (file_exists("../etc/flag/enablecronforall.flg")) {
+			if (Cron::knAllowed($this)) {
 				$alist[] = "a=list&c=cron";
 			}
 

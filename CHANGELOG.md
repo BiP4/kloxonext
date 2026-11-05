@@ -2,6 +2,35 @@
 
 All KloxoNext changes over [Kloxo Next Generation](https://github.com/KloxoNGCommunity/kloxo).
 
+## 2026-11-05
+
+### Menu - a client looked at
+- With a client selected, the sidebar holds that client's pages under their usual names
+  (Domains, Cron Tasks, ...) and says whose they are (*Client: name*, link back to your own
+  account). Before, every entry came twice, named after the login and after the client, and
+  *More > Other* was a column of the client's name.
+
+### Cron tasks
+- Cron tasks of a client: for the administrator always (client page, menu), for a client
+  when its resource plan has *Cron Manage*. The server-wide *enable cron for all* switch is
+  gone; until now it hid cron from the administrator too, on the client's pages.
+- Checked when added or changed: the schedule (values in range), the command (one line,
+  its program exists - absolute path, or found in the system PATH), the e-mail of the
+  results. A crontab refused by cron is an error of the form (it was a task that never ran).
+- *All Cron Tasks* (administrator): the tasks of every client.
+
+### MySQL - users apart from databases
+- New *MySQL Users* (client page, menu *Databases*): users created on their own (prefixed
+  with the client's name), each given access to any of the client's databases with the
+  privileges chosen (all, or SELECT / INSERT / UPDATE / ...). A user may use several
+  databases, a database several users; the database page lists who has access.
+- A database can be created without its own user (*Create a user with the same name* off).
+- Deleting a database removes the access of the users to it; deleting a user removes the
+  user from MySQL.
+- The password of a database's user can be changed again: MariaDB 10.4+ ignored the old
+  `UPDATE mysql.user` (now `ALTER USER`).
+- Classes added after a server was installed get their only possible driver (they had none).
+
 ## 2026-10-24
 
 ### Upgrade from Kloxo Next Generation (RPM)

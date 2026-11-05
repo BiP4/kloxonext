@@ -125,13 +125,24 @@ function kn_nav_key($href)
 {
 	parse_str(parse_url(html_entity_decode($href), PHP_URL_QUERY) ?? '', $q);
 
+	// a page of a client looked at (frm_o_o[0] = client): the same page as the login's own,
+	// one level down - its objects are matched from frm_o_o[1]
+	$o = isset($q['frm_o_o']) && is_array($q['frm_o_o']) ? array_values($q['frm_o_o']) : array();
+	$cl = '';
+
+	if (isset($o[0]['class']) && ($o[0]['class'] === 'client')) {
+		$cl = isset($o[0]['nname']) ? (string)$o[0]['nname'] : '';
+		array_shift($o);
+	}
+
 	return array(
 		'a'  => isset($q['frm_action']) ? $q['frm_action'] : '',
 		'sa' => isset($q['frm_subaction']) ? $q['frm_subaction'] : '',
 		'c'  => isset($q['frm_o_cname']) ? $q['frm_o_cname'] : '',
-		'o0' => isset($q['frm_o_o'][0]['class']) ? $q['frm_o_o'][0]['class'] : '',
-		'o1' => isset($q['frm_o_o'][1]['class']) ? $q['frm_o_o'][1]['class'] : '',
+		'o0' => isset($o[0]['class']) ? $o[0]['class'] : '',
+		'o1' => isset($o[1]['class']) ? $o[1]['class'] : '',
 		'dt' => isset($q['frm_dttype']['val']) ? $q['frm_dttype']['val'] : '',
+		'cl' => $cl,
 	);
 }
 
@@ -182,6 +193,7 @@ function kn_nav_curate($sections)
 		'Databases' => array('db', array(
 			array('All Databases', array('c' => 'all_mysqldb')),
 			array('MySQL Databases', array('a' => 'list', 'c' => 'mysqldb')),
+			array('MySQL Users', array('a' => 'list', 'c' => 'mysqluser')),
 			array('Database Admins', array('c' => 'dbadmin')),
 			array('MySQL Password Reset', array('sa' => 'mysqlpasswordreset')),
 		)),

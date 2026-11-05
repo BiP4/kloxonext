@@ -10,8 +10,9 @@ if (strpos($_SERVER["SCRIPT_NAME"], "/display.php") === false) {
  * reseller, customer, an admin looking at a client, several servers). nav.php turns it
  * into the nexus sidebar; it reads the sections (<li><a>), the groups (<b>) and the links.
  *
- * An entry seen while looking at a client has two links: one for the logged in account,
- * one for the client. Its query is written once, with these marks:
+ * While a client is looked at (frm_o_o[0] = client), the entries of the account are those
+ * of that client, under their usual names (the sidebar says whose they are). An entry's
+ * query is written once, with these marks:
  *   {C}  nothing / the client query
  *   {O}  frm_o_o[0][class]= / the client query + frm_o_o[1][class]=  (object below the client)
  *   {L}  frm_o_o[0] / frm_o_o[1]                                     (that object)
@@ -95,16 +96,9 @@ $kn_q = function ($q, $forclient) use ($clientquery) {
 	));
 };
 
-// an entry of the account: alone, or for the login and for the client looked at
-$kn_pair = function ($title, $q) use ($kn_a, $kn_q, $kn_client, $consumedlogin, $loginas, $clientid) {
-	if (!$kn_client) {
-		$kn_a($consumedlogin . $kn_q($q, false), $title);
-
-		return;
-	}
-
-	$kn_a($consumedlogin . $kn_q($q, false), $loginas);
-	$kn_a($consumedlogin . $kn_q($q, true), $clientid);
+// an entry of the account: the login's own, or the client's while one is looked at
+$kn_pair = function ($title, $q) use ($kn_a, $kn_q, $kn_client, $consumedlogin) {
+	$kn_a($consumedlogin . $kn_q($q, $kn_client), $title);
 };
 
 // an entry of a server: the server in use, or localhost and the other server
@@ -150,14 +144,14 @@ if (!$login->isCustomer()) {
 	$kn_b($kn_k('alllist'));
 
 	foreach (array('client', 'domain', 'addondomain', 'mailaccount', 'mailforward', 'mailinglist', 'mysqldb', 'cron', 'ftpuser', 'sslcert') as $c) {
-		$kn_a("{$consumedlogin}frm_action=list&frm_o_cname=all_{$c}", $kn_client ? $loginas : $kn_t("a=list&c=all_{$c}"));
+		$kn_a("{$consumedlogin}frm_action=list&frm_o_cname=all_{$c}", $kn_t("a=list&c=all_{$c}"));
 	}
 
 	$kn_b($kn_k('resourceplan'));
 	$kn_a("{$consumedlogin}frm_action=list&frm_o_cname=resourceplan", $kn_t("a=list&c=resourceplan"));
 
 	if ($kn_client) {
-		$kn_a("{$consumedlogin}frm_action=updateform&frm_subaction=change_plan&{$clientquery}", $clientid);
+		$kn_a("{$consumedlogin}frm_action=updateform&frm_subaction=change_plan&{$clientquery}", $kn_t("a=update&sa=change_plan"));
 	}
 
 	$kn_b($kn_k('support'));
@@ -225,7 +219,7 @@ if ($login->isAdmin()) {
 	$kn_a("frm_action=show&frm_o_o[0][class]=cfaccount", "Cloudflare Account");
 
 	if ($kn_client) {
-		$kn_a("frm_action=updateform&frm_subaction=dnstemplatelist&{$clientquery}", $clientid);
+		$kn_a("frm_action=updateform&frm_subaction=dnstemplatelist&{$clientquery}", $kn_t("a=updateform&sa=dnstemplatelist"));
 	}
 }
 
@@ -369,7 +363,7 @@ $kn_pair($kn_t("a=updateform&sa=default_domain&o=client"), "frm_action=updatefor
 
 $kn_b($kn_k('ftpmaildatabase'));
 
-foreach (array('ftpuser', 'mailaccount', 'mysqldb') as $c) {
+foreach (array('ftpuser', 'mailaccount', 'mysqldb', 'mysqluser') as $c) {
 	$kn_pair($kn_t("a=list&c={$c}"), "frm_action=list&{C}frm_o_cname={$c}");
 }
 
@@ -379,14 +373,16 @@ if ($login->isAdmin()) {
 	$kn_srv($syncserver, "frm_action=show&{S}frm_o_o[1][class]=ffile&frm_o_o[1][nname]=", '');
 }
 
-// the file manager of the account itself is named after it
-$kn_pair($clientid, "frm_action=show&{O}ffile&{L}[nname]=/");
+$kn_pair($kn_t("a=show&o=ffile"), "frm_action=show&{O}ffile&{L}[nname]=/");
 
-$kn_b($kn_k('crontask'));
-$kn_pair($kn_t("a=list&c=cron"), "frm_action=list&{C}frm_o_cname=cron");
+// cron: the administrator, or a plan with 'Cron Manage' (Cron::knAllowed)
+if (Cron::knAllowed($login)) {
+	$kn_b($kn_k('crontask'));
+	$kn_pair($kn_t("a=list&c=cron"), "frm_action=list&{C}frm_o_cname=cron");
 
-foreach (array('simple', 'complex') as $t) {
-	$kn_pair($kn_t("a=addform&c=cron&dta[var]=ttype&dta[val]={$t}"), "frm_action=addform&{C}frm_dttype[var]=ttype&frm_dttype[val]={$t}&frm_o_cname=cron");
+	foreach (array('simple', 'complex') as $t) {
+		$kn_pair($kn_t("a=addform&c=cron&dta[var]=ttype&dta[val]={$t}"), "frm_action=addform&{C}frm_dttype[var]=ttype&frm_dttype[val]={$t}&frm_o_cname=cron");
+	}
 }
 
 if (!$login->isCustomer()) {

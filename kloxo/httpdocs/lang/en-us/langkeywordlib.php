@@ -220,6 +220,15 @@ $__throw["invalid_database_name"] = "Invalid database name";
 $__throw["invalid_password"] = "Password is too simple or contains invalid characters";
 
 $__throw["invalid_plan_name"] = "Invalid plan name";
+$__throw["cron_not_allowed"] = "Cron tasks are not allowed for this account (resource plan: Cron Manage)";
+$__throw["cron_invalid_schedule"] = "Invalid cron schedule";
+$__throw["cron_invalid_command"] = "Invalid cron command";
+$__throw["mysql_invalid_user_name"] = "Invalid MySQL user name (letters, digits, _; at most 32 characters)";
+$__throw["mysql_invalid_privilege"] = "Invalid MySQL privilege";
+$__throw["mysql_invalid_database"] = "Not a database of this client";
+$__throw["mysql_access_exists"] = "The user already has access to this database (edit its privileges)";
+$__throw["mysql_no_database_left"] = "The user already has access to every database of the client";
+$__throw["mysql_error"] = "MySQL error";
 
 $__throw["more_than_128_chars"] = "More than 128 chars";
 $__throw["more_than_255_chars"] = "More than 255 chars";

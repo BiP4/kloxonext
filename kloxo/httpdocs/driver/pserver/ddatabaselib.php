@@ -23,6 +23,9 @@ class databasecore extends Lxdb
 
 	static $__desc_clientname_as_prefix = array("f", "",  "clientname_as_prefix");
 
+	// KloxoNext - a database can be made without its own user (MySQL Users give access to it)
+	static $__desc_create_user_flag = array("f", "",  "mysql_create_db_user");
+
 	function inheritSynserverFromParent()
 	{ 
 		return false; 
@@ -67,21 +70,37 @@ class databasecore extends Lxdb
 		}
 
 		$param['nname'] = trim($param['nname']);
-		$param['dbpassword'] = trim($param['dbpassword']);
+		$param['dbpassword'] = trim((string)$param['dbpassword']);
 
 		validate_database_name($param['nname']);
-		validate_password($param['dbpassword']);
 
 		$param['dbname'] = $param['nname'];
 
-		if ($parent->isAdmin()) {
-			$param['username'] = substr($param['username'], 0, 15);
+		$withuser = !isset($param['create_user_flag']) || ($param['create_user_flag'] !== 'off');
 
-			// MR -- use database name for validate of admin's database username
-			validate_database_name($param['nname']);
+		if (!$withuser) {
+			// database only: users are given access from MySQL Users
+			$param['username'] = '';
+			$param['dbpassword'] = '';
 		} else {
-			$param['username'] = substr($param['nname'], 0, 15);
+			validate_password($param['dbpassword']);
+
+			if ($parent->isAdmin()) {
+				$param['username'] = substr($param['username'], 0, 15);
+
+				// MR -- use database name for validate of admin's database username
+				validate_database_name($param['nname']);
+			} else {
+				$param['username'] = substr($param['nname'], 0, 15);
+			}
+
+			// not a MySQL user of the panel already
+			if (exists_in_db(null, 'mysqluser', $param['username'])) {
+				throw new lxException($login->getThrow("user_already_exists"), '', $param['username']);
+			}
 		}
+
+		unset($param['create_user_flag']);
 
 		$param['dbtype'] = strtil($class, "db");
 
@@ -299,8 +318,12 @@ class databasecore extends Lxdb
 				$vlist['nname'] = array('M', null);
 				$vlist['dbtype'] = array('M', null);
 				$vlist['syncserver'] = array('M', null);
-				$vlist['username'] = array('M', null);
-				$vlist['dbpassword'] = null;
+
+				// a database without its own user: access is given from MySQL Users
+				if ((string)$this->username !== '') {
+					$vlist['username'] = array('M', null);
+					$vlist['dbpassword'] = null;
+				}
 				
 				return $vlist;
 		}
@@ -362,10 +385,16 @@ class databasecore extends Lxdb
 			$vlist['syncserver'] = array('s', $pp->listpriv->$var);
 		}
 
+		if (!$parent->isAdmin()) {
+			$vlist['clientname_as_prefix'] = null;
+		}
+
+		// KloxoNext - its own user (as before), or the database alone
+		$vlist['create_user_flag'] = array('f', array('on', 'off'));
+		$ghtml->__http_vars['frm_mysqldb_c_create_user_flag'] = 'on';
+
 		if ($parent->isAdmin()) {
 			$vlist['username'] = null;
-		} else {
-			$vlist['clientname_as_prefix'] = null;
 		}
 
 	//	$vlist['username'] = array('m', array('pretext' => $dbprefix));
@@ -437,6 +466,29 @@ class mysqldb extends databasecore
 
 //	static $__desc_mysqldbuser_l = array("db", "", "");
 
+	// KloxoNext - who may use the database (its own user + MySQL Users given access)
+	static $__desc_mysqldbaccess_l = array("v", "", "virtual");
+
+	function createShowClist($subaction)
+	{
+		$clist['mysqldbaccess'] = null;
+
+		return $clist;
+	}
+
+	// KloxoNext - the access given to MySQL Users goes with the database
+	function deleteSpecific()
+	{
+		foreach (Mysqlgrant::knRows("dbname = '" . kn_sql_escape($this->dbname) . "'") as $r) {
+			$sq = new Sqlite(null, 'mysqlgrant');
+			$sq->rawQuery("DELETE FROM mysqlgrant WHERE nname = '" . kn_sql_escape($r['nname']) . "'");
+		}
+
+		if (method_exists('databasecore', 'deleteSpecific')) {
+			parent::deleteSpecific();
+		}
+	}
+
 	function getStubUrl($name)
 	{
 		if ($name == '__stub_phpmyadmin_url') {
@@ -446,7 +498,7 @@ class mysqldb extends databasecore
 			$pass = $this->dbpassword;
 		//	$pass = urlencode($pass);
 			
-			if ($dbadminUrl) {
+			if ($dbadminUrl && ((string)$user !== "")) {
 				return create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass),
 					'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 			}
@@ -491,10 +543,13 @@ class mysqldb extends databasecore
 		$servernum = $this->getDbServerNum();
 	//	$pass = urlencode($pass);
 
-		if ($dbadminUrl) {
+		// a database without its own user: phpMyAdmin from the MySQL User's page
+		if ($dbadminUrl && ((string)$user !== '')) {
 			$alist['property'][] = create_simpleObject(array('url' => kn_pma_sso_url($dbadminUrl, $user, $pass),
 				'purl' => "c=mysqldb&a=updateform&sa=phpmyadmin", 'target' => "target='_blank'"));
 		}
+
+		$alist['property'][] = 'a=list&c=mysqldbaccess';
 	}
 
 	function createShowAlist(&$alist, $subaction = null)

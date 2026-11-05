@@ -218,6 +218,13 @@ with the slave's IP or hostname and its admin password. Port 7779 of the slave m
 reachable from the master. A slave recognises its own IP/hostname, so the objects the master
 creates on it are handled locally.
 
+## Databases
+
+* *MySQL Databases* - a database with its own user (as before) or alone.
+* *MySQL Users* - users apart from the databases, given access to any database of the
+  client with chosen privileges (several databases per user, several users per database);
+  the database page shows who has access. phpMyAdmin opens with the user's login.
+
 ## Other panel pages
 
 * *Server > Services* – the services KloxoNext actually runs, with their real systemd state.

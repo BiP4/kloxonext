@@ -762,3 +762,11 @@ body.kn :focus-visible { outline: none; box-shadow: var(--kn-focus); border-radi
 .kn-nav { min-height: 0; }
 .kn-sidebar, .kn-topbar, .kn-brand-name { font-family: var(--kn-font) !important; }
 .kn-brand-mark { flex: 0 0 32px; line-height: 1; }
+
+/* KloxoNext - a client looked at: whose pages the menu holds */
+.kn-nav-context { margin: 8px 10px 0; padding: 8px 10px; border-radius: 8px; background: rgba(56, 189, 248, .12); border: 1px solid rgba(56, 189, 248, .35); display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: 13px; }
+.kn-nav-context-label { color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: .04em; }
+.kn-nav-context-name { color: #e0f2fe; font-weight: 600; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.kn-nav-context-back { color: #94a3b8; text-decoration: none; margin-left: auto; font-size: 12px; }
+.kn-nav-context a:hover { text-decoration: underline; }
+.kn-collapsed .kn-nav-context { display: none; }

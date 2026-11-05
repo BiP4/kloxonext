@@ -3338,3 +3338,29 @@ CREATE INDEX "notification_parent_clname_notification" ON "notification" ("paren
 ----
 CREATE INDEX "mimetype_parent_clname_mimetype" ON "mimetype" ("parent_clname");
 COMMIT;
+
+-- KloxoNext - MySQL users of the clients and their access to databases
+CREATE TABLE IF NOT EXISTS "mysqluser" (
+  "nname" varchar(255) NOT NULL,
+  "parent_clname" varchar(255) DEFAULT NULL,
+  "parent_cmlist" text,
+  "username" varchar(255) DEFAULT NULL,
+  "dbpassword" varchar(255) DEFAULT NULL,
+  "syncserver" varchar(255) DEFAULT NULL,
+  "oldsyncserver" varchar(255) DEFAULT NULL,
+  "olddeleteflag" varchar(255) DEFAULT NULL,
+  PRIMARY KEY ("nname")
+);
+
+CREATE TABLE IF NOT EXISTS "mysqlgrant" (
+  "nname" varchar(255) NOT NULL,
+  "parent_clname" varchar(255) DEFAULT NULL,
+  "parent_cmlist" text,
+  "username" varchar(255) DEFAULT NULL,
+  "dbname" varchar(255) DEFAULT NULL,
+  "privileges" varchar(1024) DEFAULT NULL,
+  "syncserver" varchar(255) DEFAULT NULL,
+  "oldsyncserver" varchar(255) DEFAULT NULL,
+  "olddeleteflag" varchar(255) DEFAULT NULL,
+  PRIMARY KEY ("nname")
+);

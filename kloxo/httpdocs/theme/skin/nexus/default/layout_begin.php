@@ -37,6 +37,14 @@ $kn_status = trim(strip_tags((string)$this->print_message('nexus')));
 $kn_status_is_error = ($kn_status !== '') && (stripos($kn_status, 'alert') === 0);
 
 $kn_logo = file_exists("./login/images/user-logo.png") ? "/login/images/user-logo.png" : null;
+
+// --- a client looked at: the menu holds its pages (see menu.php) -----------
+$kn_ctx_client = '';
+
+if (isset($ghtml->frm_o_o[0]['class']) && ($ghtml->frm_o_o[0]['class'] === 'client')
+	&& isset($ghtml->frm_o_o[0]['nname']) && ((string)$ghtml->frm_o_o[0]['nname'] !== (string)$kn_user)) {
+	$kn_ctx_client = (string)$ghtml->frm_o_o[0]['nname'];
+}
 ?>
 <body class="kn">
 <a class="kn-skip" href="#mmm">Skip to content</a>
@@ -54,6 +62,13 @@ $kn_logo = file_exists("./login/images/user-logo.png") ? "/login/images/user-log
 			</a>
 		</div>
 
+<?php if ($kn_ctx_client !== '') { ?>
+		<div class="kn-nav-context">
+			<span class="kn-nav-context-label">Client</span>
+			<a class="kn-nav-context-name" href="/display.php?frm_action=show&amp;frm_o_o[0][class]=client&amp;frm_o_o[0][nname]=<?= $kn_h(urlencode($kn_ctx_client)) ?>"><?= $kn_h($kn_ctx_client) ?></a>
+			<a class="kn-nav-context-back" href="/display.php?frm_action=show">&larr; <?= $kn_h($kn_user) ?></a>
+		</div>
+<?php } ?>
 		<?= kn_nav_render($kn_sections) ?>
 
 		<div class="kn-sidebar-foot">

@@ -36,6 +36,8 @@ $gl_class_array['diskusage__linux'] =  "driver/pserver/diskusage__linuxlib.php";
 $gl_class_array['dbadmin__sync'] =  "driver/pserver/dbadmin__synclib.php";
 $gl_class_array['mysqldb__mysql'] =  "driver/pserver/mysqldb__mysqllib.php";
 $gl_class_array['mysqldbuser__mysql'] =  "driver/pserver/mysqldbuser__mysqllib.php";
+$gl_class_array['mysqluser__mysql'] =  "driver/pserver/mysqluser__mysqllib.php";
+$gl_class_array['mysqlgrant__mysql'] =  "driver/pserver/mysqlgrant__mysqllib.php";
 //--// $gl_class_array['mssqldb__mssql'] =  "driver/pserver/mssqldb__mssqllib.php";
 //--// $gl_class_array['mssqldbuser__mssql'] =  "driver/pserver/mssqldbuser__mssqllib.php";
 
